@@ -1,0 +1,6 @@
+include opengen/templates/*
+include opengen/templates/**/*
+include opengen/icasadi/*
+include opengen/icasadi/**/*
+include VERSION
+

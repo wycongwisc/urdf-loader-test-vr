@@ -1,0 +1,24 @@
+{
+  "name": "urdf-loader-tester",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --devtool source-map"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^5.57.1",
+    "webpack-cli": "^4.7.2"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "mathjs": "^9.5.0",
+    "three": "^0.129.0",
+    "urdf-loader": "^0.10.2",
+    "xmlhttprequest": "^1.8.0"
+  }
+}
