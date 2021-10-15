@@ -28,11 +28,18 @@ export class VrControl {
 
         this.squeezeStart = this.squeezeStart.bind(this);
         this.squeezeEnd = this.squeezeEnd.bind(this);
+        this.selectStart = this.selectStart.bind(this);
+        this.selectEnd = this.selectEnd.bind(this);
+
         this.controller1.addEventListener('squeezestart', this.squeezeStart.bind(this));
         this.controller1.addEventListener('squeezeend', this.squeezeEnd.bind(this));
+        this.controller1.addEventListener('selectstart', this.selectStart.bind(this));
+        this.controller1.addEventListener('selectend', this.selectEnd.bind(this));
+        
     }
 
-    squeezeStart() {
+    selectStart() {
+        clearInterval(this.intervalID);
         let controllerPos = this.controller1.getWorldPosition(new T.Vector3(0, 0, 0))
         let prevX = controllerPos.x * 5000
         let prevY = controllerPos.z * 5000
@@ -45,22 +52,39 @@ export class VrControl {
             let x = currX - prevX
             let y = currY - prevY
 
-            this.mouseControl.onControllerMove(x, y)
+            this.mouseControl.onControllerRotate(y, x)
             
             prevX = currX
             prevY = currY
+        }, 5);
+    }
 
-            // let step = mathjsMatToThreejsVector3(this.controlMapping.transform([
-            //         x * this.moveTransScale,
-            //         -y * this.moveTransScale, 
-            //         0]));
-            // console.log(step)
-            // this.mouseControl.ee_goal_rel_ros.posi.add( step );
+    selectEnd() {
+        clearInterval(this.intervalID);
+    }
+
+    squeezeStart() {
+        clearInterval(this.intervalID);
+        let controllerPos = this.controller1.getWorldPosition(new T.Vector3(0, 0, 0))
+        let prevX = controllerPos.x * 5000
+        let prevY = controllerPos.z * 5000
+
+        this.intervalID = setInterval(() => {
+            controllerPos = this.controller1.getWorldPosition(new T.Vector3(0, 0, 0))
+            let currX = controllerPos.x * 5000
+            let currY = controllerPos.z * 5000
+
+            let x = currX - prevX
+            let y = currY - prevY
+
+            this.mouseControl.onControllerMove(y, x)
+            
+            prevX = currX
+            prevY = currY
         }, 5);
     }
 
     squeezeEnd() {
-        console.log("end")
         clearInterval(this.intervalID);
     }
 }

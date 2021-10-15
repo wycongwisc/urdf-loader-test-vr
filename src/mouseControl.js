@@ -303,9 +303,15 @@ export class MouseControl {
                             x * this.moveTransScale,
                             -y * this.moveTransScale, 
                             0]));
-        console.log('x: ' + x + ' y: ' + y)
-        console.log(step)
         this.ee_goal_rel_ros.posi.add( step );
+    }
+
+    onControllerRotate(x, y) {
+        this.ee_goal_rel_ros.ori.premultiply( new T.Quaternion().setFromEuler( new T.Euler(
+            -y * this.moveRotScale,
+            -x * this.moveRotScale,
+            0.
+        )))
     }
 
     quaternionToAxisAngle(q) {
