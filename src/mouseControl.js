@@ -297,12 +297,17 @@ export class MouseControl {
         }
     }
 
-    onControllerMove(x, y) {
+    onControllerMove(x, y, z, r) {
+        let aa = quaternionToAxisAngle(r)
+        console.log('Axis: ' + aa.axis + ', Angle: ' + aa.angle)
+
         let step = mathjsMatToThreejsVector3( 
                         this.controlMapping.transform([
-                            x * this.moveTransScale,
-                            -y * this.moveTransScale, 
-                            0]));
+                            y * this.moveTransScale,
+                            x * this.moveTransScale, 
+                            z * this.wheelTransScale]));
+
+        this.ee_goal_rel_ros.ori.premultiply(r)
         this.ee_goal_rel_ros.posi.add( step );
     }
 
