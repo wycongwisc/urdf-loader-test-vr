@@ -2,6 +2,7 @@
  * @author Yeping Wang 
  */
 
+import { atan } from 'mathjs';
 import * as T from 'three';
 import { degToRad, getCurrEEpose, mathjsMatToThreejsVector3 } from './utils';
 
@@ -297,9 +298,10 @@ export class MouseControl {
         }
     }
 
-    onControllerMove(x, y, z, r) {
-        let aa = quaternionToAxisAngle(r)
-        console.log('Axis: ' + aa.axis + ', Angle: ' + aa.angle)
+    onControllerMove(x, y, z, r, worldToRobot) {
+        let robot_r = this.rotQuaternion(r, worldToRobot);
+        // let aa = this.quaternionToAxisAngle(robot_r)
+        // console.log(aa)
 
         let step = mathjsMatToThreejsVector3( 
                         this.controlMapping.transform([
@@ -307,16 +309,8 @@ export class MouseControl {
                             x * this.moveTransScale, 
                             z * this.wheelTransScale]));
 
-        this.ee_goal_rel_ros.ori.premultiply(r)
+        this.ee_goal_rel_ros.ori.premultiply(robot_r)
         this.ee_goal_rel_ros.posi.add( step );
-    }
-
-    onControllerRotate(x, y) {
-        this.ee_goal_rel_ros.ori.premultiply( new T.Quaternion().setFromEuler( new T.Euler(
-            -y * this.moveRotScale,
-            -x * this.moveRotScale,
-            0.
-        )))
     }
 
     quaternionToAxisAngle(q) {

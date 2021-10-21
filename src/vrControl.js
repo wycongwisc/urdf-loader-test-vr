@@ -16,7 +16,12 @@ export class VrControl {
         this.intervalID = undefined;
         this.mouseControl = options.mouseControl
         this.controlMapping = options.controlMapping;
-        this.test = 1
+        this.scale = 5000
+        this.worldToRobot = new T.Matrix4();
+        this.worldToRobot.set(1, 0, 0, 0,
+                              0, 0, -1, 0,
+                              0, 1, 0, 0, 
+                              0, 0, 0, 1)
 
         this.controller1 = this.renderer.xr.getController(0); 
         this.controllerGrip1 = this.renderer.xr.getControllerGrip(0);
@@ -28,74 +33,50 @@ export class VrControl {
 
         this.squeezeStart = this.squeezeStart.bind(this);
         this.squeezeEnd = this.squeezeEnd.bind(this);
-        this.selectStart = this.selectStart.bind(this);
-        this.selectEnd = this.selectEnd.bind(this);
 
         this.controller1.addEventListener('squeezestart', this.squeezeStart.bind(this));
         this.controller1.addEventListener('squeezeend', this.squeezeEnd.bind(this));
-        this.controller1.addEventListener('selectstart', this.selectStart.bind(this));
-        this.controller1.addEventListener('selectend', this.selectEnd.bind(this));
         
-    }
-
-    selectStart() {
-        clearInterval(this.intervalID);
-        let controllerPos = this.controller1.getWorldPosition(new T.Vector3(0, 0, 0))
-        let prevX = controllerPos.x * 5000
-        let prevY = controllerPos.z * 5000
-
-        this.intervalID = setInterval(() => {
-            controllerPos = this.controller1.getWorldPosition(new T.Vector3(0, 0, 0))
-            let currX = controllerPos.x * 5000
-            let currY = controllerPos.z * 5000
-
-            let x = currX - prevX
-            let y = currY - prevY
-
-            this.mouseControl.onControllerRotate(y, x)
-            
-            prevX = currX
-            prevY = currY
-        }, 5);
-    }
-
-    selectEnd() {
-        clearInterval(this.intervalID);
     }
 
     squeezeStart() {
         clearInterval(this.intervalID);
-        let controllerPos = this.controller1.getWorldPosition(new T.Vector3(0, 0, 0))
-        let controllerRot = this.controller1.getWorldQuaternion(new T.Quaternion())
-
-        let scaleFactor = 5000
-        let prev = {
-            x: controllerPos.x * scaleFactor,
-            y: controllerPos.y * (scaleFactor/100),
-            z: controllerPos.z * scaleFactor,
-            r: controllerRot
-        } 
+        let prev = this.getPose(this.controller1)
 
         this.intervalID = setInterval(() => {
-            controllerPos = this.controller1.getWorldPosition(new T.Vector3(0, 0, 0))
-            controllerRot = this.controller1.getWorldQuaternion(new T.Quaternion())
-            
-            let curr = {
-                x: controllerPos.x * scaleFactor,
-                y: controllerPos.y * (scaleFactor/100),
-                z: controllerPos.z * scaleFactor,
-                r: controllerRot
-            }
+            let curr = this.getPose(this.controller1)
 
-            let x = curr.x - prev.x
-            let y = curr.y - prev.y
-            let z = curr.z - prev.z
-            let r = curr.r.multiply(prev.r.invert())
+            let x = (curr.x - prev.x) * this.scale
+            let y = (curr.y - prev.y) * this.scale
+            let z = (curr.z - prev.z) * (this.scale / 100)
+            let r = new T.Quaternion();
+            let q1 = prev.r.clone()
+            let q2 = curr.r.clone()
+            r.multiplyQuaternions(q2, q1.invert())
 
-            this.mouseControl.onControllerMove(x, z, y, r)
+            // console.log('Previous orientation')
+            // console.log(prev.r)
+            // console.log('Current orientation')
+            // console.log(curr.r)
+            // console.log('Computed difference')
+            // console.log(r)
+
+            // in world space, y is up; in robot space, z is up
+            this.mouseControl.onControllerMove(x, z, y, r, this.worldToRobot)
             
             prev = curr
         }, 5); 
+    }
+
+    getPose(controller) {
+        let controllerPos = controller.getWorldPosition(new T.Vector3())
+        let controllerOri = controller.getWorldQuaternion(new T.Quaternion())
+        return {
+            x: controllerPos.x, 
+            y: controllerPos.y,
+            z: controllerPos.z,
+            r: controllerOri
+        } 
     }
 
     squeezeEnd() {
