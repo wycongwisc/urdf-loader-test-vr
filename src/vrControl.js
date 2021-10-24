@@ -16,12 +16,14 @@ export class VrControl {
         this.intervalID = undefined;
         this.mouseControl = options.mouseControl
         this.controlMapping = options.controlMapping;
-        this.scale = 5000
+        this.scale = 1000
         this.worldToRobot = new T.Matrix4();
         this.worldToRobot.set(1, 0, 0, 0,
                               0, 0, -1, 0,
                               0, 1, 0, 0, 
                               0, 0, 0, 1)
+
+        this.controlMode = false;
 
         this.controller1 = this.renderer.xr.getController(0); 
         this.controllerGrip1 = this.renderer.xr.getControllerGrip(0);
@@ -31,41 +33,43 @@ export class VrControl {
 
         this.scene.add( this.controllerGrip1 );
 
-        this.squeezeStart = this.squeezeStart.bind(this);
-        this.squeezeEnd = this.squeezeEnd.bind(this);
+        this.select = this.select.bind(this);
 
-        this.controller1.addEventListener('squeezestart', this.squeezeStart.bind(this));
-        this.controller1.addEventListener('squeezeend', this.squeezeEnd.bind(this));
+        this.controller1.addEventListener('select', this.select.bind(this));
         
     }
 
-    squeezeStart() {
-        clearInterval(this.intervalID);
-        let prev = this.getPose(this.controller1)
+    select() {
+        if (this.controlMode) {
+            this.controlMode = false;
+            clearInterval(this.intervalID);
+        } else {
+            this.controlMode = true;
+            let prev = this.getPose(this.controller1)
+            this.intervalID = setInterval(() => {
+                let curr = this.getPose(this.controller1)
 
-        this.intervalID = setInterval(() => {
-            let curr = this.getPose(this.controller1)
+                let x = (curr.x - prev.x) * this.scale
+                let y = (curr.y - prev.y) * (this.scale / 100)
+                let z = (curr.z - prev.z) * this.scale
+                let r = new T.Quaternion();
+                let q1 = prev.r.clone()
+                let q2 = curr.r.clone()
+                r.multiplyQuaternions(q2, q1.invert())
 
-            let x = (curr.x - prev.x) * this.scale
-            let y = (curr.y - prev.y) * this.scale
-            let z = (curr.z - prev.z) * (this.scale / 100)
-            let r = new T.Quaternion();
-            let q1 = prev.r.clone()
-            let q2 = curr.r.clone()
-            r.multiplyQuaternions(q2, q1.invert())
+                // console.log('Previous orientation')
+                // console.log(prev.r)
+                // console.log('Current orientation')
+                // console.log(curr.r)
+                // console.log('Computed difference')
+                // console.log(r)
 
-            // console.log('Previous orientation')
-            // console.log(prev.r)
-            // console.log('Current orientation')
-            // console.log(curr.r)
-            // console.log('Computed difference')
-            // console.log(r)
-
-            // in world space, y is up; in robot space, z is up
-            this.mouseControl.onControllerMove(x, z, y, r, this.worldToRobot)
-            
-            prev = curr
-        }, 5); 
+                // in world space, y is up; in robot space, z is up
+                this.mouseControl.onControllerMove(x, z, y, r, this.worldToRobot)
+                
+                prev = curr
+            }, 5); 
+        }
     }
 
     getPose(controller) {
@@ -77,10 +81,6 @@ export class VrControl {
             z: controllerPos.z,
             r: controllerOri
         } 
-    }
-
-    squeezeEnd() {
-        clearInterval(this.intervalID);
     }
 }
 
