@@ -292,8 +292,6 @@ export class MouseControl {
                                 -y * this.moveTransScale, 
                                 0]));
 
-            console.log('x: ' + x + ' y: ' + y)
-            console.log(step)
             this.ee_goal_rel_ros.posi.add( step );
         }
     }

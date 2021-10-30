@@ -1,5 +1,5 @@
-import { createFileUploader } from "./src/inputAdders.js";
-import { getWedModifiedURDF } from "./src/loaderHelper.js";
+import { createFileUploader } from "./src/inputAdders.js.js";
+import { getWedModifiedURDF } from "./src/loaderHelper.js.js";
 import { fetchFromURL } from "./src/helpers.js"
 
 // let inputs = document.createElement('div');
