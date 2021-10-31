@@ -297,9 +297,13 @@ export class MouseControl {
     }
 
     onControllerMove(x, y, z, r, worldToRobot) {
+        if (!this.moveCursorNotRobot) {
+            let curr_ee_abs_three =  getCurrEEpose();
+            let curr_ee_rel_three = this.absToRel(curr_ee_abs_three, this.init_ee_abs_three);
+            this.ee_goal_rel_ros = this.changeReferenceFrame(curr_ee_rel_three, this.T_ROS_to_THREE);
+        } 
+
         let robot_r = this.rotQuaternion(r, worldToRobot);
-        // let aa = this.quaternionToAxisAngle(robot_r)
-        // console.log(aa)
 
         let step = mathjsMatToThreejsVector3( 
                         this.controlMapping.transform([

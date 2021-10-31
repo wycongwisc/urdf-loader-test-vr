@@ -50,7 +50,7 @@ export class VrControl {
                 let curr = this.getPose(this.controller1)
 
                 let x = (curr.x - prev.x) * this.scale
-                let y = (curr.y - prev.y) * this.scale
+                let y = (curr.y - prev.y) * (this.scale / 50)
                 let z = (curr.z - prev.z) * this.scale
                 let r = new T.Quaternion();
                 let q1 = prev.r.clone()
