@@ -16,7 +16,7 @@ export class VrControl {
         this.intervalID = undefined;
         this.mouseControl = options.mouseControl
         this.controlMapping = options.controlMapping;
-        this.scale = 3000
+        this.scale = 12000
         this.worldToRobot = new T.Matrix4();
         this.worldToRobot.set(1, 0, 0, 0,
                               0, 0, -1, 0,
