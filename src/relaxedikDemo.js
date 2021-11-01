@@ -13,8 +13,6 @@ import { getCurrEEpose } from './utils';
 import { ControlMapping} from './controlMapping';
 import { create } from 'mathjs';
 
-import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
-
 export function relaxedikDemo() {
 
     let scene, camera, renderer, camControls, target_cursor;
@@ -31,9 +29,6 @@ export function relaxedikDemo() {
     camControls = init_scene[3];
     camera.position.set(2, 2, 2);
     camera.lookAt(0, 1, 0);
-
-    document.body.appendChild( VRButton.createButton( renderer ) );
-    renderer.xr.enabled = true;
 
     window.robot = {};
     let mouseControl = undefined;
