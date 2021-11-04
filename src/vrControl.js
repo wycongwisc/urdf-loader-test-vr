@@ -34,9 +34,15 @@ export class VrControl {
         this.scene.add( this.controllerGrip1 );
 
         this.select = this.select.bind(this);
+        this.squeeze = this.squeeze.bind(this);
 
         this.controller1.addEventListener('select', this.select.bind(this));
+        this.controller1.addEventListener('squeeze', this.squeeze.bind(this))
         
+    }
+
+    squeeze() {
+        this.mouseControl.reset()
     }
 
     select() {
@@ -50,7 +56,7 @@ export class VrControl {
                 let curr = this.getPose(this.controller1)
 
                 let x = (curr.x - prev.x) * this.scale
-                let y = (curr.y - prev.y) * (this.scale / 80)
+                let y = (curr.y - prev.y) * (this.scale / 100)
                 let z = (curr.z - prev.z) * this.scale
                 let r = new T.Quaternion();
                 let q1 = prev.r.clone()

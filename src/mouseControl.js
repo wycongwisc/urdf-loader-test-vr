@@ -84,6 +84,8 @@ export class MouseControl {
                 that.target_cursor.visible  = false;
         }; 
 
+        this.reset = this.reset.bind(this)
+
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseMove = this.onMouseMove.bind(this);
         this.onMouseWheel = this.onMouseWheel.bind(this);
@@ -207,13 +209,16 @@ export class MouseControl {
                 this.canvas.removeEventListener("mousedown", this.onMouseDown, false);
                 this.canvas.removeEventListener('wheel', this.onMouseWheel, false);
 
-                this.relaxedIK.recover_vars([]);
-
-                this.ee_goal_rel_ros = {"posi": new T.Vector3(),
-                                        "ori": new T.Quaternion().identity()};
+                this.reset()
             }
         }
         this.canvasDraw();
+    }
+
+    reset() {
+        this.relaxedIK.recover_vars([]);
+        this.ee_goal_rel_ros = {"posi": new T.Vector3(),
+                                "ori": new T.Quaternion().identity()};
     }
 
     onMouseDown(event) {
@@ -297,11 +302,11 @@ export class MouseControl {
     }
 
     onControllerMove(x, y, z, r, worldToRobot) {
-        if (!this.moveCursorNotRobot) {
-            let curr_ee_abs_three =  getCurrEEpose();
-            let curr_ee_rel_three = this.absToRel(curr_ee_abs_three, this.init_ee_abs_three);
-            this.ee_goal_rel_ros = this.changeReferenceFrame(curr_ee_rel_three, this.T_ROS_to_THREE);
-        } 
+        // if (!this.moveCursorNotRobot) {
+        //     let curr_ee_abs_three =  getCurrEEpose();
+        //     let curr_ee_rel_three = this.absToRel(curr_ee_abs_three, this.init_ee_abs_three);
+        //     this.ee_goal_rel_ros = this.changeReferenceFrame(curr_ee_rel_three, this.T_ROS_to_THREE);
+        // } 
 
         let robot_r = this.rotQuaternion(r, worldToRobot);
 
