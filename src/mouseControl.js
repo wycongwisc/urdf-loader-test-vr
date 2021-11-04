@@ -92,6 +92,11 @@ export class MouseControl {
         this.lockChangeAlert = this.lockChangeAlert.bind(this);
         document.addEventListener('pointerlockchange', this.lockChangeAlert.bind(this), false);
         document.addEventListener('mozpointerlockchange', this.lockChangeAlert.bind(this), false);
+
+        // to assess performance
+        this.updateRates = [];
+        this.relaxedIKRates = [];
+        this.preStepTime = undefined;
     }
 
     resizeCanvas() {
@@ -366,6 +371,15 @@ export class MouseControl {
     }
     
     step() {
+        let currStepTime = performance.now();
+        if (this.preStepTime !== undefined) {
+            this.updateRates.push( 1000.0 / (currStepTime - this.preStepTime))
+            if (this.updateRates.length > 200) {
+                this.updateRates.shift();
+            }
+        }
+        this.preStepTime = currStepTime;
+
         let curr_ee_abs_three  = getCurrEEpose();
         let ee_goal_rel_ros = this.ee_goal_rel_ros;
         let init_ee_abs_three = this.init_ee_abs_three;
@@ -383,16 +397,37 @@ export class MouseControl {
         let a = curr_ee_abs_three.ori.angleTo( ee_goal_abs_three.ori );
 
         if ( d > 1e-3 || a > 1e-3 ) {
-            // let before = performance.now();
+            let before = performance.now();
 
             let res = this.relaxedIK.solve ([
                 ee_goal_rel_ros.posi.x,
                 ee_goal_rel_ros.posi.y,
                 ee_goal_rel_ros.posi.z],
                 [ee_goal_rel_ros.ori.w, ee_goal_rel_ros.ori.x, ee_goal_rel_ros.ori.y, ee_goal_rel_ros.ori.z]);
-            // let after = performance.now();
-            // console.log(after - before);
-            // console.log(res);
+            
+            let after = performance.now();
+            this.relaxedIKRates.push( 1000.0 / (after - before))
+            if (this.relaxedIKRates.length === 200) {
+                // https://stackoverflow.com/questions/7343890/standard-deviation-javascript
+                let n = this.updateRates.length;
+                let mean = this.updateRates.reduce((a, b) => a + b) / n;
+                let std = Math.sqrt(this.updateRates.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n);
+                let max = Math.max(...this.updateRates);
+                let min = Math.min(...this.updateRates);
+                console.log("Avg. update rate in the past 200 loops: M = " + mean.toFixed(3) + "Hz (SD = " + std.toFixed(3) + ") \n Max: " 
+                    + max.toFixed(3) + "Hz  Min: " + min.toFixed(3) + "Hz");
+
+                n = this.relaxedIKRates.length;
+                mean = this.relaxedIKRates.reduce((a, b) => a + b) / n;
+                std = Math.sqrt(this.relaxedIKRates.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n);
+                max = Math.max(...this.relaxedIKRates);
+                min = Math.min(...this.relaxedIKRates);
+                console.log("Avg. RelaxedIK rate in the past 200 loops: M = " + mean.toFixed(3) + "Hz (SD = " + std.toFixed(3) + ") \n Max: " 
+                + max.toFixed(3) + "Hz  Min: " + min.toFixed(3) + "Hz");
+
+                this.updateRates = [];
+                this.relaxedIKRates = [];
+            }
 
             let jointArr = Object.entries(window.robot.joints).filter(joint => joint[1]._jointType != "fixed" && joint[1].type != "URDFMimicJoint");
             jointArr.forEach( joint => {

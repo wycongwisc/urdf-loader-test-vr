@@ -88,7 +88,6 @@ export function relaxedikDemo() {
 
     let mouseRightSelect = createSelect("mouse-right", "Mouse right maps to", "inputs", meaningful_axes);
     mouseRightSelect.onchange = function(user_change) {
-        console.log("in onchange")
         controlMapping.directions[0] = mouseRightSelect.value;
         if (user_change)
             controlMappingSelect.value = "Custom combinations";

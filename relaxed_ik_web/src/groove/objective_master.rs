@@ -28,13 +28,13 @@ impl ObjectiveMaster {
         let mut weight_priors: Vec<f64> = Vec::new();
         for i in 0..num_chains {
             objectives.push(Box::new(MatchEEPosGoals::new(i)));
-            weight_priors.push(1.0);
+            weight_priors.push(2.0);
             objectives.push(Box::new(MatchEEQuatGoals::new(i)));
             weight_priors.push(1.0);
         }
-        objectives.push(Box::new(MinimizeVelocity));   weight_priors.push(7.0);
-        objectives.push(Box::new(MinimizeAcceleration));    weight_priors.push(2.0);
-        objectives.push(Box::new(MinimizeJerk));    weight_priors.push(1.0);
+        objectives.push(Box::new(MinimizeVelocity));   weight_priors.push(2.0);
+        objectives.push(Box::new(MinimizeAcceleration));    weight_priors.push(1.0);
+        objectives.push(Box::new(MinimizeJerk));    weight_priors.push(0.5);
         // objectives.push(Box::new(JointLimits));    weight_priors.push(1.0);
         objectives.push(Box::new(NNSelfCollision));    weight_priors.push(1.0);
 
