@@ -13,7 +13,7 @@ import { getCurrEEpose } from './utils';
 import { ControlMapping} from './controlMapping';
 import { create } from 'mathjs';
 
-import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+import { TaskManager } from './taskManager.js'
 
 export function relaxedikDemo() {
 
@@ -31,9 +31,6 @@ export function relaxedikDemo() {
     camControls = init_scene[3];
     camera.position.set(2, 2, 2);
     camera.lookAt(0, 1, 0);
-
-    document.body.appendChild( VRButton.createButton( renderer ) );
-    renderer.xr.enabled = true;
 
     window.robot = {};
     let mouseControl = undefined;
@@ -88,6 +85,7 @@ export function relaxedikDemo() {
 
     let mouseRightSelect = createSelect("mouse-right", "Mouse right maps to", "inputs", meaningful_axes);
     mouseRightSelect.onchange = function(user_change) {
+        console.log("in onchange")
         controlMapping.directions[0] = mouseRightSelect.value;
         if (user_change)
             controlMappingSelect.value = "Custom combinations";
@@ -206,6 +204,10 @@ export function relaxedikDemo() {
             });
         }
     }
+
+    let taskManager = new TaskManager({ scene });
+    taskManager.init();
+
 
     async function load_config() {
         console.log("loading robot config");
