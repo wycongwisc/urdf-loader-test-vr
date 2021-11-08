@@ -36,7 +36,9 @@ export class VrControl {
         this.select = this.select.bind(this);
 
         this.controller1.addEventListener('select', this.select.bind(this));
-        
+        this.controller1.addEventListener('squeeze', () => {
+            this.renderer.xr.mono = !this.renderer.xr.mono
+        })
     }
 
     select() {
@@ -56,13 +58,6 @@ export class VrControl {
                 let q1 = prev.r.clone()
                 let q2 = curr.r.clone()
                 r.multiplyQuaternions(q2, q1.invert())
-
-                // console.log('Previous orientation')
-                // console.log(prev.r)
-                // console.log('Current orientation')
-                // console.log(curr.r)
-                // console.log('Computed difference')
-                // console.log(r)
 
                 // in world space, y is up; in robot space, z is up
                 this.mouseControl.onControllerMove(x, z, y, r, this.worldToRobot)
