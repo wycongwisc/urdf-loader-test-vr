@@ -16,7 +16,7 @@ export class VrControl {
         this.intervalID = undefined;
         this.mouseControl = options.mouseControl
         this.controlMapping = options.controlMapping;
-        this.scale = 20000
+        this.scale = 30000
         this.worldToRobot = new T.Matrix4();
         this.worldToRobot.set(1, 0, 0, 0,
                               0, 0, -1, 0,
@@ -56,19 +56,12 @@ export class VrControl {
                 let curr = this.getPose(this.controller1)
 
                 let x = (curr.x - prev.x) * this.scale
-                let y = (curr.y - prev.y) * (this.scale / 600)
+                let y = (curr.y - prev.y) * (this.scale / 1500)
                 let z = (curr.z - prev.z) * this.scale
                 let r = new T.Quaternion();
                 let q1 = prev.r.clone()
                 let q2 = curr.r.clone()
                 r.multiplyQuaternions(q2, q1.invert())
-
-                // console.log('Previous orientation')
-                // console.log(prev.r)
-                // console.log('Current orientation')
-                // console.log(curr.r)
-                // console.log('Computed difference')
-                // console.log(r)
 
                 // in world space, y is up; in robot space, z is up
                 this.mouseControl.onControllerMove(x, z, y, r, this.worldToRobot)
