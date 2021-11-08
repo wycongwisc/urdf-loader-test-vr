@@ -13,7 +13,7 @@ import { getCurrEEpose } from './utils';
 import { ControlMapping} from './controlMapping';
 import { create } from 'mathjs';
 
-import { TaskManager } from './taskManager.js'
+import { TaskControl } from './taskControl.js'
 
 export function relaxedikDemo() {
 
@@ -205,8 +205,8 @@ export function relaxedikDemo() {
         }
     }
 
-    let taskManager = new TaskManager({ scene });
-    taskManager.init();
+    let taskControl = new TaskControl({ scene, camera });
+    taskControl.init();
 
 
     async function load_config() {

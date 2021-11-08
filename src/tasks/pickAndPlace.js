@@ -10,11 +10,11 @@ import {
 } from "../utils.js";
 
 export class Brick {
-    constructor(init_posi, init_angle, target_posi, color, target_object, box_color, box_height, scene) {
-        this.init_posi = init_posi;
-        this.init_angle = init_angle;
-        this.target_posi = target_posi;
-        this.scene = scene;
+    constructor(options) {
+        this.init_posi = options.init_posi;
+        this.init_angle = options.init_angle;
+        this.target_posi = options.target_posi;
+        this.scene = options.scene;
 
         this.drawn = false;
 
@@ -23,37 +23,52 @@ export class Brick {
         this.bottom_offset = new T.Vector3(0, 0, -height/2);
         {
             let geometry = new T.BoxGeometry( 0.03, 0.03, height, 32, 32, 32 );
-            let material = new T.MeshStandardMaterial( {color: color} );
+            let material = new T.MeshStandardMaterial( {color: options.color} );
             this.brick = new T.Mesh( geometry, material );
             this.brick.castShadow = true;
             this.brick.receiveShadow = true;
         }
         this.reset();
-        if (target_object == "circle")  {
-            let geometry = new T.CircleGeometry( 0.05, 64 );
+        if (options.target_object == "circle")  {
+            // let geometry = new T.CircleGeometry( 0.05, 64 );
                 
-            let points = geometry.vertices;
-            points.shift();
+            // let points = geometry.vertices;
+            // points.shift();
+
+            // let points = new T.Path().absarc(0, 0, 10, 0, Math.PI * 2).getPoints(64);
+            
+            // let points = []
+            // let radius = 0.05
+            // for(let i = 0; i <= 360; i += 3){
+            //     points.push(Math.sin(i*(Math.PI/180))*radius, Math.cos(i*(Math.PI/180))*radius, 0);
+            // }
+
+
             // points.push(geometry.vertices[0]);
-            let mesh = Line3D(points, color, 0.003);
+            // let mesh = Line3D(points, color, 0.003);
+
+            const geometry = new T.TorusGeometry( 0.05, 0.02, 64, 64);
+            const material = new T.MeshBasicMaterial( { color: options.color } );
+            const mesh = new T.Mesh( geometry, material );
+
 
             this.target = new T.Group();
             this.target.name = "circle";
             this.target.add(mesh);
-            this.target.position.copy(target_posi);
+            this.target.position.copy(options.target_posi);
             this.target.castShadow = true;
             this.target.receiveShadow = true;
 
 
-        } else if (target_object == "box") {
+        } else if (options.target_object == "box") {
             let geometry = new T.BoxGeometry( 0.07, 0.07, box_height , 32, 32, 32 );
-            let material = new T.MeshStandardMaterial( {color: box_color} );
+            let material = new T.MeshStandardMaterial( {color: options.box_color} );
       
             this.target = new T.Mesh( geometry, material );
             this.target.name = "box";
-            this.target.position.set(   target_posi.x,
-                                        target_posi.y, 
-                                        target_posi.z - box_height/2);
+            this.target.position.set( options.target_posi.x,
+                                      options.target_posi.y, 
+                                      options.target_posi.z - options.box_height/2);
             this.target.castShadow = true;
             this.target.receiveShadow = true;
         }
@@ -136,96 +151,97 @@ export class PickAndPlaceBricksTabletop {
         this.scene = options.scene
     }
 
-    countCollision() {
-        // let that = this;
-        // new ROS3D.SceneNode({
-        //     frameID: window.robot_ns + "/right_hand",
-        //     tfClient: window.tfClient,
-        //     object: undefined,
-        //     tfCallback: function (pose) {
-        //         let collide = false;
-        //         let offset;
-        //         if (that.gripper_occupied) offset = 0.17;
-        //                             else offset = 0.12;
-        //         let ee_offset = new T.Vector3(0, 0., offset).applyQuaternion(
-        //             new T.Quaternion(pose.orientation.x,
-        //                                 pose.orientation.y,
-        //                                 pose.orientation.z,
-        //                                 pose.orientation.w));
-        //         let ee_posi = new T.Vector3( pose.position.x, 
-        //                         pose.position.y, 
-        //                         pose.position.z ).add(ee_offset);
+    // countCollision() {
+    //     let that = this;
+    //     new ROS3D.SceneNode({
+    //         frameID: window.robot_ns + "/right_hand",
+    //         tfClient: window.tfClient,
+    //         object: undefined,
+    //         tfCallback: function (pose) {
+    //             let collide = false;
+    //             let offset;
+    //             if (that.gripper_occupied) offset = 0.17;
+    //                                 else offset = 0.12;
+    //             let ee_offset = new T.Vector3(0, 0., offset).applyQuaternion(
+    //                 new T.Quaternion(pose.orientation.x,
+    //                                     pose.orientation.y,
+    //                                     pose.orientation.z,
+    //                                     pose.orientation.w));
+    //             let ee_posi = new T.Vector3( pose.position.x, 
+    //                             pose.position.y, 
+    //                             pose.position.z ).add(ee_offset);
               
-        //         // colliding with table
-        //         if ( ee_posi.z < 0.75)
-        //             collide = true;
+    //             // colliding with table
+    //             if ( ee_posi.z < 0.75)
+    //                 collide = true;
                 
-        //         // collding with the larger brick
-        //         for (let i=0; i<that.bricks.length; i++) {
-        //             let brick = that.bricks[i];
-        //             if (brick.target.name === 'brick') {
-        //                 if ( ee_posi.z < 0.75 + brick.target.geometry.parameters.depth ) {
-        //                     let x_sign = [1, 1, -1, -1];
-        //                     let y_sign = [1, -1, 1, -1];
-        //                     for (let i =0; i<4; i++) {
-        //                         let x = ee_posi.x + x_sign[i] * brick.brick.geometry.parameters.width / 2;
-        //                         let y = ee_posi.y + y_sign[i] * brick.brick.geometry.parameters.width / 2;
-        //                         let d_x = Math.abs( x - brick.target_posi.x);
-        //                         let d_y = Math.abs( y - brick.target_posi.y);
-        //                         if (d_x < brick.target.geometry.parameters.width/2 && d_y < brick.target.geometry.parameters.width/2 ) {
-        //                             collide = true;
-        //                             break;
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
+    //             // collding with the larger brick
+    //             for (let i=0; i<that.bricks.length; i++) {
+    //                 let brick = that.bricks[i];
+    //                 if (brick.target.name === 'brick') {
+    //                     if ( ee_posi.z < 0.75 + brick.target.geometry.parameters.depth ) {
+    //                         let x_sign = [1, 1, -1, -1];
+    //                         let y_sign = [1, -1, 1, -1];
+    //                         for (let i =0; i<4; i++) {
+    //                             let x = ee_posi.x + x_sign[i] * brick.brick.geometry.parameters.width / 2;
+    //                             let y = ee_posi.y + y_sign[i] * brick.brick.geometry.parameters.width / 2;
+    //                             let d_x = Math.abs( x - brick.target_posi.x);
+    //                             let d_y = Math.abs( y - brick.target_posi.y);
+    //                             if (d_x < brick.target.geometry.parameters.width/2 && d_y < brick.target.geometry.parameters.width/2 ) {
+    //                                 collide = true;
+    //                                 break;
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //             }
 
-        //         if (window.task_state === "started" && collide) {
-        //             document.getElementById("error_sound").play();
-        //         }
-        //     }
-        // });
-    }
+    //             if (window.task_state === "started" && collide) {
+    //                 document.getElementById("error_sound").play();
+    //             }
+    //         }
+    //     });
+    // }
 
-    autoGrasp() {
-        let that = this;
-        console.log('auto grasp')
-        // this.autoGraspNode = new ROS3D.SceneNode({
-        //     frameID: window.robot_ns + "/right_hand",
-        //     tfClient: window.tfClient,
-        //     object: undefined,
-        //     tfCallback: function (pose) {
-        //         if (!that.grasped) {
-        //             let ee_offset = new T.Vector3 (0., 0., 0.10).applyQuaternion(
-        //                 new T.Quaternion(pose.orientation.x,
-        //                                     pose.orientation.y,
-        //                                     pose.orientation.z,
-        //                                     pose.orientation.w));
-        //             let ee_posi = new T.Vector3( pose.position.x, 
-        //                             pose.position.y, 
-        //                             pose.position.z ).add(ee_offset);
-        //             for (let i=0; i<that.bricks.length; i++) {
-        //                 that.gripper_occupied = that.bricks[i].autoGrasp(ee_posi, that.gripper_occupied);
-        //             }
-        //         }
-        //     }
-        // });
-    }
+    // autoGrasp() {
+    //     let that = this;
+    //     this.autoGraspNode = new ROS3D.SceneNode({
+    //         frameID: window.robot_ns + "/right_hand",
+    //         tfClient: window.tfClient,
+    //         object: undefined,
+    //         tfCallback: function (pose) {
+    //             if (!that.grasped) {
+    //                 let ee_offset = new T.Vector3 (0., 0., 0.10).applyQuaternion(
+    //                     new T.Quaternion(pose.orientation.x,
+    //                                         pose.orientation.y,
+    //                                         pose.orientation.z,
+    //                                         pose.orientation.w));
+    //                 let ee_posi = new T.Vector3( pose.position.x, 
+    //                                 pose.position.y, 
+    //                                 pose.position.z ).add(ee_offset);
+    //                 for (let i=0; i<that.bricks.length; i++) {
+    //                     that.gripper_occupied = that.bricks[i].autoGrasp(ee_posi, that.gripper_occupied);
+    //                 }
+    //             }
+    //         }
+    //     });
+    // }
 
-    removeAutoGrasp() {
-        // this.autoGraspNode.unsubscribeTf();
-    }
+    // removeAutoGrasp() {
+    //     // this.autoGraspNode.unsubscribeTf();
+    // }
 
-    postInstruct(s) {
-        document.getElementById("instruction-div").innerHTML = s;
-    }
+    // postInstruct(s) {
+    //     document.getElementById("instruction-div").innerHTML = s;
+    // }
 
-    userClickRedDot() {
-        window.task_state = "started";
-    }
+    // userClickRedDot() {
+    //     window.task_state = "started";
+    // }
 
     pubTaskPrepare() {
+
+        console.log(this.bricks)
         // let msg;
         // msg = new ROSLIB.Message({
         //     position: this.init_joint_angles
@@ -256,11 +272,11 @@ export class PickAndPlaceBricksTabletop {
         // this.removeAutoGrasp();
     }
 
-    userHitESC() {
-        this.pubTaskPrepare();
-        if (window.penCurve)
-            window.penCurve.remove();
-    }
+    // userHitESC() {
+    //     this.pubTaskPrepare();
+    //     if (window.penCurve)
+    //         window.penCurve.remove();
+    // }
 
     init() {
         this.pubTaskPrepare();
@@ -277,11 +293,11 @@ export class PickAndPlaceBricksTabletop {
                     let table = gltf.scene;
                     let scale = 0.00925;
                     table.scale.set(scale, scale, scale);
-                    table.rotateY(Math.PI / 2);
-                    table.rotateZ(Math.PI / 2);
-                    table.position.x = 0.4;
-                    table.position.y = 0.2;
-                    table.position.z = 0;
+                    table.rotateY(Math.PI / 2); // up
+                    // table.rotateZ(Math.PI / 2);
+                    table.position.x = 0.6;
+                    // table.position.y = 0.2;
+                    // table.position.z = .3;
                     castShadow(table);	
                     table.children[0].castShadow = true;
                     table.children[0].receiveShadow = true;
