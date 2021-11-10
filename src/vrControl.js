@@ -18,11 +18,14 @@ export class VrControl {
         this.controlMapping = options.controlMapping;
         this.scale = 40000
         this.worldToRobot = new T.Matrix4();
-        this.worldToRobot.set(1, 0, 0, 0,
+        this.worldToRobot.set(1, 0,  0, 0,
                               0, 0, -1, 0,
-                              0, 1, 0, 0, 
-                              0, 0, 0, 1)
+                              0, 1,  0, 0, 
+                              0, 0,  0, 1)
 
+        this.lastSqueeze = 0;
+
+        // toggles robot control
         this.controlMode = false;
 
         this.controller1 = this.renderer.xr.getController(0); 
@@ -42,7 +45,12 @@ export class VrControl {
     }
 
     squeeze() {
-        this.mouseControl.reset()
+        if (Math.abs(Date.now() - this.lastSqueeze) > 1000) {
+            this.mouseControl.reset()
+        } else {
+            this.renderer.xr.mono = !this.renderer.xr.mono
+        }
+        this.lastSqueeze = Date.now()
     }
 
     select() {
