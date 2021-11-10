@@ -24,7 +24,9 @@ export class VrControl {
                               0, 0,  0, 1)
 
         this.lastSqueeze = 0;
-
+        this.defaultPosition = new T.Vector3();
+        this.defaultPosition.set(1.5, 1.5, 0)
+1
         // toggles robot control
         this.controlMode = false;
 
@@ -41,6 +43,17 @@ export class VrControl {
 
         this.controller1.addEventListener('select', this.select.bind(this));
         this.controller1.addEventListener('squeeze', this.squeeze.bind(this))
+
+        let stereoToggle = document.querySelector('#stereo-toggle');
+        stereoToggle.addEventListener('click', (e) => {
+            this.renderer.xr.stereo = e.target.checked
+        })
+
+        let parallaxToggle = document.querySelector('#parallax-toggle');
+        parallaxToggle.addEventListener('click', (e) => {
+            this.renderer.xr.parallax = e.target.checked;
+            this.renderer.xr.defaultPosition = this.defaultPosition;
+        })
         
     }
 
@@ -48,7 +61,7 @@ export class VrControl {
         if (Math.abs(Date.now() - this.lastSqueeze) > 1000) {
             this.mouseControl.reset()
         } else {
-            this.renderer.xr.mono = !this.renderer.xr.mono
+            this.renderer.xr.stereo = !this.renderer.xr.stereo
         }
         this.lastSqueeze = Date.now()
     }

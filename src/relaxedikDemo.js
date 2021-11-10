@@ -51,9 +51,17 @@ export function relaxedikDemo() {
     createText("3. Scroll mouse wheel to move the robot up and down.", "inputs", "p");
     createText("4. Right-click to switch to rotation mode.", "inputs", "p");
     createText("5. Press the ESC button on your keyboard to unlock your cursor.", "inputs", "p");
+
     createBr("inputs");
     createBr("inputs");
-    
+
+    createText("VR Options:", "inputs", "h3");
+    createToggleSwitch ("stereo", "inputs", "Mono", "Stereo", true);
+    createToggleSwitch ("parallax", "inputs", "No Parallax", "Parallax", true);
+
+    createBr("inputs");
+    createBr("inputs");
+
     createText("Options:", "inputs", "h3");
     createToggleSwitch ("cursor-or-robot", "inputs", "Move robot", "Move cursor", true);
     createToggleSwitch ("show-cursor", "inputs", "Hide cursor", "Show cursor", true);
