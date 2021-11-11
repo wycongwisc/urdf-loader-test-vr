@@ -1,5 +1,6 @@
 import * as T from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
 export function initScene() {
 
@@ -18,6 +19,9 @@ export function initScene() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = T.PCFSoftShadowMap;
     document.body.appendChild(renderer.domElement);
+
+    renderer.xr.enabled = true;
+    document.body.appendChild( VRButton.createButton( renderer ) );
 
     const directionalLight = new T.DirectionalLight(0xffffff, 1.0);
     directionalLight.castShadow = true;

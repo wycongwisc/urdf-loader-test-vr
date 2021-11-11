@@ -4,7 +4,7 @@
 
 import * as T from 'three';
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
-import { degToRad, getCurrEEpose, mathjsMatToThreejsVector3 } from './utils';
+// import { degToRad, getCurrEEpose, mathjsMatToThreejsVector3 } from './utils';
 
 
 export class VrControl {
@@ -58,10 +58,12 @@ export class VrControl {
     }
 
     squeeze() {
-        if (Math.abs(Date.now() - this.lastSqueeze) > 1000) {
+        if (Math.abs(Date.now() - this.lastSqueeze) > 300) {
+            console.log('Reset robot pose')
             this.mouseControl.reset()
         } else {
             this.renderer.xr.stereo = !this.renderer.xr.stereo
+            console.log('Stereo: ' +  this.renderer.xr.stereo)
         }
         this.lastSqueeze = Date.now()
     }
@@ -77,7 +79,7 @@ export class VrControl {
                 let curr = this.getPose(this.controller1)
 
                 let x = (curr.x - prev.x) * this.scale
-                let y = (curr.y - prev.y) * (this.scale / 10000)
+                let y = (curr.y - prev.y) * (this.scale / 7000)
                 let z = (curr.z - prev.z) * this.scale
                 let r = new T.Quaternion();
                 let q1 = prev.r.clone()

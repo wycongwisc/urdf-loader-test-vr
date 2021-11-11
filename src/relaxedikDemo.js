@@ -13,16 +13,14 @@ import { getCurrEEpose } from './utils';
 import { ControlMapping} from './controlMapping';
 import { create } from 'mathjs';
 
-import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
-
 export function relaxedikDemo() {
 
     let scene, camera, renderer, camControls, target_cursor;
 
     // Load robot
     
-    const manager = new T.LoadingManager();
-    const loader = new URDFLoader(manager);
+    // const manager = new T.LoadingManager();
+    // const loader = new URDFLoader(manager);
 
     let init_scene = initScene();
     scene = init_scene[0];
@@ -32,9 +30,6 @@ export function relaxedikDemo() {
     camera.position.set(2, 2, 2);
     camera.lookAt(0, 1, 0);
 
-    document.body.appendChild( VRButton.createButton( renderer ) );
-    renderer.xr.enabled = true;
-
     window.robot = {};
     let mouseControl = undefined;
     let vrControl = undefined;
@@ -42,6 +37,20 @@ export function relaxedikDemo() {
 
     getURDFFromURL("https://raw.githubusercontent.com/gjnguyen18/URDF-Model-Viewer-Test-Files/726b6a528d9ea969a90793b81c3c7f74da9be28f/sawyer_description/urdf/sawyer.urdf", (blob) => {
         loadRobot(URL.createObjectURL(blob))
+    });
+
+    getURDFFromURL("https://raw.githubusercontent.com/gjnguyen18/URDF-Model-Viewer-Test-Files/main/backgrounds/kitchen%20updated/Kitchen/Kitchen_dynamic/urdf/kitchen_dynamic.urdf", (blob) => {
+        loadKitchenDynamic(URL.createObjectURL(blob))
+    });
+
+    // refridgerator, props (plates, microwave, bowls, etc.)
+    getURDFFromURL("https://raw.githubusercontent.com/gjnguyen18/URDF-Model-Viewer-Test-Files/main/backgrounds/kitchen%20updated/Kitchen/Kitchen_standard/urdf/Kitchen_standard.urdf", (blob) => {
+        loadKitchenStandard(URL.createObjectURL(blob))
+    });
+
+    // kitchen 
+    getURDFFromURL("https://raw.githubusercontent.com/gjnguyen18/URDF-Model-Viewer-Test-Files/main/backgrounds/kitchen%20updated/Kitchen/Kitchen_static/urdf/Kitchen_static.urdf", (blob) => {
+        loadKitchenStatic(URL.createObjectURL(blob))
     });
 
     createText("How to control:", "inputs", "h3");
@@ -184,6 +193,8 @@ export function relaxedikDemo() {
     scene.add( target_cursor );
 
     let loadRobot = (robotFile) => {
+        const manager = new T.LoadingManager();
+        const loader = new URDFLoader(manager);
         loader.load(robotFile, result => {
             window.robot = result;
         });
@@ -214,6 +225,53 @@ export function relaxedikDemo() {
             });
         }
     }
+
+    let kitchenTransformation = (kitchen) => {
+        kitchen.rotation.x = -Math.PI / 2;
+        kitchen.rotation.z = Math.PI;
+        kitchen.position.x = -0.5
+        kitchen.position.z = -0.7
+    }
+
+    let loadKitchenStatic = (kitchenFile) => {
+        const manager = new T.LoadingManager();
+        const loader = new URDFLoader(manager);
+        loader.load(kitchenFile, result => {
+            window.kitchenStatic = result;
+        });
+        manager.onLoad = () => {
+            scene.add(window.kitchenStatic);
+            kitchenTransformation(window.kitchenStatic)
+        }
+    }
+
+    let loadKitchenStandard = (kitchenFile) => {
+        const manager = new T.LoadingManager();
+        const loader = new URDFLoader(manager);
+        loader.load(kitchenFile, result => {
+            window.kitchenStandard = result;
+        });
+        manager.onLoad = () => {
+            scene.add(window.kitchenStandard);
+            kitchenTransformation(window.kitchenStandard)
+            window.kitchenStandard.position.y = 0.92
+        }
+    }
+
+    let loadKitchenDynamic = (kitchenFile) => {
+        const manager = new T.LoadingManager();
+        const loader = new URDFLoader(manager);
+        loader.load(kitchenFile, result => {
+            window.kitchenDynamic = result;
+        });
+        manager.onLoad = () => {
+            scene.add(window.kitchenDynamic);
+            kitchenTransformation(window.kitchenDynamic)
+        }
+
+    }
+
+
 
     async function load_config() {
         console.log("loading robot config");
