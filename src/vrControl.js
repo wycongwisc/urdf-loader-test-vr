@@ -20,9 +20,14 @@ export class VrControl {
         this.worldToRobot = new T.Matrix4();
         this.worldToRobot.set(1, 0, 0, 0,
                               0, 0, -1, 0,
-                              0, 1, 0, 0, 
-                              0, 0, 0, 1)
+                              0, 1,  0, 0, 
+                              0, 0,  0, 1)
 
+        this.lastSqueeze = 0;
+        this.defaultPosition = new T.Vector3();
+        this.defaultPosition.set(1.5, 1.5, 0)
+
+        // toggles robot control
         this.controlMode = false;
 
         this.controller1 = this.renderer.xr.getController(0); 
