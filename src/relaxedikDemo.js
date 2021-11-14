@@ -13,6 +13,8 @@ import { getCurrEEpose } from './utils';
 import { ControlMapping} from './controlMapping';
 import { create } from 'mathjs';
 
+import { TaskControl } from './taskControl.js'
+
 export function relaxedikDemo() {
 
     let scene, camera, renderer, camControls, target_cursor;
@@ -271,7 +273,8 @@ export function relaxedikDemo() {
 
     }
 
-
+    let taskControl = new TaskControl({ scene, camera });
+    taskControl.init();
 
     async function load_config() {
         console.log("loading robot config");
