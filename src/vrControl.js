@@ -16,7 +16,7 @@ export class VrControl {
         this.intervalID = undefined;
         this.mouseControl = options.mouseControl
         this.controlMapping = options.controlMapping;
-        this.scale = 40000
+        this.scale = 20000
 
         this.lastSqueeze = 0;
         this.defaultPosition = new T.Vector3();
@@ -74,7 +74,7 @@ export class VrControl {
                 let curr = this.getPose(this.controller1)
 
                 let x = (curr.x - prev.x) * this.scale
-                let y = (curr.y - prev.y) * (this.scale / 1000)
+                let y = (curr.y - prev.y) * (this.scale / 400)
                 let z = (curr.z - prev.z) * this.scale
                 let r = new T.Quaternion();
                 let q1 = prev.r.clone()
