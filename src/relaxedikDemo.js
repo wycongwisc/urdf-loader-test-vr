@@ -274,6 +274,7 @@ export function relaxedikDemo() {
     }
 
     let taskControl = new TaskControl({ scene, camera });
+    window.taskControl = taskControl;
     taskControl.init();
 
     async function load_config() {
@@ -310,6 +311,8 @@ export function relaxedikDemo() {
                 let m4 = T_ROS_to_THREE.clone().multiply( new T.Matrix4().makeRotationFromQuaternion(curr_ee_abs_three.ori));
                 let m3 = new T.Matrix3().setFromMatrix4(m4);
                 controlMapping.updateEEPose(m3);
+
+                taskControl.update(curr_ee_abs_three)
             } 
         }, 5);
 

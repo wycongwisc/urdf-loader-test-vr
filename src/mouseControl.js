@@ -4,7 +4,7 @@
 
 import { atan } from 'mathjs';
 import * as T from 'three';
-import { degToRad, getCurrEEpose, mathjsMatToThreejsVector3 } from './utils';
+import { degToRad, getCurrEEpose, mathjsMatToThreejsVector3, rotQuaternion, changeReferenceFrame, quaternionToAxisAngle } from './utils';
 
 export class MouseControl {
     constructor(options) {
@@ -258,7 +258,7 @@ export class MouseControl {
         if (!this.moveCursorNotRobot) {
             let curr_ee_abs_three =  getCurrEEpose();
             let curr_ee_rel_three = this.absToRel(curr_ee_abs_three, this.init_ee_abs_three);
-            this.ee_goal_rel_ros = this.changeReferenceFrame(curr_ee_rel_three, this.T_ROS_to_THREE);
+            this.ee_goal_rel_ros = changeReferenceFrame(curr_ee_rel_three, this.T_ROS_to_THREE);
         } 
 
         if (this.isRotate) {
@@ -285,7 +285,7 @@ export class MouseControl {
         if (!this.moveCursorNotRobot) {
             let curr_ee_abs_three =  getCurrEEpose();
             let curr_ee_rel_three = this.absToRel(curr_ee_abs_three, this.init_ee_abs_three);
-            this.ee_goal_rel_ros = this.changeReferenceFrame(curr_ee_rel_three, this.T_ROS_to_THREE);
+            this.ee_goal_rel_ros = changeReferenceFrame(curr_ee_rel_three, this.T_ROS_to_THREE);
         } 
         
         if (this.isRotate) {
@@ -306,14 +306,16 @@ export class MouseControl {
         }
     }
 
-    onControllerMove(x, y, z, r, worldToRobot) {
+    onControllerMove(x, y, z, r) {
         // if (!this.moveCursorNotRobot) {
         //     let curr_ee_abs_three =  getCurrEEpose();
         //     let curr_ee_rel_three = this.absToRel(curr_ee_abs_three, this.init_ee_abs_three);
-        //     this.ee_goal_rel_ros = this.changeReferenceFrame(curr_ee_rel_three, this.T_ROS_to_THREE);
+        //     this.ee_goal_rel_ros = changeReferenceFrame(curr_ee_rel_three, this.T_ROS_to_THREE);
         // } 
+        let worldToRobot = new T.Matrix4()
+        worldToRobot.set(1, 0,  0, 0, 0, 0, -1, 0, 0, 1,  0, 0, 0, 0,  0, 1);
 
-        let robot_r = this.rotQuaternion(r, worldToRobot);
+        let robot_r = rotQuaternion(r, worldToRobot);
 
         let step = mathjsMatToThreejsVector3( 
                         this.controlMapping.transform([
@@ -323,39 +325,6 @@ export class MouseControl {
 
         this.ee_goal_rel_ros.ori.premultiply(robot_r)
         this.ee_goal_rel_ros.posi.add( step );
-    }
-
-    quaternionToAxisAngle(q) {
-        // https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/index.htm
-        if (q.w > 1) q.normalize();
-        let angle = 2 * Math.acos(q.w);
-        let s = Math.sqrt(1-q.w*q.w);
-        let x, y, z;
-        if (s < 0.001) { // test to avoid divide by zero, s is always positive due to sqrt
-            // if s close to zero then direction of axis not important
-            x = q.x; // if it is important that axis is normalised then replace with x=1; y=z=0;
-            y = q.y;
-            z = q.z;
-          } else {
-            x = q.x / s;  // normalise axis
-            y = q.y / s;
-            z = q.z / s;
-          }
-        return {axis: new T.Vector3(x, y, z),
-                angle: angle};
-    }
-
-    // change the reference frame of a quaternion
-    rotQuaternion(q, rot) {
-        let axisAngle = this.quaternionToAxisAngle(q);
-        let new_axis = axisAngle.axis.clone().applyMatrix4(rot);
-        return new T.Quaternion().setFromAxisAngle(new_axis, axisAngle.angle);        
-    }
-
-    changeReferenceFrame(pose, transform) {
-        return {
-            "posi": pose.posi.clone().applyMatrix4(transform.clone()),
-            "ori": this.rotQuaternion(pose.ori.clone(), transform.clone()) };
     }
 
     relToAbs(rel_pose, init_pose) {
@@ -385,7 +354,7 @@ export class MouseControl {
         let init_ee_abs_three = this.init_ee_abs_three;
         
         // convert ee_goal from ROS reference frame to THREE reference frame
-        let ee_goal_rel_three = this.changeReferenceFrame(ee_goal_rel_ros, this.T_THREE_to_ROS);
+        let ee_goal_rel_three = changeReferenceFrame(ee_goal_rel_ros, this.T_THREE_to_ROS);
         let ee_goal_abs_three = this.relToAbs(ee_goal_rel_three, init_ee_abs_three);
 
         this.target_cursor.position.copy( ee_goal_abs_three.posi );

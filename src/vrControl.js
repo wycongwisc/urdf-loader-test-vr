@@ -17,11 +17,6 @@ export class VrControl {
         this.mouseControl = options.mouseControl
         this.controlMapping = options.controlMapping;
         this.scale = 40000
-        this.worldToRobot = new T.Matrix4();
-        this.worldToRobot.set(1, 0,  0, 0,
-                              0, 0, -1, 0,
-                              0, 1,  0, 0, 
-                              0, 0,  0, 1)
 
         this.lastSqueeze = 0;
         this.defaultPosition = new T.Vector3();
@@ -87,7 +82,7 @@ export class VrControl {
                 r.multiplyQuaternions(q2, q1.invert())
 
                 // in world space, y is up; in robot space, z is up
-                this.mouseControl.onControllerMove(x, z, y, r, this.worldToRobot)
+                this.mouseControl.onControllerMove(x, z, y, r)
                 
                 prev = curr
             }, 5); 

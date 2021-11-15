@@ -6,13 +6,16 @@ import * as T from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 import {
-    getBrowser, T_THREE_to_ROS, Line3D, castShadow
+    getBrowser, T_THREE_to_ROS, T_ROS_to_THREE, Line3D, castShadow, rotQuaternion, changeReferenceFrame, quaternionToAxisAngle
 } from "../utils.js";
 
 export class Brick {
     constructor(options) {
         this.init_posi = options.init_posi;
         this.init_angle = options.init_angle;
+
+        this.curr_posi = this.init_posi;
+
         this.target_posi = options.target_posi;
         this.scene = options.scene;
 
@@ -22,7 +25,7 @@ export class Brick {
         this.handle_offset = new T.Vector3(0, 0, height/2);
         this.bottom_offset = new T.Vector3(0, 0, -height/2);
         {
-            let geometry = new T.BoxGeometry( 0.03, 0.03, height, 32, 32, 32 );
+            let geometry = new T.BoxGeometry( 0.03, height, 0.03, 32, 32, 32 );
             let material = new T.MeshStandardMaterial( {color: options.color} );
             this.brick = new T.Mesh( geometry, material );
             this.brick.castShadow = true;
@@ -30,35 +33,18 @@ export class Brick {
         }
         this.reset();
         if (options.target_object == "circle")  {
-            // let geometry = new T.CircleGeometry( 0.05, 64 );
-                
-            // let points = geometry.vertices;
-            // points.shift();
 
-            // let points = new T.Path().absarc(0, 0, 10, 0, Math.PI * 2).getPoints(64);
-            
-            // let points = []
-            // let radius = 0.05
-            // for(let i = 0; i <= 360; i += 3){
-            //     points.push(Math.sin(i*(Math.PI/180))*radius, Math.cos(i*(Math.PI/180))*radius, 0);
-            // }
-
-
-            // points.push(geometry.vertices[0]);
-            // let mesh = Line3D(points, color, 0.003);
-
-            const geometry = new T.TorusGeometry( 0.05, 0.02, 64, 64);
+            const geometry = new T.TorusGeometry( 0.05, 0.005, 64, 64);
             const material = new T.MeshBasicMaterial( { color: options.color } );
             const mesh = new T.Mesh( geometry, material );
-
 
             this.target = new T.Group();
             this.target.name = "circle";
             this.target.add(mesh);
             this.target.position.copy(options.target_posi);
+            this.target.rotation.x = Math.PI/2;
             this.target.castShadow = true;
             this.target.receiveShadow = true;
-
 
         } else if (options.target_object == "box") {
             let geometry = new T.BoxGeometry( 0.07, 0.07, box_height , 32, 32, 32 );
@@ -74,7 +60,7 @@ export class Brick {
         }
     }
 
-    updatePosi() {
+    updatePose() {
         this.brick.position.copy( this.curr_posi );
         this.brick.rotation.z =  this.curr_angle; 
         this.brick.updateMatrixWorld();
@@ -96,7 +82,7 @@ export class Brick {
         this.grasp_offset = undefined;
         this.curr_posi = this.init_posi;
         this.curr_angle = this.init_angle;
-        this.updatePosi();
+        this.updatePose();
     }
 
     remove() {
@@ -104,8 +90,20 @@ export class Brick {
         this.scene.remove(this.target);
         this.drawn = false;
     }
+    
 
-    // autoGrasp(ee_posi, gripper_occupied) {
+    autoGrasp(ee_pose, gripper_occupied) {
+        console.log('GRABBED')
+
+        this.curr_posi = ee_pose.posi;
+
+        this.brick.position.copy( ee_pose.posi );
+        this.brick.quaternion.copy( ee_pose.ori );
+
+        if (this.curr_posi.distanceTo(this.target_posi) < 0.02) {
+            window.taskControl.finished();
+        }
+
     //     if (this.grasped) {
     //         if (!this.released) {
     //             this.curr_posi = ee_posi.add(this.handle_offset.clone().negate());
@@ -138,7 +136,7 @@ export class Brick {
     //             return false;
     //         }
     //     }
-    // }
+    }
 }
 
 export class PickAndPlaceBricksTabletop {
@@ -249,8 +247,9 @@ export class PickAndPlaceBricksTabletop {
         // window.rosServer.task_prepare_publisher.publish(msg);
         // window.task_state = "prepared";
         
-        for (let i=0; i<this.bricks.length; i++) 
+        for (let i=0; i<this.bricks.length; i++) {
             this.bricks[i].draw();
+        }
     }
 
     // loadModels() {
@@ -281,6 +280,16 @@ export class PickAndPlaceBricksTabletop {
     init() {
         this.pubTaskPrepare();
         // this.loadModels();
+    }
+
+    update(ee_pose) {
+        for (let i=0; i<this.bricks.length; i++) {
+            // console.log(this.bricks[i].brick.position)
+            if (ee_pose.posi.distanceTo(this.bricks[i].brick.position) < 0.1) {
+                this.bricks[i].autoGrasp(ee_pose)
+            }
+        }
+
     }
 
     // drawTable() {
