@@ -203,7 +203,11 @@ export function relaxedikDemo() {
         manager.onLoad = () => {
             scene.add(window.robot);
             window.robot.rotation.x = -Math.PI / 2;
-            window.robot.position.y = 0.92;
+            window.robot.position.y = 1.05;
+            window.robot.position.x = .1;
+            window.robot.scale.x = 1.15;
+            window.robot.scale.y = 1.15;
+            window.robot.scale.z = 1.15;
             window.robot.traverse(c => {
                 c.castShadow = true;
                 if (c.material) {
