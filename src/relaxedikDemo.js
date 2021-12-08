@@ -37,7 +37,7 @@ export function relaxedikDemo() {
     let vrControl = undefined;
     let jointSliders = [];
 
-    getURDFFromURL("https://raw.githubusercontent.com/gjnguyen18/URDF-Model-Viewer-Test-Files/726b6a528d9ea969a90793b81c3c7f74da9be28f/sawyer_description/urdf/sawyer.urdf", (blob) => {
+    getURDFFromURL("https://raw.githubusercontent.com/gjnguyen18/URDF-Model-Viewer-Test-Files/main/sawyer_description/urdf/sawyer_gripper.urdf", (blob) => {
         loadRobot(URL.createObjectURL(blob))
     });
 
@@ -62,6 +62,16 @@ export function relaxedikDemo() {
     createText("3. Scroll mouse wheel to move the robot up and down.", "inputs", "p");
     createText("4. Right-click to switch to rotation mode.", "inputs", "p");
     createText("5. Press the ESC button on your keyboard to unlock your cursor.", "inputs", "p");
+
+    createBr("inputs");
+    createBr("inputs");
+
+    createText("Task Options:", "inputs", "h3");
+    createSelect("tasks", "Select a task", "inputs", [
+        "PickAndPlaceStatic",
+        "PickAndPlaceDynamic",
+        "PickAndPlaceMoving"
+    ])
 
     createBr("inputs");
     createBr("inputs");
@@ -203,8 +213,8 @@ export function relaxedikDemo() {
         manager.onLoad = () => {
             scene.add(window.robot);
             window.robot.rotation.x = -Math.PI / 2;
-            window.robot.position.y = 1.05;
-            window.robot.position.x = .1;
+            window.robot.position.y = 0.02;
+            window.robot.position.x = .25;
             window.robot.scale.x = 1.15;
             window.robot.scale.y = 1.15;
             window.robot.scale.z = 1.15;
@@ -277,7 +287,7 @@ export function relaxedikDemo() {
 
     }
 
-    let taskControl = new TaskControl({ scene, camera });
+    const taskControl = new TaskControl({ scene, camera });
     window.taskControl = taskControl;
     taskControl.init();
 
@@ -310,14 +320,13 @@ export function relaxedikDemo() {
         });
 
         setInterval( function(){ 
+            const curr_ee_abs_three = getCurrEEpose();
             if (mouseControl.step()) {
-                let curr_ee_abs_three = getCurrEEpose();
                 let m4 = T_ROS_to_THREE.clone().multiply( new T.Matrix4().makeRotationFromQuaternion(curr_ee_abs_three.ori));
                 let m3 = new T.Matrix3().setFromMatrix4(m4);
                 controlMapping.updateEEPose(m3);
-
-                taskControl.update(curr_ee_abs_three)
             } 
+            taskControl.update(curr_ee_abs_three)
         }, 5);
 
         vrControl = new VrControl({
