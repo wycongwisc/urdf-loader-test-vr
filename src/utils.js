@@ -94,6 +94,18 @@ export function castShadow(obj) {
     });
 }
 
+export function getRandom(min, max) {
+    return (Math.random() * (max - min) + min);
+}
+
+export function getRandomDimensions3(a, b, c, d, e, f) {
+    return {
+        width: getRandom(a, b),
+        height: getRandom(c, d),
+        depth: getRandom(e, f)
+    }
+}
+
 // https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
 export function getBrowser() {
     // Opera 8.0+

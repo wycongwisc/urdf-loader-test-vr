@@ -6,7 +6,7 @@ import * as T from 'three';
 import { Object3D } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import Task from './Task'
-import Brick from './Brick'
+import Brick from './Block'
 
 import {
     getBrowser, T_THREE_to_ROS, T_ROS_to_THREE, Line3D, castShadow, rotQuaternion, changeReferenceFrame, quaternionToAxisAngle

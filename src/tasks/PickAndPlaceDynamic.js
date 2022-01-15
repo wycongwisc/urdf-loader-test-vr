@@ -4,10 +4,10 @@
 
 import * as T from 'three';
 import Task from './Task'
-import Brick from './Brick'
+import Brick from './Block'
 
 import {
-    getBrowser, T_THREE_to_ROS, T_ROS_to_THREE, Line3D, castShadow, rotQuaternion, changeReferenceFrame, quaternionToAxisAngle
+    getRandom, getBrowser, T_THREE_to_ROS, T_ROS_to_THREE, Line3D, castShadow, rotQuaternion, changeReferenceFrame, quaternionToAxisAngle
 } from "../utils.js";
 import { setQuaternionFromProperEuler } from 'three/src/math/MathUtils';
 
@@ -26,20 +26,20 @@ export default class PickAndPlaceDynamic extends Task {
         this.rounds = [
             new Brick({
                 brick_dimensions: {
-                    width: this.getRandom(.03, .06),
-                    height: this.getRandom(.03, .10),
-                    depth: this.getRandom(.03, .06)
+                    width: getRandom(.03, .06),
+                    height: getRandom(.03, .10),
+                    depth: getRandom(.03, .06)
                 },
                 init_posi: new T.Vector3(
-                    this.getRandom(0.6, 1.2), 
+                    getRandom(0.6, 1.2), 
                     0, 
-                    this.getRandom(-0.5, 0.5)
+                    getRandom(-0.5, 0.5)
                 ),
                 init_angle: 0,
                 target_posi: new T.Vector3(
-                    this.getRandom(0.6, 1.2), 
+                    getRandom(0.6, 1.2), 
                     0, 
-                    this.getRandom(-0.5, 0.5)
+                    getRandom(-0.5, 0.5)
                 ),
                 color: 0xFF0000,
                 target_object: "circle",
@@ -47,20 +47,20 @@ export default class PickAndPlaceDynamic extends Task {
             }),
             new Brick({ 
                 brick_dimensions: {
-                    width: this.getRandom(.03, .06),
-                    height: this.getRandom(.03, .10),
-                    depth: this.getRandom(.03, .06)
+                    width: getRandom(.03, .06),
+                    height: getRandom(.03, .10),
+                    depth: getRandom(.03, .06)
                 },
                 init_posi: new T.Vector3(
-                    this.getRandom(0.6, 1.2), 
+                    getRandom(0.6, 1.2), 
                     0, 
-                    this.getRandom(-0.5, 0.5)
+                    getRandom(-0.5, 0.5)
                 ),
                 init_angle: 0, 
                 target_posi: new T.Vector3(
-                    this.getRandom(0.6, 1.2), 
+                    getRandom(0.6, 1.2), 
                     0, 
-                    this.getRandom(-0.5, 0.5)
+                    getRandom(-0.5, 0.5)
                 ),
                 color: 0xdddd88, 
                 target_object: "circle",
@@ -68,20 +68,20 @@ export default class PickAndPlaceDynamic extends Task {
             }),
             new Brick({
                 brick_dimensions: {
-                    width: this.getRandom(.03, .06),
-                    height: this.getRandom(.03, .10),
-                    depth: this.getRandom(.03, .06)
+                    width: getRandom(.03, .06),
+                    height: getRandom(.03, .10),
+                    depth: getRandom(.03, .06)
                 },
                 init_posi: new T.Vector3(
-                    this.getRandom(0.6, 1.2), 
+                    getRandom(0.6, 1.2), 
                     0, 
-                    this.getRandom(-0.5, 0.5)
+                    getRandom(-0.5, 0.5)
                 ),
                 init_angle: 0, 
                 target_posi: new T.Vector3(
-                    this.getRandom(0.6, 1.2), 
+                    getRandom(0.6, 1.2), 
                     0, 
-                    this.getRandom(-0.5, 0.5)
+                    getRandom(-0.5, 0.5)
                 ),
                 color: 0xFF0000, 
                 target_object: "circle",
@@ -90,9 +90,6 @@ export default class PickAndPlaceDynamic extends Task {
         ]
     }
 
-    getRandom(min, max) {
-        return (Math.random() * (max - min) + min);
-    }
 
     // draws the current state/round to the scene
     draw() {

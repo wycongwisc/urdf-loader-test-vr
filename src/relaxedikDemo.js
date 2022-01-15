@@ -67,11 +67,13 @@ export function relaxedikDemo() {
     createBr("inputs");
 
     createText("Task Options:", "inputs", "h3");
-    createSelect("tasks", "Select a task", "inputs", [
-        "PickAndPlaceStatic",
-        "PickAndPlaceDynamic",
-        "PickAndPlaceMoving"
-    ])
+    createText("Warning: changing task settings will reset the task", "inputs", "p");
+    createToggleSwitch("randomize-target-size", "inputs", "", "Randomize Target Size", false);
+    createToggleSwitch("randomize-block-size", "inputs", "", "Randomize Block Size", false);
+    createToggleSwitch("randomize-target-position", "inputs", "", "Randomize Target Position", false);
+    createToggleSwitch("randomize-block-position", "inputs", "", "Randomize Block Position", false);
+    createToggleSwitch("moving-target", "inputs", "", "Moving Target", false);
+    createToggleSwitch("moving-block", "inputs", "", "Moving Block", false);
 
     createBr("inputs");
     createBr("inputs");
@@ -289,7 +291,6 @@ export function relaxedikDemo() {
 
     const taskControl = new TaskControl({ scene, camera });
     window.taskControl = taskControl;
-    taskControl.init();
 
     async function load_config() {
         console.log("loading robot config");

@@ -4,7 +4,7 @@
 
 import * as T from 'three';
 import Task from './Task'
-import Brick from './Brick'
+import Brick from './Block'
 
 import { getBrowser } from "../utils.js";
 
