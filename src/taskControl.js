@@ -41,8 +41,8 @@ export class TaskControl {
     finishRound() {
         this.task.clearRound();
 
-        if (this.task.currentRound < this.task.rounds.length - 1) {
-            this.task.currentRound++;
+        if (this.task.currRound < this.task.rounds.length - 1) {
+            this.task.currRound++;
             this.task.displayRound();
         } else {
             this.task.finished = true;

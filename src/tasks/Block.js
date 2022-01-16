@@ -1,33 +1,36 @@
 import * as T from 'three';
-import { rotQuaternion } from "../utils.js";
-import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET } from "./globals"
-
-const TABLE_HEIGHT = 1.05;
+import { TABLE_HEIGHT } from './globals';
 
 export default class Block {
     constructor(params) {
-        this.init_posi = (params.init_posi.y += TABLE_HEIGHT, params.init_posi);
-        this.init_angle = params.init_angle;
         this.target = params.target;
+
+        this.initPos = params.initPos ?? new T.Vector3(1, TABLE_HEIGHT, 0.2);
+        this.initAngle = params.initAngle ?? 0;
+        this.color = params.color ?? 0xFF0000;
+        this.vel = params.vel;
+        
+        // [width, height, depth]
+        this.size = params.size ?? [0.03, 0.03, 0.03];
+
         this.drawn = false;
         
-        const HEIGHT = 0.08;
-        this.handle_offset = new T.Vector3(0, 0, HEIGHT/2);
-        this.bottom_offset = new T.Vector3(0, 0, -HEIGHT/2);
+        // const HEIGHT = 0.08;
+        // this.handle_offset = new T.Vector3(0, 0, HEIGHT/2);
+        // this.bottom_offset = new T.Vector3(0, 0, -HEIGHT/2);
 
         // create the brick
-        const height = params.dimensions?.height ?? 0.03;
         this.mesh = new T.Mesh( 
             new T.BoxGeometry( 
-                params.dimensions?.width ?? 0.03,
-                height,
-                params.dimensions?.depth ?? 0.03,
+                this.size[0],
+                this.size[1],
+                this.size[2],
                 1, 1, 1 
             ),
-            new T.MeshStandardMaterial({ color: params.color })
+            new T.MeshStandardMaterial({ color: this.color })
         );
 
-        this.init_posi.y += height / 2;
+        this.initPos.y += this.size[1] / 2;
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
 
@@ -39,8 +42,8 @@ export default class Block {
         this.released = false;
         this.grasp_offset = undefined;
 
-        this.mesh.position.copy(this.init_posi);
-        this.mesh.rotation.z = this.init_angle; 
+        this.mesh.position.copy(this.initPos);
+        this.mesh.rotation.z = this.initAngle; 
 
         this.mesh.updateMatrixWorld();
     }

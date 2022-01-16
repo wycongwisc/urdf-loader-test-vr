@@ -12,21 +12,18 @@ import Target from './Target';
 import {
     getRandomDimensions3, getRandom, getBrowser
 } from "../utils.js";
-import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET } from "./globals"
+import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET, TABLE_HEIGHT } from "./globals"
  
- export default class PickAndPlace extends Task {
-     constructor(params) {
-         super();
- 
-         this.browser = getBrowser();
-         this.init_joint_angles = [0.04201808099852697 + 0.4, 0.11516517933728028, -2.1173004511959856, 1.1497982678125709, -1.2144663084736145, -2.008953561788951, 0.7504719405723105 + 0.4];
-         this.gripper_occupied = false;
-         this.scene = params.scene
+export default class PickAndPlace extends Task {
+    constructor(params) {
+        super();
 
-         this.clock = new T.Clock({ autoStart: false });
-         this.currentRound = 0;
+        this.scene = params.scene;
+        this.clock = new T.Clock({ autoStart: false });
+        this.currRound = 0;
+        this.rounds = [];
 
-         this.options = {
+        this.options = {
             randomizeTargetSize: false,
             randomizeBlockSize: false,
             randomizeTargetPosition: false,
@@ -36,86 +33,84 @@ import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET } from "./globals"
         }
 
         document.querySelector('#randomize-target-size-toggle').addEventListener('change', (e) => {
-            this.options.randomizeTargetSize = e.target.value;
+            this.options.randomizeTargetSize = e.target.checked;
             this.init();
         })
 
         document.querySelector('#randomize-block-size-toggle').addEventListener('change', (e) => {
-            this.options.randomizeBlockSize = e.target.value;
+            this.options.randomizeBlockSize = e.target.checked;
             this.init();
         })
 
         document.querySelector('#randomize-target-position-toggle').addEventListener('change', (e) => {
-            this.options.randomizeTargetPosition = e.target.value;
+            this.options.randomizeTargetPosition = e.target.checked;
             this.init();
         })
 
         document.querySelector('#randomize-block-position-toggle').addEventListener('change', (e) => {
-            this.options.randomizeBlockPosition = e.target.value;
+            this.options.randomizeBlockPosition = e.target.checked;
             this.init();
         })
 
         document.querySelector('#moving-target-toggle').addEventListener('change', (e) => {
-            this.options.movingTarget = e.target.value;
+            this.options.movingTarget = e.target.checked;
             this.init();
         })
 
         document.querySelector('#moving-block-toggle').addEventListener('change', (e) => {
-            this.options.movingBlock = e.target.value;
+            this.options.movingBlock = e.target.checked;
             this.init();
         })
-     }
+    }
 
     init() {
-        this.currentRound = 0;
+        this.clearRound();
+
+        this.currRound = 0;
 
         this.rounds = [
             { 
                 block: new Block({
-                    init_posi: new T.Vector3(1, 0, 0.2),
-                    init_angle: 0, 
-                    color: 0xFF0000,
+                    initPos: this.options.randomizeBlockPosition ? 
+                        new T.Vector3(getRandom(0.6, 1.2), TABLE_HEIGHT, getRandom(-0.5, 0.5)) : 
+                        new T.Vector3(1, TABLE_HEIGHT, 0.2),
+                    size: this.options.randomizeBlockSize ? 
+                        [getRandom(.03, .06), getRandom(.03, .10), getRandom(.03, .06)] : // [width, height, depth]
+                        undefined,
+                    vel: this.options.movingBlock ? 
+                        new T.Vector3(0, 0, .2) : 
+                        undefined,
                 }),
                 target: new Target({ 
-                    pos: new T.Vector3(0.7, 0, 0.75),
-                    color: 0xFF0000,
+                    initPos: this.options.randomizeTargetPosition ? 
+                        new T.Vector3(getRandom(0.6, 1.2), TABLE_HEIGHT, getRandom(-0.5, 0.5)) :
+                        new T.Vector3(0.7, TABLE_HEIGHT, 0.75),
+                    size: this.options.randomizeTargetSize ? 
+                        getRandom(0.03, 0.08) : 
+                        undefined,
+                    vel: this.options.movingTarget ? 
+                        new T.Vector3(0, 0, .2) : 
+                        undefined,
                 }),
             },
-            {
-                block: new Block({
-                    init_posi: new T.Vector3(1, 0, 0.2),
-                    init_angle: 0, 
-                    color: 0xFF0000,
-                }),
-                target: new Target({ 
-                    pos: new T.Vector3(0.7, 0, 0.75),
-                    color: 0xFF0000,
-                }),
-            },
-            {
-                block: new Block({
-                    init_posi: new T.Vector3(1, 0, -0.75), 
-                    init_angle: 0, 
-                    color: 0xFF0000, 
-                }),
-                target: new Target({ 
-                    pos: new T.Vector3(0.5, 0, 0.5),
-                    color: 0xFF0000,
-                })
-            }
-        ]
-
+        ];
         this.displayRound();
     }
 
     displayRound() {
-        this.scene.add(this.rounds[this.currentRound].block.mesh);
-        this.scene.add(this.rounds[this.currentRound].target.mesh);
+        if (this.rounds.length === 0) {
+            return;
+        }
+        this.scene.add(this.rounds[this.currRound].block.mesh);
+        this.scene.add(this.rounds[this.currRound].target.mesh);
     } 
  
     clearRound() {
-        this.scene.remove(this.rounds[this.currentRound].block.mesh)
-        this.scene.remove(this.rounds[this.currentRound].target.mesh);
+        if (this.rounds.length === 0) {
+            return;
+        }
+        this.scene.remove(this.rounds[this.currRound].block.mesh)
+        this.scene.remove(this.rounds[this.currRound].target.mesh);
     }
  
      // this is called every 5 ms
@@ -125,8 +120,10 @@ import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET } from "./globals"
             return;
         }
 
-        const block = this.rounds[this.currentRound].block;
-        const target = this.rounds[this.currentRound].target;
+        const delta = this.clock.getDelta();
+
+        const block = this.rounds[this.currRound].block;
+        const target = this.rounds[this.currRound].target;
         // object representing gripper in Three space; there is probably a better way to do this
         const gripper = new T.Object3D();
         gripper.position.copy(new T.Vector3(ee_pose.posi.x, ee_pose.posi.y, ee_pose.posi.z));
@@ -150,12 +147,20 @@ import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET } from "./globals"
 
         block.mesh.updateMatrixWorld();
 
-        if (target.velocity) {
-            if ((target.velocity.z < 0 && target.mesh.position.z <= -1) ||
-                (this.target_vel.z > 0 && this.target.position.z >= 1)) {
-                target.velocity.negate(); 
+        if (target.vel) {
+            if ((target.vel.z < 0 && target.mesh.position.z <= -1) ||
+                (target.vel.z > 0 && target.mesh.position.z >= 1)) {
+                target.vel.negate(); 
             }
-            target.mesh.position.add(target.velocity.clone().multiplyScalar(this.clock.getDelta()));
+            target.mesh.position.add(target.vel.clone().multiplyScalar(delta));
+        }
+
+        if (block.vel) {
+            if ((block.vel.z < 0 && block.mesh.position.z <= -1) ||
+                (block.vel.z > 0 && block.mesh.position.z >= 1)) {
+                    block.vel.negate(); 
+            }
+            block.mesh.position.add(block.vel.clone().multiplyScalar(delta));
         }
     }
 }
