@@ -14,7 +14,7 @@ import { ControlMapping} from './controlMapping';
 import { create } from 'mathjs';
 
 import { TaskControl } from './taskControl.js'
-import { SheetControl } from './sheetControl';
+import { DataControl } from './dataControl';
 
 export async function relaxedikDemo() {
 
@@ -38,9 +38,9 @@ export async function relaxedikDemo() {
     let vrControl = undefined;
     let jointSliders = [];
 
-    const sheetControl = new SheetControl();
-    await sheetControl.init()
-    window.sheetControl = sheetControl;
+    const dataControl = new DataControl();
+    await dataControl.init()
+    window.dataControl = dataControl;
 
     getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/sawyer_description/urdf/sawyer_gripper.urdf", (blob) => {
         loadRobot(URL.createObjectURL(blob))
@@ -71,7 +71,7 @@ export async function relaxedikDemo() {
     createBr("inputs");
     createBr("inputs");
 
-    sheetControl.createButtons();
+    dataControl.createButtons();
 
     createBr("inputs");
     createBr("inputs");
@@ -199,7 +199,7 @@ export async function relaxedikDemo() {
     // transformation from ROS' reference frame to THREE's reference frame
     let T_ROS_to_THREE = new T.Matrix4().makeRotationFromEuler(new T.Euler(1.57079632679, 0., 0.));
     // transformation from THREE' reference frame to ROS's reference frame
-    let T_THREE_to_ROS= T_ROS_to_THREE.clone().invert();
+    let T_THREE_to_ROS = T_ROS_to_THREE.clone().invert();
 
     function onCamMove() {
         let m4 = T_ROS_to_THREE.clone().multiply( camera.matrixWorld.clone());
@@ -299,7 +299,7 @@ export async function relaxedikDemo() {
 
     }
 
-    const taskControl = new TaskControl({ scene, camera, sheetControl });
+    const taskControl = new TaskControl({ scene, camera, dataControl });
     window.taskControl = taskControl;
 
     async function load_config() {

@@ -1,5 +1,5 @@
 
-export class SheetControl {
+export class DataControl {
     constructor(params) {
 
         this.CLIENT_ID = '715533057109-fhq9oj5oqml5m835lpfl33mollm1lp0e.apps.googleusercontent.com';
