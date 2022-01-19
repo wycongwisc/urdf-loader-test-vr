@@ -19,8 +19,11 @@ export default class PickAndPlace extends Task {
         super();
 
         this.scene = params.scene;
+
+        // used for moving blocks/targets
         this.clock = new T.Clock({ autoStart: false });
         this.currRound = 0;
+        this.NUM_ROUNDS = 3;
         this.rounds = [];
 
         this.options = {
@@ -68,12 +71,25 @@ export default class PickAndPlace extends Task {
 
         this.currRound = 0;
 
-        this.rounds = [
-            { 
+        // lenth mush match NUM_ROUNDS
+        const BLOCK_POSITIONS = [
+            new T.Vector3(1, TABLE_HEIGHT, 0.2), 
+            new T.Vector3(0.8, TABLE_HEIGHT, 0.5), 
+            new T.Vector3(1, TABLE_HEIGHT, -0.75)
+        ];
+        const TARGET_POSITIONS = [
+            new T.Vector3(0.7, TABLE_HEIGHT, 0.75), 
+            new T.Vector3(1, TABLE_HEIGHT, -0.5), 
+            new T.Vector3(0.5, TABLE_HEIGHT, 0.5)
+        ];
+
+        this.rounds = []
+        for (let i = 0; i < this.NUM_ROUNDS; i++) {
+            this.rounds.push({
                 block: new Block({
                     initPos: this.options.randomizeBlockPosition ? 
                         new T.Vector3(getRandom(0.6, 1.2), TABLE_HEIGHT, getRandom(-0.5, 0.5)) : 
-                        new T.Vector3(1, TABLE_HEIGHT, 0.2),
+                        BLOCK_POSITIONS[i],
                     size: this.options.randomizeBlockSize ? 
                         [getRandom(.03, .06), getRandom(.03, .10), getRandom(.03, .06)] : // [width, height, depth]
                         undefined,
@@ -84,7 +100,7 @@ export default class PickAndPlace extends Task {
                 target: new Target({ 
                     initPos: this.options.randomizeTargetPosition ? 
                         new T.Vector3(getRandom(0.6, 1.2), TABLE_HEIGHT, getRandom(-0.5, 0.5)) :
-                        new T.Vector3(0.7, TABLE_HEIGHT, 0.75),
+                        TARGET_POSITIONS[i],
                     size: this.options.randomizeTargetSize ? 
                         getRandom(0.03, 0.08) : 
                         undefined,
@@ -92,8 +108,9 @@ export default class PickAndPlace extends Task {
                         new T.Vector3(0, 0, .2) : 
                         undefined,
                 }),
-            },
-        ];
+            })
+        }
+
         this.displayRound();
     }
 
@@ -142,7 +159,7 @@ export default class PickAndPlace extends Task {
         }
 
         if (block.mesh.position.distanceTo(target.mesh.position) < 0.02) {
-            window.taskControl.nextRound();
+            window.taskControl.finishRound();
         }
 
         block.mesh.updateMatrixWorld();

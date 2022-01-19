@@ -2,7 +2,7 @@ import * as T from 'three';
 import URDFLoader from 'urdf-loader';
 import { initScene } from './sceneInit';
 import { getURDFFromURL } from './robotFunctions/loaderHelper';
-import { createSlider, createCanvas, createText, createToggleSwitch, createBr, createSelect } from './ui/inputAdders';
+import { createButton, createSlider, createCanvas, createText, createToggleSwitch, createBr, createSelect } from './ui/inputAdders';
 
 import { MouseControl } from './mouseControl.js';
 import { VrControl } from './vrControl.js'
@@ -14,8 +14,9 @@ import { ControlMapping} from './controlMapping';
 import { create } from 'mathjs';
 
 import { TaskControl } from './taskControl.js'
+import { SheetControl } from './sheetControl';
 
-export function relaxedikDemo() {
+export async function relaxedikDemo() {
 
     let scene, camera, renderer, camControls, target_cursor;
 
@@ -36,6 +37,10 @@ export function relaxedikDemo() {
     let mouseControl = undefined;
     let vrControl = undefined;
     let jointSliders = [];
+
+    const sheetControl = new SheetControl();
+    await sheetControl.init()
+    window.sheetControl = sheetControl;
 
     getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/sawyer_description/urdf/sawyer_gripper.urdf", (blob) => {
         loadRobot(URL.createObjectURL(blob))
@@ -62,6 +67,11 @@ export function relaxedikDemo() {
     createText("3. Scroll mouse wheel to move the robot up and down.", "inputs", "p");
     createText("4. Right-click to switch to rotation mode.", "inputs", "p");
     createText("5. Press the ESC button on your keyboard to unlock your cursor.", "inputs", "p");
+
+    createBr("inputs");
+    createBr("inputs");
+
+    sheetControl.createButtons();
 
     createBr("inputs");
     createBr("inputs");
@@ -289,7 +299,7 @@ export function relaxedikDemo() {
 
     }
 
-    const taskControl = new TaskControl({ scene, camera });
+    const taskControl = new TaskControl({ scene, camera, sheetControl });
     window.taskControl = taskControl;
 
     async function load_config() {

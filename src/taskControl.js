@@ -1,19 +1,12 @@
-import PickAndPlaceStatic from "./tasks/PickAndPlaceStatic"
-import PickAndPlaceDynamic from "./tasks/PickAndPlaceDynamic"
-import PickAndPlaceMoving from "./tasks/PickAndPlaceMoving"
 import PickAndPlace from "./tasks/PickAndPlace"
 import * as T from 'three'
 
-import {
-    getBrowser, threejsVector3ToMathjsMat,
-} from "./utils.js";
-
 export class TaskControl {
-    constructor(options) {
-        this.scene = options.scene
-        this.browser = getBrowser();
+    constructor(params) {
+        this.scene = params.scene
         this.task = new PickAndPlace({ scene: this.scene });
-        this.camera = options.camera;
+        this.sheetControl = params.sheetControl;
+        this.camera = params.camera;
         // document.querySelector('#tasks-select').addEventListener('change', (e) => {
         //     switch(e.target.value) {
         //         case 'PickAndPlaceStatic':
@@ -40,6 +33,7 @@ export class TaskControl {
 
     finishRound() {
         this.task.clearRound();
+        this.sheetControl.appendRow([Date.now()])
 
         if (this.task.currRound < this.task.rounds.length - 1) {
             this.task.currRound++;
@@ -68,6 +62,7 @@ export class TaskControl {
 
     init() {
         this.task.init();
+        this.sheetControl.appendRow([1, 2, 3])
     }
 
     // this is called in relaxedikDemo.js about every 5 ms
