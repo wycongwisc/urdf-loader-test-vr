@@ -39,7 +39,7 @@ export async function relaxedikDemo() {
     let jointSliders = [];
 
     const dataControl = new DataControl();
-    await dataControl.init()
+    // await dataControl.init()
     window.dataControl = dataControl;
 
     getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/sawyer_description/urdf/sawyer_gripper.urdf", (blob) => {
@@ -71,10 +71,10 @@ export async function relaxedikDemo() {
     createBr("inputs");
     createBr("inputs");
 
-    dataControl.createButtons();
+    // dataControl.createButtons();
 
-    createBr("inputs");
-    createBr("inputs");
+    // createBr("inputs");
+    // createBr("inputs");
 
     createText("Task Options:", "inputs", "h3");
     createText("Warning: changing task settings will reset the task", "inputs", "p");
@@ -299,7 +299,7 @@ export async function relaxedikDemo() {
 
     }
 
-    const taskControl = new TaskControl({ scene, camera, dataControl });
+    const taskControl = new TaskControl({ scene, camera });
     window.taskControl = taskControl;
 
     async function load_config() {

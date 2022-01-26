@@ -5,7 +5,6 @@ export class TaskControl {
     constructor(params) {
         this.scene = params.scene
         this.task = new PickAndPlace({ scene: this.scene });
-        this.dataControl = params.dataControl;
         this.camera = params.camera;
         // document.querySelector('#tasks-select').addEventListener('change', (e) => {
         //     switch(e.target.value) {
@@ -33,7 +32,6 @@ export class TaskControl {
 
     finishRound() {
         this.task.clearRound();
-        this.sheetControl.appendRow([Date.now()])
 
         if (this.task.currRound < this.task.rounds.length - 1) {
             this.task.currRound++;
@@ -62,7 +60,6 @@ export class TaskControl {
 
     init() {
         this.task.init();
-        this.dataControl.appendRow([1, 2, 3])
     }
 
     // this is called in relaxedikDemo.js about every 5 ms
