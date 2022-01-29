@@ -323,13 +323,14 @@ export async function relaxedikDemo() {
         let relaxedIK = new RelaxedIK(robot_info, robot_nn_config);
         
         mouseControl = new MouseControl({
-            relaxedIK: relaxedIK,
-            jointSliders: jointSliders,
-            robot_info: robot_info,
-            target_cursor: target_cursor,
-            controlMapping: controlMapping
+            relaxedIK,
+            jointSliders,
+            robot_info,
+            target_cursor,
+            controlMapping
         });
 
+        let data = [];
         setInterval( function(){ 
             const curr_ee_abs_three = getCurrEEpose();
             if (mouseControl.step()) {
@@ -338,6 +339,18 @@ export async function relaxedikDemo() {
                 controlMapping.updateEEPose(m3);
             } 
             taskControl.update(curr_ee_abs_three)
+
+            let jointInfo = [];
+            for (const property in window.robot.joints) {
+                jointInfo.push(window.robot.joints[property].position, window.robot.joints[property].quaternion)
+            }
+
+            data.push([new Date(), ...jointInfo])
+            if (data.length === 500) {
+                console.log(window.robot.joints)
+                dataControl.post(data);
+                data = [];
+            }
         }, 5);
 
         vrControl = new VrControl({

@@ -1,8 +1,16 @@
 
 export class DataControl {
     constructor(params) {
+        this.SCRIPT_PATH = "https://script.google.com/macros/s/AKfycbxeSUXm_gZo8X5acNVoqvDyfxiQrSMvyjA1vag9MMcShorF_aEzmHDhImcgrysbuKpN/exec"
+        this.post([[new Date(), navigator.platform]])
+    }
 
-        fetch("https://script.google.com/macros/s/AKfycbzHctgHipFkyBh-tXrGghm4uDHF2yfinr47H-DGetz02v9dt03Gl7qsjJZo99jXIVFu/exec", {
+    /**
+     * 
+     * @param {*} data 2D array
+     */
+    post(data) {
+        fetch(this.SCRIPT_PATH, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -10,21 +18,11 @@ export class DataControl {
             }, 
             mode: 'no-cors',
             body: JSON.stringify({
-                timestamp: new Date(),
-                os: navigator.platform,
+                data,
             })
         }).then(res => {
             console.log("Request complete! response:", res);
         })
-
-        // this.CLIENT_ID = '715533057109-fhq9oj5oqml5m835lpfl33mollm1lp0e.apps.googleusercontent.com';
-        // this.API_KEY = 'AIzaSyCmvMxe3_1O3sppBOQsE_YBIMPqck87W9w';
-        // this.DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
-        // this.SCOPES = "https://www.googleapis.com/auth/spreadsheets";
-        // this.SPREADSHEET_ID = '1HFSNfwMQ_Axr1X6zkcccIGTya4ikqhctO74BewK-4x4'
-
-        // this.initClient = this.initClient.bind(this);
-        // this.updateSignInStatus = this.updateSignInStatus.bind(this);
     }
 
     // async init() {
