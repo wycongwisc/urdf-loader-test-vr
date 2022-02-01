@@ -1,15 +1,25 @@
+import { generateUUID } from 'three/src/math/MathUtils';
 
 export class DataControl {
     constructor(params) {
-        this.SCRIPT_PATH = "https://script.google.com/macros/s/AKfycbxeSUXm_gZo8X5acNVoqvDyfxiQrSMvyjA1vag9MMcShorF_aEzmHDhImcgrysbuKpN/exec"
-        this.post([[new Date(), navigator.platform]])
+        this.SCRIPT_PATH = "https://script.google.com/macros/s/AKfycby-ZCKzHej-YE5cg5poh7yt64Zseqgu96W-FM8qBvLpT1o1u-OXy7WNG32W7ETvIRwR/exec"
+        this.SESSION_ID = generateUUID();
+
+        this.post([[new Date(), navigator.platform]], { type: 'session' })
     }
 
     /**
      * 
      * @param {*} data 2D array
+     * @param {Object} options 
      */
-    post(data) {
+    post(data, options = {}) {
+
+        // add the SESSION ID to the beginning of each row
+        for (const row of data) {
+            row.unshift(this.SESSION_ID)
+        }
+        
         fetch(this.SCRIPT_PATH, {
             method: "POST",
             headers: {
@@ -19,6 +29,7 @@ export class DataControl {
             mode: 'no-cors',
             body: JSON.stringify({
                 data,
+                options,
             })
         }).then(res => {
             console.log("Request complete! response:", res);

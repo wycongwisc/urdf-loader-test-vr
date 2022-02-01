@@ -71,11 +71,6 @@ export async function relaxedikDemo() {
     createBr("inputs");
     createBr("inputs");
 
-    // dataControl.createButtons();
-
-    // createBr("inputs");
-    // createBr("inputs");
-
     createText("Task Options:", "inputs", "h3");
     createText("Warning: changing task settings will reset the task", "inputs", "p");
     createToggleSwitch("randomize-target-size", "inputs", "", "Randomize Target Size", false);
@@ -330,6 +325,10 @@ export async function relaxedikDemo() {
             controlMapping
         });
 
+        console.log(window.robot.joints)
+        
+        // list of joints to be logged
+        const JOINTS = ["head_pan", "right_j0", "right_j1", "right_j1_2", "right_j2", "right_j2_2", "right_j3", "right_j4", "right_j4_2", "right_j5", "right_j6"];
         let data = [];
         setInterval( function(){ 
             const curr_ee_abs_three = getCurrEEpose();
@@ -340,14 +339,16 @@ export async function relaxedikDemo() {
             } 
             taskControl.update(curr_ee_abs_three)
 
-            let jointInfo = [];
-            for (const property in window.robot.joints) {
-                jointInfo.push(window.robot.joints[property].position, window.robot.joints[property].quaternion)
+            let row = [];
+            row.push(new Date());
+            for (const joint of JOINTS) {
+                let currJoint = window.robot.joints[joint];
+                row.push(currJoint.position.x + ' ' + currJoint.position.y + ' ' + currJoint.position.z + ', ' + currJoint.quaternion.x + ' ' + currJoint.quaternion.y + ' ' + currJoint.quaternion.z + ' ' + currJoint.quaternion.w);
             }
+            data.push(row)
 
-            data.push([new Date(), ...jointInfo])
+            // POST request every 500 * 5 = 2500 ms
             if (data.length === 500) {
-                console.log(window.robot.joints)
                 dataControl.post(data);
                 data = [];
             }

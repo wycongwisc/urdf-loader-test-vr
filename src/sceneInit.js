@@ -8,7 +8,7 @@ export function initScene() {
 
     // scene
     scene = new T.Scene();
-    scene.background = new T.Color(0x263238);
+    scene.background = new T.Color(0x2c3e50);
 
     camera = new T.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.001, 1000);
     camera.position.set(3, 3, 3);
