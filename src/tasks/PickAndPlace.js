@@ -175,7 +175,7 @@ export default class PickAndPlace extends Task {
         if (block.vel) {
             if ((block.vel.z < 0 && block.mesh.position.z <= -1) ||
                 (block.vel.z > 0 && block.mesh.position.z >= 1)) {
-                    block.vel.negate(); 
+                block.vel.negate(); 
             }
             block.mesh.position.add(block.vel.clone().multiplyScalar(delta));
         }

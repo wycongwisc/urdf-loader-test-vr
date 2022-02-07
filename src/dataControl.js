@@ -2,7 +2,7 @@ import { generateUUID } from 'three/src/math/MathUtils';
 
 export class DataControl {
     constructor(params) {
-        this.SCRIPT_PATH = "https://script.google.com/macros/s/AKfycby-ZCKzHej-YE5cg5poh7yt64Zseqgu96W-FM8qBvLpT1o1u-OXy7WNG32W7ETvIRwR/exec"
+        this.SCRIPT_PATH = "https://script.google.com/macros/s/AKfycbzlyTXFtoV2CwMrnZjv4hwwHRuxwK6eg0CGizhtn-1M4YEctgFSWavKmvgY0JH5mL5S/exec"
         this.SESSION_ID = generateUUID();
 
         this.post([[new Date(), navigator.platform]], { type: 'session' })

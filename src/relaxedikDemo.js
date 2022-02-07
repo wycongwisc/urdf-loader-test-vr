@@ -325,10 +325,8 @@ export async function relaxedikDemo() {
             controlMapping
         });
 
-        console.log(window.robot.joints)
+        console.log(window.robot)
         
-        // list of joints to be logged
-        const JOINTS = ["head_pan", "right_j0", "right_j1", "right_j1_2", "right_j2", "right_j2_2", "right_j3", "right_j4", "right_j4_2", "right_j5", "right_j6"];
         let data = [];
         setInterval( function(){ 
             const curr_ee_abs_three = getCurrEEpose();
@@ -341,7 +339,7 @@ export async function relaxedikDemo() {
 
             let row = [];
             row.push(new Date());
-            for (const joint of JOINTS) {
+            for (const joint of ["head_pan", "right_j0", "right_j1", "right_j1_2", "right_j2", "right_j2_2", "right_j3", "right_j4", "right_j4_2", "right_j5", "right_j6"]) {
                 let currJoint = window.robot.joints[joint];
                 row.push(currJoint.position.x + ' ' + currJoint.position.y + ' ' + currJoint.position.z + ', ' + currJoint.quaternion.x + ' ' + currJoint.quaternion.y + ' ' + currJoint.quaternion.z + ' ' + currJoint.quaternion.w);
             }
