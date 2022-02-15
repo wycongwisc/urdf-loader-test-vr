@@ -13,8 +13,11 @@ import { getCurrEEpose } from './utils';
 import { ControlMapping} from './controlMapping';
 import { create } from 'mathjs';
 
+import ThreeMeshUI from 'three-mesh-ui'
+
 import { TaskControl } from './taskControl.js'
 import { DataControl } from './dataControl';
+import { UiControl } from './uiControl';
 
 export async function relaxedikDemo() {
 
@@ -34,8 +37,6 @@ export async function relaxedikDemo() {
     camera.lookAt(0, 1, 0);
 
     window.robot = {};
-    let mouseControl = undefined;
-    let vrControl = undefined;
     let jointSliders = [];
 
     const dataControl = new DataControl();
@@ -294,9 +295,6 @@ export async function relaxedikDemo() {
 
     }
 
-    const taskControl = new TaskControl({ scene, camera });
-    window.taskControl = taskControl;
-
     async function load_config() {
         console.log("loading robot config");
         let robot_info = yaml.load(await fetch("https://raw.githubusercontent.com/uwgraphics/relaxed_ik_core/collision-ik/config/info_files/sawyer_info.yaml").then(response => response.text()));
@@ -317,7 +315,19 @@ export async function relaxedikDemo() {
 
         let relaxedIK = new RelaxedIK(robot_info, robot_nn_config);
         
-        mouseControl = new MouseControl({
+        const uiControl = new UiControl({
+            scene,
+        })
+
+        const taskControl = new TaskControl({ 
+            scene, 
+            camera,
+            uiControl 
+        });
+
+        window.taskControl = taskControl;
+
+        const mouseControl = new MouseControl({
             relaxedIK,
             jointSliders,
             robot_info,
@@ -325,14 +335,16 @@ export async function relaxedikDemo() {
             controlMapping
         });
 
-        vrControl = new VrControl({
+        const vrControl = new VrControl({
             renderer,
             scene,
             relaxedIK,
             robot_info,
             target_cursor,
-            controlMapping
+            controlMapping,
+            uiControl
         })
+
 
         console.log(window.robot)
         
@@ -381,6 +393,8 @@ export async function relaxedikDemo() {
     // render();
 
     renderer.setAnimationLoop( function () {
+
+        ThreeMeshUI.update();
 
         renderer.render( scene, camera );
     

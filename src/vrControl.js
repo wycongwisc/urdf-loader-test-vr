@@ -12,23 +12,21 @@ import { Vector3 } from 'three';
 
 
 export class VrControl {
-    constructor(options) {
+    constructor(params) {
 
-        this.relaxedIK = options.relaxedIK
-        this.renderer = options.renderer
-        this.scene = options.scene
+        this.relaxedIK = params.relaxedIK
+        this.renderer = params.renderer
+        this.scene = params.scene
         this.intervalID = undefined;
-        this.controlMapping = options.controlMapping;
-        this.target_cursor = options.target_cursor;
-        this.robotInfo = options.robot_info;
+        this.controlMapping = params.controlMapping;
+        const uiControl = params.uiControl;
+        this.target_cursor = params.target_cursor;
+        this.robotInfo = params.robot_info;
         this.scale = 2
 
         this.lastSqueeze = 0;
         this.defaultPosition = new T.Vector3();
         this.defaultPosition.set(1.5, 1.5, 0)
-
-        this.WORLD_TO_ROBOT = new T.Matrix4();
-        this.WORLD_TO_ROBOT.set(1, 0,  0, 0, 0, 0, -1, 0, 0, 1,  0, 0, 0, 0,  0, 1);
 
         this.init_ee_abs_three = getCurrEEpose();
         this.ee_goal_rel_three = {"posi": new T.Vector3(),
@@ -63,10 +61,12 @@ export class VrControl {
                 { name: 'activateDragControl', from: 'IDLE', to: 'DRAG_CONTROL' },
                 { name: 'activateRemoteControl', from: 'IDLE', to: 'REMOTE_CONTROL' },
                 { name: 'deactivateDragControl', from: 'DRAG_CONTROL', to: 'IDLE' },
-                { name: 'deactivateRemoteControl', from: 'REMOTE_CONTROL', to: 'IDLE' }
+                { name: 'deactivateRemoteControl', from: 'REMOTE_CONTROL', to: 'IDLE' },
+                { name: 'goto', from: '*', to: function(s) { return s } }
             ],
             data: {},
-            methods: {}
+            methods: {
+            }
         })
 
         let stereoToggle = document.querySelector('#stereo-toggle');
@@ -84,7 +84,6 @@ export class VrControl {
 
     squeeze() {
         if (Math.abs(Date.now() - this.lastSqueeze) > 300) {
-            console.log('Reset robot pose')
             this.reset()
         } else {
             this.renderer.xr.stereo = !this.renderer.xr.stereo
@@ -112,9 +111,11 @@ export class VrControl {
     }
 
     reset() {
+        this.state.goto('IDLE');
         this.relaxedIK.recover_vars([]);
         this.ee_goal_rel_three = {"posi": new T.Vector3(),
                                 "ori": new T.Quaternion().identity()};
+    }
 
     step() {
 
@@ -183,7 +184,7 @@ export class VrControl {
             return true;
         }
         return false;
-    };
+    }
 
     getPose(controller) {
         return { 
