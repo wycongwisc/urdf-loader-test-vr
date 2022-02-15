@@ -81,6 +81,18 @@ export function Line3D (points, color, width) {
     return new T.Mesh(geometry2, material);
 }
 
+export function relToAbs(rel_pose, init_pose) {
+    return {
+        "posi": init_pose.posi.clone().add(rel_pose.posi),
+        "ori": init_pose.ori.clone().premultiply(rel_pose.ori) };
+}
+
+export function absToRel(abs_pose, init_pose) {
+    return {
+        "posi": abs_pose.posi.clone().add( init_pose.posi.clone().negate() ),
+        "ori": abs_pose.ori.clone().premultiply(init_pose.ori.clone().invert()) };
+}
+
 export function castShadow(obj) {
     obj.children.forEach(function (child) {
         if (child.constructor.name === 'Mesh') {

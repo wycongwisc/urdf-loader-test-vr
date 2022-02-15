@@ -325,12 +325,29 @@ export async function relaxedikDemo() {
             controlMapping
         });
 
+        vrControl = new VrControl({
+            renderer,
+            scene,
+            relaxedIK,
+            robot_info,
+            target_cursor,
+            controlMapping
+        })
+
         console.log(window.robot)
         
         let data = [];
         setInterval( function(){ 
             const curr_ee_abs_three = getCurrEEpose();
-            if (mouseControl.step()) {
+
+            let update;
+            if (renderer.xr.isPresenting) {
+                update = vrControl.step()
+            } else {
+                update = mouseControl.step();
+            }
+
+            if (update) {
                 let m4 = T_ROS_to_THREE.clone().multiply( new T.Matrix4().makeRotationFromQuaternion(curr_ee_abs_three.ori));
                 let m3 = new T.Matrix3().setFromMatrix4(m4);
                 controlMapping.updateEEPose(m3);
@@ -352,13 +369,6 @@ export async function relaxedikDemo() {
             }
         }, 5);
 
-        vrControl = new VrControl({
-            renderer,
-            scene,
-            relaxedIK,
-            mouseControl,
-            controlMapping
-        })
     }
 
     // function render() {

@@ -141,6 +141,7 @@ export default class PickAndPlace extends Task {
 
         const block = this.rounds[this.currRound].block;
         const target = this.rounds[this.currRound].target;
+        
         // object representing gripper in Three space; there is probably a better way to do this
         const gripper = new T.Object3D();
         gripper.position.copy(new T.Vector3(ee_pose.posi.x, ee_pose.posi.y, ee_pose.posi.z));

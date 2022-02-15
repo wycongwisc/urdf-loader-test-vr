@@ -306,26 +306,26 @@ export class MouseControl {
         }
     }
 
-    onControllerMove(x, y, z, r) {
-        // if (!this.moveCursorNotRobot) {
-        //     let curr_ee_abs_three =  getCurrEEpose();
-        //     let curr_ee_rel_three = this.absToRel(curr_ee_abs_three, this.init_ee_abs_three);
-        //     this.ee_goal_rel_ros = changeReferenceFrame(curr_ee_rel_three, this.T_ROS_to_THREE);
-        // } 
-        let worldToRobot = new T.Matrix4()
-        worldToRobot.set(1, 0,  0, 0, 0, 0, -1, 0, 0, 1,  0, 0, 0, 0,  0, 1);
+    // onControllerMove(x, y, z, r) {
+    //     // if (!this.moveCursorNotRobot) {
+    //     //     let curr_ee_abs_three =  getCurrEEpose();
+    //     //     let curr_ee_rel_three = this.absToRel(curr_ee_abs_three, this.init_ee_abs_three);
+    //     //     this.ee_goal_rel_ros = changeReferenceFrame(curr_ee_rel_three, this.T_ROS_to_THREE);
+    //     // } 
+    //     let worldToRobot = new T.Matrix4()
+    //     worldToRobot.set(1, 0,  0, 0, 0, 0, -1, 0, 0, 1,  0, 0, 0, 0,  0, 1);
 
-        let robot_r = rotQuaternion(r, worldToRobot);
+    //     let robot_r = rotQuaternion(r, worldToRobot);
 
-        let step = mathjsMatToThreejsVector3( 
-                        this.controlMapping.transform([
-                            y * this.moveTransScale,
-                            x * this.moveTransScale, 
-                            z * this.wheelTransScale]));
+    //     let step = mathjsMatToThreejsVector3( 
+    //                     this.controlMapping.transform([
+    //                         y * this.moveTransScale,
+    //                         x * this.moveTransScale, 
+    //                         z * this.wheelTransScale]));
 
-        this.ee_goal_rel_ros.ori.premultiply(robot_r)
-        this.ee_goal_rel_ros.posi.add( step );
-    }
+    //     this.ee_goal_rel_ros.ori.premultiply(robot_r)
+    //     this.ee_goal_rel_ros.posi.add( step );
+    // }
 
     relToAbs(rel_pose, init_pose) {
         return {

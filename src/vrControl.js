@@ -5,6 +5,10 @@
 import * as T from 'three';
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 // import { degToRad, getCurrEEpose, mathjsMatToThreejsVector3 } from './utils';
+import { rotQuaternion, getCurrEEpose, changeReferenceFrame, relToAbs, absToRel } from './utils';
+import StateMachine from 'javascript-state-machine';
+import { isZero } from 'mathjs';
+import { Vector3 } from 'three';
 
 
 export class VrControl {
@@ -14,30 +18,56 @@ export class VrControl {
         this.renderer = options.renderer
         this.scene = options.scene
         this.intervalID = undefined;
-        this.mouseControl = options.mouseControl
         this.controlMapping = options.controlMapping;
-        this.scale = 20000
+        this.target_cursor = options.target_cursor;
+        this.robotInfo = options.robot_info;
+        this.scale = 2
 
         this.lastSqueeze = 0;
         this.defaultPosition = new T.Vector3();
         this.defaultPosition.set(1.5, 1.5, 0)
-1
-        // toggles robot control
-        this.controlMode = false;
 
-        this.controller1 = this.renderer.xr.getController(0); 
-        this.controllerGrip1 = this.renderer.xr.getControllerGrip(0);
+        this.WORLD_TO_ROBOT = new T.Matrix4();
+        this.WORLD_TO_ROBOT.set(1, 0,  0, 0, 0, 0, -1, 0, 0, 1,  0, 0, 0, 0,  0, 1);
+
+        this.init_ee_abs_three = getCurrEEpose();
+        this.ee_goal_rel_three = {"posi": new T.Vector3(),
+        "ori": new T.Quaternion().identity()};
+
+        this.ee_goal_rel_ros = {"posi": new T.Vector3(),
+                                "ori": new T.Quaternion().identity()};
+        
+        // transformation from ROS' reference frame to THREE's reference frame
+        this.T_ROS_to_THREE = new T.Matrix4().makeRotationFromEuler(new T.Euler(1.57079632679, 0., 0.));
+        // transformation from THREE' reference frame to ROS's reference frame
+        this.T_THREE_to_ROS= this.T_ROS_to_THREE.clone().invert();
+
+
+        this.controller = this.renderer.xr.getController(0); 
+        this.controllerGrip = this.renderer.xr.getControllerGrip(0);
         const controllerModelFactory = new XRControllerModelFactory()
-        this.model1 = controllerModelFactory.createControllerModel(this.controllerGrip1);
-        this.controllerGrip1.add(this.model1);
+        this.model = controllerModelFactory.createControllerModel(this.controllerGrip);
+        this.controllerGrip.add(this.model);
 
-        this.scene.add( this.controllerGrip1 );
+        this.scene.add( this.controllerGrip );
 
         this.select = this.select.bind(this);
         this.squeeze = this.squeeze.bind(this);
 
-        this.controller1.addEventListener('select', this.select.bind(this));
-        this.controller1.addEventListener('squeeze', this.squeeze.bind(this))
+        this.controller.addEventListener('select', this.select.bind(this));
+        this.controller.addEventListener('squeeze', this.squeeze.bind(this))
+
+        this.state = new StateMachine({
+            init: 'IDLE',
+            transitions: [
+                { name: 'activateDragControl', from: 'IDLE', to: 'DRAG_CONTROL' },
+                { name: 'activateRemoteControl', from: 'IDLE', to: 'REMOTE_CONTROL' },
+                { name: 'deactivateDragControl', from: 'DRAG_CONTROL', to: 'IDLE' },
+                { name: 'deactivateRemoteControl', from: 'REMOTE_CONTROL', to: 'IDLE' }
+            ],
+            data: {},
+            methods: {}
+        })
 
         let stereoToggle = document.querySelector('#stereo-toggle');
         stereoToggle.addEventListener('click', (e) => {
@@ -55,7 +85,7 @@ export class VrControl {
     squeeze() {
         if (Math.abs(Date.now() - this.lastSqueeze) > 300) {
             console.log('Reset robot pose')
-            this.mouseControl.reset()
+            this.reset()
         } else {
             this.renderer.xr.stereo = !this.renderer.xr.stereo
             console.log('Stereo: ' +  this.renderer.xr.stereo)
@@ -64,39 +94,101 @@ export class VrControl {
     }
 
     select() {
-        if (this.controlMode) {
-            this.controlMode = false;
-            clearInterval(this.intervalID);
-        } else {
-            this.controlMode = true;
-            let prev = this.getPose(this.controller1)
-            this.intervalID = setInterval(() => {
-                let curr = this.getPose(this.controller1)
 
-                let x = (curr.x - prev.x) * this.scale
-                let y = (curr.y - prev.y) * (this.scale / 370)
-                let z = (curr.z - prev.z) * this.scale
-                let r = new T.Quaternion();
-                let q1 = prev.r.clone()
-                let q2 = curr.r.clone()
-                r.multiplyQuaternions(q2, q1.invert())
-
-                // in world space, y is up; in robot space, z is up
-                this.mouseControl.onControllerMove(x, z, y, r)
-                
-                prev = curr
-            }, 5); 
+        switch(this.state.state) {
+            case 'IDLE':
+                this.state.activateRemoteControl();
+                break;
+            case 'REMOTE_CONTROL':
+                this.state.deactivateRemoteControl();
+                break;
+            case 'DRAG_CONTROL':
+                this.state.deactivateDragControl();
+                this.reset();
+                break;
+            default:
+                break;
         }
     }
 
+    reset() {
+        this.relaxedIK.recover_vars([]);
+        this.ee_goal_rel_three = {"posi": new T.Vector3(),
+                                "ori": new T.Quaternion().identity()};
+
+    step() {
+
+        const curr_ee_abs_three  = getCurrEEpose();
+        const ctrlPose = this.getPose(this.controller)
+        const prevCtrlPose = this.prevCtrlPose;
+        this.prevCtrlPose = ctrlPose;
+
+        const init_ee_abs_three = this.init_ee_abs_three;
+
+        if (this.state.is('IDLE')) {
+
+            if (ctrlPose.posi.distanceTo(curr_ee_abs_three.posi) <= 0.1) {
+                this.state.activateDragControl();
+                return false;
+            }
+
+        } else if (this.state.is('REMOTE_CONTROL')) {
+
+            const deltaPosi = new T.Vector3(); 
+            deltaPosi.subVectors(ctrlPose.posi, prevCtrlPose.posi)
+            this.ee_goal_rel_three.posi.add(deltaPosi);
+
+            const deltaOri = new T.Quaternion();
+            deltaOri.multiplyQuaternions(ctrlPose.ori.clone(), prevCtrlPose.ori.clone().invert())
+            this.ee_goal_rel_three.ori.premultiply(deltaOri)
+
+        } else if (this.state.is('DRAG_CONTROL')) { 
+
+            const deltaPosi = new Vector3();
+            deltaPosi.subVectors(ctrlPose.posi, init_ee_abs_three.posi)
+            this.ee_goal_rel_three.posi.copy(deltaPosi);
+
+            const deltaOri = new T.Quaternion();
+            deltaOri.multiplyQuaternions(ctrlPose.ori.clone(), prevCtrlPose.ori.clone().invert())
+            this.ee_goal_rel_three.ori.premultiply(deltaOri)
+            
+        }
+
+        let ee_goal_rel_three = this.ee_goal_rel_three;
+        let ee_goal_rel_ros = changeReferenceFrame(ee_goal_rel_three, this.T_ROS_to_THREE);
+        let ee_goal_abs_three = relToAbs(ee_goal_rel_three, init_ee_abs_three);
+
+        this.target_cursor.position.copy( ee_goal_abs_three.posi );
+        this.target_cursor.matrixWorldNeedsUpdate = true;
+
+        // distance difference
+        let d = curr_ee_abs_three.posi.distanceTo( ee_goal_abs_three.posi  );
+        // angle difference
+        let a = curr_ee_abs_three.ori.angleTo( ee_goal_abs_three.ori );
+
+        if ( d > 1e-3 || a > 1e-3 ) {
+            const res = this.relaxedIK.solve ([
+                ee_goal_rel_ros.posi.x,
+                ee_goal_rel_ros.posi.y,
+                ee_goal_rel_ros.posi.z],
+                [ee_goal_rel_ros.ori.w, ee_goal_rel_ros.ori.x, ee_goal_rel_ros.ori.y, ee_goal_rel_ros.ori.z]);
+            
+            const jointArr = Object.entries(window.robot.joints).filter(joint => joint[1]._jointType != "fixed" && joint[1].type != "URDFMimicJoint");
+            jointArr.forEach( joint => {
+                const i = this.robotInfo.joint_ordering.indexOf(joint[0]);
+                if (i != -1) {
+                    window.robot.setJointValue(joint[0],  res[i]);
+                }
+            })   
+            return true;
+        }
+        return false;
+    };
+
     getPose(controller) {
-        let controllerPos = controller.getWorldPosition(new T.Vector3())
-        let controllerOri = controller.getWorldQuaternion(new T.Quaternion())
-        return {
-            x: controllerPos.x, 
-            y: controllerPos.y,
-            z: controllerPos.z,
-            r: controllerOri
+        return { 
+            "posi": controller.getWorldPosition(new T.Vector3()),
+            "ori": controller.getWorldQuaternion(new T.Quaternion()),
         } 
     }
 }
