@@ -1,0 +1,1108 @@
+<?xml version="1.0"?>
+<!-- created with Phobos 1.0.1 "Capricious Choutengan" -->
+<sdf version="1.5">
+  <model name="Kitchen_standard">
+    <link name="Plate_root.005">
+      <pose>-1.29344 0.99308 1.08019 0 0 0</pose>
+      <inertial>
+        <mass>0.55</mass>
+        <inertia>
+          <ixx>0.00149</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00161</iyy>
+          <iyz>0</iyz>
+          <izz>0.00309</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Plate.col.005">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plate.010.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Plate.005">
+        <pose>0.0 0.0 0.0 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.64 0.64 0.64 1.0</ambient>
+          <diffuse>0.64 0.64 0.64 1.0</diffuse>
+          <specular>0.4 0.4 0.4 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plate.011.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="Plate">
+      <pose>0.9344 -1.6298 0.97698 0 0 2.43466</pose>
+      <inertial>
+        <mass>1.0</mass>
+        <inertia>
+          <ixx>0.00397</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00397</iyy>
+          <iyz>0</iyz>
+          <izz>0.00794</izz>
+        </inertia>
+        <pose>2e-05 1e-05 0.00484 0 0 0</pose>
+      </inertial>
+      <collision name="Microwave_plate">
+        <pose>2e-05 1e-05 0.00484 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.12598</radius>
+            <length>0.0063</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="Microwave_plate_g.col">
+        <pose>1.1920928955078125e-07 -5.960464477539063e-08 0.0 3.303653350883451e-09 4.201713466045476e-08 -5.960464477539063e-08</pose>
+        <material>
+          <ambient>0.8 0.8 0.8 1.0</ambient>
+          <diffuse>0.8 0.8 0.8 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/meshId1_name.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="refridge_door1">
+      <pose>0.66025 2.41359 0.0077 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Plane.col">
+        <pose>-0.01745 0.4139 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plane.002.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Plane">
+        <pose>-0.017454147338867188 0.41390275955200195 0.0 -7.154701355255373e-17 -0.0 0.0</pose>
+        <material>
+          <ambient>0.74096 0.7879 0.7879 1.0</ambient>
+          <diffuse>0.74096 0.7879 0.7879 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plane.dae</uri>
+            <scale>0.02785 0.43052 0.43052</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="GlassBottle_root">
+      <pose>0 -2.11235 0.94884 0 0 0</pose>
+      <inertial>
+        <mass>0.2268</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="GlassBottle.col">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/GlassBottle.001.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="GlassBottle">
+        <pose>0.0 0.0 -5.960464477539063e-08 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.39216 0.58431 0.58431 0.50196</ambient>
+          <diffuse>0.39216 0.58431 0.92941 0.50196</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/GlassBottle.dae</uri>
+            <scale>0.00114 0.00114 0.00114</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="root_standard">
+      <pose>-0.00875 -0.00141 0.94251 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+    </link>
+    <link name="Plate_root.002">
+      <pose>0.96965 1.01579 0.9334 0 0 0</pose>
+      <inertial>
+        <mass>0.55</mass>
+        <inertia>
+          <ixx>0.00149</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00161</iyy>
+          <iyz>0</iyz>
+          <izz>0.00309</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Plate.col.002">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plate.005.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Plate.002">
+        <pose>5.960464477539063e-08 0.0 5.960464477539063e-08 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.64 0.64 0.64 1.0</ambient>
+          <diffuse>0.64 0.64 0.64 1.0</diffuse>
+          <specular>0.4 0.4 0.4 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plate.004.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="Microwave_root">
+      <pose>0.89828 -1.66205 1.09123 0 0 2.43466</pose>
+      <inertial>
+        <mass>15.0</mass>
+        <inertia>
+          <ixx>0.43564</ixx>
+          <ixy>0.00033</ixy>
+          <ixz>-0.02819</ixz>
+          <iyy>0.25701</iyy>
+          <iyz>-0.00109</iyz>
+          <izz>0.45276</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Oven.col">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/meshId2_name.001.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Oven">
+        <pose>1.1920928955078125e-07 1.1920928955078125e-07 0.0 8.073071455783065e-08 -4.862441471686907e-08 0.0</pose>
+        <material>
+          <ambient>0.8 0.8 0.8 1.0</ambient>
+          <diffuse>0.8 0.8 0.8 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/meshId2_name.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="refridge_door2">
+      <pose>0.66057 2.41377 1.20409 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Plane.001.000">
+        <pose>-0.01778 0.41381 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plane.003.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Plane.001">
+        <pose>-0.017780303955078125 0.41381049156188965 0.0 2.9802322387695312e-08 9.47311907330316e-16 0.0</pose>
+        <material>
+          <ambient>0.74096 0.7879 0.7879 1.0</ambient>
+          <diffuse>0.74096 0.7879 0.7879 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plane.001.dae</uri>
+            <scale>0.02785 0.43052 0.43052</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="mug1_root">
+      <pose>0.89674 -0.43428 1.01337 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+    </link>
+    <link name="base_link">
+      <pose>0.89674 -0.43428 1.01337 0 0 0</pose>
+      <inertial>
+        <mass>0.2</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="mug_base.col">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Group1/mesh6/mesh6-geometry#mesh6-geometry.001.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="mug_base">
+        <pose>0.0 0.0 0.0 0.0 -0.0 1.94280749562343e-15</pose>
+        <material>
+          <ambient>0 0 0 0</ambient>
+          <diffuse>0 0 0.4 0</diffuse>
+          <specular>0.06667 0.06667 0.06667 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Group1/mesh6/mesh6-geometry#mesh6-geometry.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="Plate_root.003">
+      <pose>0.78043 1.65158 0.9334 0 0 0</pose>
+      <inertial>
+        <mass>0.55</mass>
+        <inertia>
+          <ixx>0.00149</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00161</iyy>
+          <iyz>0</iyz>
+          <izz>0.00309</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Plate.col.003">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plate.006.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Plate.003">
+        <pose>5.960464477539063e-08 0.0 5.960464477539063e-08 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.64 0.64 0.64 1.0</ambient>
+          <diffuse>0.64 0.64 0.64 1.0</diffuse>
+          <specular>0.4 0.4 0.4 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plate.007.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="Glass_root.003">
+      <pose>-1.68337 1.41782 1.07637 0 0 0</pose>
+      <inertial>
+        <mass>0.14</mass>
+        <inertia>
+          <ixx>0.00082</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00082</iyy>
+          <iyz>0</iyz>
+          <izz>0.00015</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Glass.col.003">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Glass.006.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Glass.003">
+        <pose>0.0 0.0 0.0 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.8 0.8 0.8 0.96</ambient>
+          <diffuse>0.8 0.8 0.8 0.96</diffuse>
+          <specular>0.205 0.205 0.205 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Glass.007.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="SodaCan_root">
+      <pose>-0.44342 -2.0052 0.96141 0 0 0</pose>
+      <inertial>
+        <mass>0.384</mass>
+        <inertia>
+          <ixx>0.00096</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00096</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="SodaCan">
+        <pose>0 0 0.03217 3.14159 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.03285</radius>
+            <length>0.11973</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="SodaCan">
+        <pose>-2.9802322387695312e-08 0.0 0.0 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.64 0.64 0.64 1.0</ambient>
+          <diffuse>0.64 0.64 0.64 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/SodaCan.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="refridge_root">
+      <pose>1.01589 2.83155 0.84876 0 0 -3.14159</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Cube.col">
+        <pose>0 0 0 0 0 3.14159</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Cube.052.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Cube">
+        <pose>1.1920928955078125e-07 2.384185791015625e-07 5.960464477539063e-08 3.5773506776276865e-17 -9.014636148663158e-09 3.141592502593994</pose>
+        <material>
+          <ambient>0.74096 0.7879 0.7879 1.0</ambient>
+          <diffuse>0.74096 0.7879 0.7879 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Cube.050.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="Glass_root.002">
+      <pose>-1.32914 0.37331 1.07637 0 0 0</pose>
+      <inertial>
+        <mass>0.14</mass>
+        <inertia>
+          <ixx>0.00082</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00082</iyy>
+          <iyz>0</iyz>
+          <izz>0.00015</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Glass.col.002">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Glass.005.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Glass.002">
+        <pose>0.0 0.0 0.0 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.8 0.8 0.8 0.96</ambient>
+          <diffuse>0.8 0.8 0.8 0.96</diffuse>
+          <specular>0.205 0.205 0.205 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Glass.004.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="Plate_root.001">
+      <pose>0.84098 -0.09058 0.9334 0 0 0</pose>
+      <inertial>
+        <mass>0.55</mass>
+        <inertia>
+          <ixx>0.00149</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00161</iyy>
+          <iyz>0</iyz>
+          <izz>0.00309</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Plate.col.001">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plate.002.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Plate.001">
+        <pose>0.0 0.0 0.0 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.64 0.64 0.64 1.0</ambient>
+          <diffuse>0.64 0.64 0.64 1.0</diffuse>
+          <specular>0.4 0.4 0.4 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plate.003.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="SquarePlate_root.001">
+      <pose>-0.10987 -1.88465 0.93344 0 0 -2.78146</pose>
+      <inertial>
+        <mass>0.9</mass>
+        <inertia>
+          <ixx>0.00658</ixx>
+          <ixy>0</ixy>
+          <ixz>2e-05</ixz>
+          <iyy>0.00716</iyy>
+          <iyz>0</iyz>
+          <izz>0.01372</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="SquarePlate.col.001">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plane.005.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="SquarePlate.001">
+        <pose>5.960464477539063e-08 0.0 5.960464477539063e-08 0.0 -0.0 -2.9802322387695312e-08</pose>
+        <material>
+          <ambient>0.64 0.64 0.64 1.0</ambient>
+          <diffuse>0.64 0.64 0.64 1.0</diffuse>
+          <specular>0.4 0.4 0.4 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plane.006.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="Glass_root.001">
+      <pose>-0.97601 -2.04631 0.95258 0 0 0</pose>
+      <inertial>
+        <mass>0.14</mass>
+        <inertia>
+          <ixx>0.00082</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00082</iyy>
+          <iyz>0</iyz>
+          <izz>0.00015</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Glass.col.001">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Glass.001.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Glass.001">
+        <pose>-5.960464477539063e-08 0.0 0.0 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.8 0.8 0.8 0.96</ambient>
+          <diffuse>0.8 0.8 0.8 0.96</diffuse>
+          <specular>0.205 0.205 0.205 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Glass.003.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="SquarePlate_root.002">
+      <pose>-1.59337 -0.01514 1.06204 0 0 -0.50103</pose>
+      <inertial>
+        <mass>0.9</mass>
+        <inertia>
+          <ixx>0.00658</ixx>
+          <ixy>0</ixy>
+          <ixz>2e-05</ixz>
+          <iyy>0.00716</iyy>
+          <iyz>0</iyz>
+          <izz>0.01372</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="SquarePlate.col.002">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plane.008.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="SquarePlate.002">
+        <pose>0.0 0.0 0.0 2.862962489302845e-08 -5.227866850532337e-08 0.0</pose>
+        <material>
+          <ambient>0.64 0.64 0.64 1.0</ambient>
+          <diffuse>0.64 0.64 0.64 1.0</diffuse>
+          <specular>0.4 0.4 0.4 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plane.007.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="WineBottle_root">
+      <pose>1.34056 2.02884 0.94221 0 0 0</pose>
+      <inertial>
+        <mass>1.2</mass>
+        <inertia>
+          <ixx>0.02584</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.02584</iyy>
+          <iyz>0</iyz>
+          <izz>0.00113</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="WineBottle.col">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/WineBottle.001.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="WineBottle">
+        <pose>0.0 0.0 0.0 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.54216 0.54216 0.54216 1.0</ambient>
+          <diffuse>0.54216 0.54216 0.54216 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/WineBottle.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="lid_link">
+      <pose>0.90233 -0.43311 1.01337 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="mug_lid.col">
+        <pose>-0.00559 -0.00117 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Union1/mesh32/mesh32-geometry#mesh32-geometry.001.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="mug_lid">
+        <pose>-0.005589604377746582 -0.0011678040027618408 0.0 -1.182610460297509e-16 -0.0 0.0</pose>
+        <material>
+          <ambient>0.04706 0.04706 0.04706 0</ambient>
+          <diffuse>0.04706 0.04706 0.04706 0</diffuse>
+          <specular>0.06667 0.06667 0.06667 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Union1/mesh32/mesh32-geometry#mesh32-geometry.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="Plate_root">
+      <pose>0.72745 0.14537 0.9334 0 0 0</pose>
+      <inertial>
+        <mass>0.55</mass>
+        <inertia>
+          <ixx>0.00149</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00161</iyy>
+          <iyz>0</iyz>
+          <izz>0.00309</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Plate.col">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plate.001.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Plate">
+        <pose>0.0 0.0 0.0 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.64 0.64 0.64 1.0</ambient>
+          <diffuse>0.64 0.64 0.64 1.0</diffuse>
+          <specular>0.4 0.4 0.4 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plate.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="SquarePlate_root">
+      <pose>1.16927 0 0.93344 0 0 -0.13965</pose>
+      <inertial>
+        <mass>0.9</mass>
+        <inertia>
+          <ixx>0.00658</ixx>
+          <ixy>0</ixy>
+          <ixz>2e-05</ixz>
+          <iyy>0.00716</iyy>
+          <iyz>0</iyz>
+          <izz>0.01372</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="SquarePlate.col">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plane.004.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="SquarePlate">
+        <pose>0.0 0.0 0.0 1.5674892495098902e-08 -5.798726476768934e-08 1.4901161193847656e-08</pose>
+        <material>
+          <ambient>0.64 0.64 0.64 1.0</ambient>
+          <diffuse>0.64 0.64 0.64 1.0</diffuse>
+          <specular>0.4 0.4 0.4 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plane.000.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="Glass_root">
+      <pose>0.29565 -1.72463 0.95258 0 0 0</pose>
+      <inertial>
+        <mass>0.14</mass>
+        <inertia>
+          <ixx>0.00082</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00082</iyy>
+          <iyz>0</iyz>
+          <izz>0.00015</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Glass.col">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Glass.002.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Glass">
+        <pose>0.0 -1.1920928955078125e-07 1.1920928955078125e-07 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.8 0.8 0.8 0.96</ambient>
+          <diffuse>0.8 0.8 0.8 0.96</diffuse>
+          <specular>0.205 0.205 0.205 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Glass.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="Microwave_door">
+      <pose>0.94181 -1.36951 0.92982 0 0 2.43466</pose>
+      <inertial>
+        <mass>1.0</mass>
+        <inertia>
+          <ixx>0.08548</ixx>
+          <ixy>-0.00096</ixy>
+          <ixz>-0.0011</ixz>
+          <iyy>0.03395</iyy>
+          <iyz>-0.03158</iyz>
+          <izz>0.05174</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Door">
+        <pose>0.00615 0.19801 0.16466 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.02938 0.41796 0.32349</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="Door">
+        <pose>-1.1920928955078125e-07 2.682209014892578e-07 5.960464477539063e-08 1.6053167684049185e-08 -6.467758595363193e-08 -2.0861628513557662e-07</pose>
+        <material>
+          <ambient>0.8 0.8 0.8 1.0</ambient>
+          <diffuse>0.8 0.8 0.8 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/meshId0_name.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="Plate_root.004">
+      <pose>0.75773 -1.05808 0.9334 0 0 0</pose>
+      <inertial>
+        <mass>0.55</mass>
+        <inertia>
+          <ixx>0.00149</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00161</iyy>
+          <iyz>0</iyz>
+          <izz>0.00309</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Plate.col.004">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plate.009.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Plate.004">
+        <pose>0.0 0.0 0.0 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.64 0.64 0.64 1.0</ambient>
+          <diffuse>0.64 0.64 0.64 1.0</diffuse>
+          <specular>0.4 0.4 0.4 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_standard/meshes/Plate.008.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint type="TODO" name="Plate_root.005">
+      <parent>root_standard</parent>
+      <child>Plate_root.005</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="revolute" name="refridge_door1">
+      <parent>refridge_root</parent>
+      <child>refridge_door1</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <axis>
+        <xyz>0 0 1.0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>3.0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+    <joint type="TODO" name="GlassBottle_root">
+      <parent>root_standard</parent>
+      <child>GlassBottle_root</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="TODO" name="SquarePlate_root">
+      <parent>root_standard</parent>
+      <child>SquarePlate_root</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="TODO" name="Plate_root.002">
+      <parent>root_standard</parent>
+      <child>Plate_root.002</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="fixed" name="Microwave_root">
+      <parent>root_standard</parent>
+      <child>Microwave_root</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="revolute" name="Microwave_plate">
+      <parent>Microwave_root</parent>
+      <child>Plate</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <axis>
+        <xyz>0 0 1.0</xyz>
+        <limit>
+          <lower></lower>
+          <upper></upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+    <joint type="fixed" name="mug1_root">
+      <parent>root_standard</parent>
+      <child>mug1_root</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="TODO" name="Glass_root.002">
+      <parent>root_standard</parent>
+      <child>Glass_root.002</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="TODO" name="Glass_root.003">
+      <parent>root_standard</parent>
+      <child>Glass_root.003</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="TODO" name="SodaCan_root">
+      <parent>root_standard</parent>
+      <child>SodaCan_root</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="fixed" name="refridge_root">
+      <parent>root_standard</parent>
+      <child>refridge_root</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="TODO" name="Plate_root.003">
+      <parent>root_standard</parent>
+      <child>Plate_root.003</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="revolute" name="refridge_door2">
+      <parent>refridge_root</parent>
+      <child>refridge_door2</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <axis>
+        <xyz>0 0 1.0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>3.0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+    <joint type="TODO" name="SquarePlate_root.001">
+      <parent>root_standard</parent>
+      <child>SquarePlate_root.001</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="TODO" name="Glass_root.001">
+      <parent>root_standard</parent>
+      <child>Glass_root.001</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="fixed" name="joint_0">
+      <parent>base_link</parent>
+      <child>lid_link</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="TODO" name="SquarePlate_root.002">
+      <parent>root_standard</parent>
+      <child>SquarePlate_root.002</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="TODO" name="WineBottle_root">
+      <parent>root_standard</parent>
+      <child>WineBottle_root</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="TODO" name="Plate_root.001">
+      <parent>root_standard</parent>
+      <child>Plate_root.001</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="fixed" name="joint_1">
+      <parent>mug1_root</parent>
+      <child>base_link</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="TODO" name="Glass_root">
+      <parent>root_standard</parent>
+      <child>Glass_root</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="revolute" name="Microwave_door">
+      <parent>Microwave_root</parent>
+      <child>Microwave_door</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <axis>
+        <xyz>0 0 1.0</xyz>
+        <limit>
+          <lower>-6.0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+    <joint type="TODO" name="Plate_root.004">
+      <parent>root_standard</parent>
+      <child>Plate_root.004</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="TODO" name="Plate_root">
+      <parent>root_standard</parent>
+      <child>Plate_root</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+  </model>
+</sdf>

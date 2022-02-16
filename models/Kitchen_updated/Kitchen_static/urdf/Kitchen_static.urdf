@@ -1,0 +1,317 @@
+<?xml version="1.0"?>
+<!-- created with Phobos 1.0.1 "Capricious Choutengan" -->
+  <robot name="Kitchen_static">
+
+    <link name="cabinets_root">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cabinets">
+        <origin xyz="-0.45157 -0.20882 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cabinets.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </visual>
+      <collision name="Cabinets.000">
+        <origin xyz="-0.45157 -0.20882 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cabinets.010.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="countertop1_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Countertop_Top1">
+        <origin xyz="0 -0.00258 -0.00031" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.152.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+        <material name="CounterTopWood"/>
+      </visual>
+      <collision name="Countertop_Top1.000">
+        <origin xyz="0 -0.00258 -0.00061" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.153.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="countertop_corner_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Countertop_Corner_Base">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.154.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+        <material name="CounterTopWood"/>
+      </visual>
+      <collision name="Countertop_Corner_Base.000">
+        <origin xyz="0.0007 -0.00555 0.0003" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.158.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="countertop_edge_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Countertop_Top.001">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.155.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+        <material name="CounterTopWood"/>
+      </visual>
+      <collision name="Countertop_Top.001.000">
+        <origin xyz="0 0 6e-05" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.156.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="countertop_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Countertop_Top">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.142.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+        <material name="CounterTopWood"/>
+      </visual>
+      <collision name="Countertop_Top.col">
+        <origin xyz="0 0 0.00015" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.143.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="countertop_sink_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Countertop_Sink">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.146.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+        <material name="CounterTopSink"/>
+      </visual>
+      <collision name="Countertop_Sink.000">
+        <origin xyz="0 0 -0.00261" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.147.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="countertop_tall2_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Countertop_Top_Taller2">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.008.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+        <material name="GenericCounterMaterial"/>
+      </visual>
+      <collision name="Countertop_Top_Taller2.col">
+        <origin xyz="0 0 0.00057" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.000.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="countertop_tall_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Countertop_Top_Taller">
+        <origin xyz="0 0 -0.00342" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.157.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+        <material name="CounterTopWood"/>
+      </visual>
+      <collision name="Countertop_Top_Taller.000">
+        <origin xyz="0 0 -0.00019" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_static/meshes/dae/Cube.159.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="root_static">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Floor">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="8.0 8.0 0.002"/>
+        </geometry>
+        <material name="Floor_Material"/>
+      </visual>
+      <collision name="Floor">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="8.0 8.0 0.002"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="wall1">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Wall_1">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.10015 6.70389 3.00596"/>
+        </geometry>
+        <material name="Wall_material"/>
+      </visual>
+      <collision name="Wall_1.col">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.10015 6.70389 3.00596"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="wall2">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Wall_2">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="5.65911 0.10015 3.00596"/>
+        </geometry>
+        <material name="Wall_material"/>
+      </visual>
+      <collision name="Wall_2">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="5.65911 0.10015 3.00596"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="cabinets_root" type="fixed">
+      <origin xyz="1.23355 0.35459 2.3706" rpy="0 0 0"/>
+      <parent link="root_static"/>
+      <child link="cabinets_root"/>
+    </joint>
+
+    <joint name="countertop1_link" type="fixed">
+      <origin xyz="1.04436 -0.18407 0.90913" rpy="0 0 0"/>
+      <parent link="root_static"/>
+      <child link="countertop1_link"/>
+    </joint>
+
+    <joint name="countertop_corner_link" type="fixed">
+      <origin xyz="0.63422 -1.78146 0.44381" rpy="0 0 -3.14159"/>
+      <parent link="root_static"/>
+      <child link="countertop_corner_link"/>
+    </joint>
+
+    <joint name="countertop_edge_link" type="fixed">
+      <origin xyz="-0.95636 -2.19209 0.90906" rpy="0 0 0"/>
+      <parent link="root_static"/>
+      <child link="countertop_edge_link"/>
+    </joint>
+
+    <joint name="countertop_link" type="fixed">
+      <origin xyz="1.04436 1.80656 0.90913" rpy="0 0 0"/>
+      <parent link="root_static"/>
+      <child link="countertop_link"/>
+    </joint>
+
+    <joint name="countertop_sink_link" type="fixed">
+      <origin xyz="1.04357 0.81118 0.90952" rpy="0 0 3.14154"/>
+      <parent link="root_static"/>
+      <child link="countertop_sink_link"/>
+    </joint>
+
+    <joint name="countertop_tall2_link" type="continuous">
+      <origin xyz="-1.41531 1.20516 0.92078" rpy="0 0 0"/>
+      <parent link="root_static"/>
+      <child link="countertop_tall2_link"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="countertop_tall_link" type="fixed">
+      <origin xyz="-1.41586 0.20737 0.92078" rpy="0 0 0"/>
+      <parent link="root_static"/>
+      <child link="countertop_tall_link"/>
+    </joint>
+
+    <joint name="wall1" type="fixed">
+      <origin xyz="1.60982 0.64096 1.49534" rpy="0 0 0"/>
+      <parent link="root_static"/>
+      <child link="wall1"/>
+    </joint>
+
+    <joint name="wall2" type="fixed">
+      <origin xyz="-1.16959 -2.76415 1.49534" rpy="0 0 0"/>
+      <parent link="root_static"/>
+      <child link="wall2"/>
+    </joint>
+
+    <material name="CounterTopSink">
+      <color rgba="0.64 0 0.00054 1.0"/>
+    </material>
+
+    <material name="CounterTopWood">
+      <color rgba="0.64 0.64 0.64 1.0"/>
+    </material>
+
+    <material name="Floor_Material">
+      <color rgba="0.51303 0.37541 0.19019 1.0"/>
+    </material>
+
+    <material name="GenericCounterMaterial">
+      <color rgba="0.36791 0.38159 0.31374 1.0"/>
+    </material>
+
+    <material name="Wall_material">
+      <color rgba="0.8 0.74126 0.58046 1.0"/>
+    </material>
+
+  </robot>

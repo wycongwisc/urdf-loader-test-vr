@@ -1,0 +1,265 @@
+<?xml version="1.0"?>
+<!-- created with Phobos 1.0.1 "Capricious Choutengan" -->
+  <robot name="Kitchen_dynamic">
+
+    <link name="CabinetDoor_revolve">
+      <inertial>
+        <origin xyz="0.01108 -0.34558 0.36647" rpy="0 0 0"/>
+        <mass value="0.5"/>
+        <inertia ixx="0.05492" ixy="-1e-05" ixz="-0.00054" iyy="0.02418" iyz="0.00273" izz="0.02863"/>
+      </inertial>
+      <visual name="CabinetDoor">
+        <origin xyz="0.01108 -0.34558 0.36647" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.003.dae" scale="1.07738 1.04823 1.07738"/>
+        </geometry>
+      </visual>
+      <collision name="CabinetDoor.col">
+        <origin xyz="0.01108 -0.34558 0.36647" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.002.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="CabinetDoor_revolve.001">
+      <inertial>
+        <origin xyz="0.01108 0.36156 0.36647" rpy="0 0 0"/>
+        <mass value="0.5"/>
+        <inertia ixx="0.05492" ixy="-1e-05" ixz="-0.00054" iyy="0.02847" iyz="0.00296" izz="0.02863"/>
+      </inertial>
+      <visual name="CabinetDoor.001">
+        <origin xyz="0.01108 0.36156 0.36647" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.004.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </visual>
+      <collision name="CabinetDoor.001.col">
+        <origin xyz="0.01108 0.36156 0.36647" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.007.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="CabinetDoor_revolve.002">
+      <inertial>
+        <origin xyz="0.01108 -0.35997 0.36647" rpy="0 0 0"/>
+        <mass value="0.5"/>
+        <inertia ixx="0.04076" ixy="-1e-05" ixz="-0.0004" iyy="0.02003" iyz="0.00214" izz="0.02125"/>
+      </inertial>
+      <visual name="CabinetDoor.003">
+        <origin xyz="0.01108 -0.35997 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.001.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </visual>
+      <collision name="CabinetDoor.003.col">
+        <origin xyz="0.01108 -0.35997 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.017.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="CabinetDoor_revolve.003">
+      <inertial>
+        <origin xyz="0.01108 -0.35997 0.36647" rpy="0 0 0"/>
+        <mass value="0.5"/>
+        <inertia ixx="0.04076" ixy="-1e-05" ixz="-0.0004" iyy="0.02003" iyz="0.00214" izz="0.02125"/>
+      </inertial>
+      <visual name="CabinetDoor.004">
+        <origin xyz="0.01108 -0.35997 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.011.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </visual>
+      <collision name="CabinetDoor.004.col">
+        <origin xyz="0.01108 -0.35997 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.024.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="CabinetDoor_revolve.004">
+      <inertial>
+        <origin xyz="0.01108 0.35997 0.36647" rpy="0 0 0"/>
+        <mass value="0.5"/>
+        <inertia ixx="0.04076" ixy="-1e-05" ixz="-0.0004" iyy="0.02003" iyz="0.00214" izz="0.02125"/>
+      </inertial>
+      <visual name="CabinetDoor.005">
+        <origin xyz="0.01108 0.35997 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.014.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </visual>
+      <collision name="CabinetDoor.004.001">
+        <origin xyz="0.01108 0.35997 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.013.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="CabinetDoor_revolve.005">
+      <inertial>
+        <origin xyz="0.01108 -0.35997 0.36647" rpy="0 0 0"/>
+        <mass value="0.5"/>
+        <inertia ixx="0.04076" ixy="0" ixz="-0.0004" iyy="0.02003" iyz="0.00214" izz="0.02125"/>
+      </inertial>
+      <visual name="CabinetDoor.006">
+        <origin xyz="0.01108 -0.35997 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.015.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </visual>
+      <collision name="CabinetDoor.006.col">
+        <origin xyz="0.01108 -0.35997 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.025.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="CabinetDoor_revolve.006">
+      <inertial>
+        <origin xyz="0.01108 -0.35997 0.36647" rpy="0 0 0"/>
+        <mass value="0.5"/>
+        <inertia ixx="0.04076" ixy="0" ixz="-0.0004" iyy="0.02003" iyz="0.00214" izz="0.02125"/>
+      </inertial>
+      <visual name="CabinetDoor.007">
+        <origin xyz="0.01108 -0.35997 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.018.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </visual>
+      <collision name="CabinetDoor.007.col">
+        <origin xyz="0.01108 -0.35997 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.026.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="CabinetDoor_revolve.007">
+      <inertial>
+        <origin xyz="0.35997 -0.01108 0.36647" rpy="0 0 0"/>
+        <mass value="0.5"/>
+        <inertia ixx="0.04076" ixy="0" ixz="-0.0004" iyy="0.02003" iyz="0.00214" izz="0.02125"/>
+      </inertial>
+      <visual name="CabinetDoor.008">
+        <origin xyz="0.35997 -0.01108 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.019.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </visual>
+      <collision name="CabinetDoor.008.000">
+        <origin xyz="0.35997 -0.01108 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.022.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="CabinetDoor_revolve.008">
+      <inertial>
+        <origin xyz="0.35997 -0.01108 0.36647" rpy="0 0 0"/>
+        <mass value="0.5"/>
+        <inertia ixx="0.04076" ixy="0" ixz="-0.0004" iyy="0.02003" iyz="0.00214" izz="0.02125"/>
+      </inertial>
+      <visual name="CabinetDoor.009">
+        <origin xyz="0.35997 -0.01108 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.020.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </visual>
+      <collision name="CabinetDoor.009.000">
+        <origin xyz="0.35997 -0.01108 0.69432" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Kitchen_dynamic/meshes/dae/Cabinets.023.dae" scale="1.0 1.0 1.0"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="root_dynamic">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+    </link>
+
+    <joint name="CabinetDoor_revolve" type="revolute">
+      <origin xyz="0.87159 3.77577 2.10183" rpy="0 0 0"/>
+      <parent link="root_dynamic"/>
+      <child link="CabinetDoor_revolve"/>
+      <axis xyz="0 0 1.0"/>
+      <limit lower="-3.0" upper="0" effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="CabinetDoor_revolve.001" type="revolute">
+      <origin xyz="0.87159 2.31963 2.10183" rpy="0 0 0"/>
+      <parent link="root_dynamic"/>
+      <child link="CabinetDoor_revolve.001"/>
+      <axis xyz="0 0 1.0"/>
+      <limit lower="-3.0" upper="0" effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="CabinetDoor_revolve.002" type="revolute">
+      <origin xyz="0.87159 2.26898 1.77074" rpy="0 0 0"/>
+      <parent link="root_dynamic"/>
+      <child link="CabinetDoor_revolve.002"/>
+      <axis xyz="0 0 1.0"/>
+      <limit lower="-3.0" upper="0" effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="CabinetDoor_revolve.003" type="revolute">
+      <origin xyz="0.87159 -0.01653 1.77074" rpy="0 0 0"/>
+      <parent link="root_dynamic"/>
+      <child link="CabinetDoor_revolve.003"/>
+      <axis xyz="0 0 1.0"/>
+      <limit lower="-3.0" upper="0" effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="CabinetDoor_revolve.004" type="revolute">
+      <origin xyz="0.87159 -1.13262 1.77074" rpy="0 0 0"/>
+      <parent link="root_dynamic"/>
+      <child link="CabinetDoor_revolve.004"/>
+      <axis xyz="0 0 1.0"/>
+      <limit lower="-3.0" upper="0" effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="CabinetDoor_revolve.005" type="revolute">
+      <origin xyz="0.87159 -1.16978 1.77074" rpy="0 0 0"/>
+      <parent link="root_dynamic"/>
+      <child link="CabinetDoor_revolve.005"/>
+      <axis xyz="0 0 1.0"/>
+      <limit lower="-3.0" upper="0" effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="CabinetDoor_revolve.006" type="revolute">
+      <origin xyz="0.51584 -2.06474 1.77074" rpy="0 0 -1.5708"/>
+      <parent link="root_dynamic"/>
+      <child link="CabinetDoor_revolve.006"/>
+      <axis xyz="0 0 1.0"/>
+      <limit lower="-3.0" upper="0" effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="CabinetDoor_revolve.007" type="revolute">
+      <origin xyz="-1.07047 -2.06474 1.77074" rpy="0 0 0"/>
+      <parent link="root_dynamic"/>
+      <child link="CabinetDoor_revolve.007"/>
+      <axis xyz="0 0 1.0"/>
+      <limit lower="-3.0" upper="0" effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="CabinetDoor_revolve.008" type="revolute">
+      <origin xyz="-1.88167 -2.06474 1.77074" rpy="0 0 0"/>
+      <parent link="root_dynamic"/>
+      <child link="CabinetDoor_revolve.008"/>
+      <axis xyz="0 0 1.0"/>
+      <limit lower="-3.0" upper="0" effort="0" velocity="0"/>
+    </joint>
+
+  </robot>

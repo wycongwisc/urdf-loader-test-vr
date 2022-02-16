@@ -64,7 +64,9 @@ export class VrControl {
                 { name: 'deactivateRemoteControl', from: 'REMOTE_CONTROL', to: 'IDLE' },
                 { name: 'goto', from: '*', to: function(s) { return s } }
             ],
-            data: {},
+            data: {
+                dragTimeout: false,
+            },
             methods: {
             }
         })
@@ -103,6 +105,7 @@ export class VrControl {
                 break;
             case 'DRAG_CONTROL':
                 this.state.deactivateDragControl();
+                this.state.dragTimeout = true;
                 this.reset();
                 break;
             default:
@@ -126,12 +129,16 @@ export class VrControl {
 
         const init_ee_abs_three = this.init_ee_abs_three;
 
-        if (this.state.is('IDLE')) {
+        if (this.state.is('IDLE') && this.state.dragTimeout === false) {
 
             if (ctrlPose.posi.distanceTo(curr_ee_abs_three.posi) <= 0.1) {
                 this.state.activateDragControl();
                 return false;
             }
+
+        } else if (this.state.is('IDLE') && this.state.dragTimeout === true) {
+            
+            this.state.dragTimeout = false;
 
         } else if (this.state.is('REMOTE_CONTROL')) {
 

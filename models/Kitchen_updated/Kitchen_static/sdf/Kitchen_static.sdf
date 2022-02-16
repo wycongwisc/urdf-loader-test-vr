@@ -1,0 +1,463 @@
+<?xml version="1.0"?>
+<!-- created with Phobos 1.0.1 "Capricious Choutengan" -->
+<sdf version="1.5">
+  <model name="Kitchen_static">
+    <link name="countertop_link">
+      <pose>1.04436 1.80656 0.90913 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Countertop_Top.col">
+        <pose>0 0 0.00015 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.143.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Countertop_Top">
+        <pose>0.0 0.0 0.0 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.36791 0.38159 0.38159 1.0</ambient>
+          <diffuse>0.36791 0.38159 0.31374 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.142.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="countertop_edge_link">
+      <pose>-0.95636 -2.19209 0.90906 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Countertop_Top.001.000">
+        <pose>0 0 6e-05 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.156.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Countertop_Top.001">
+        <pose>0.0 0.0 -5.960464477539063e-08 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.36791 0.38159 0.38159 1.0</ambient>
+          <diffuse>0.36791 0.38159 0.31374 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.155.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="wall2">
+      <pose>-1.16959 -2.76415 1.49534 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Wall_2">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>5.65911 0.10015 3.00596</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="Wall_2">
+        <pose>1.1920928955078125e-07 0.0 -1.1920928955078125e-07 0.0 -5.960465188081798e-08 0.0</pose>
+        <material>
+          <ambient>0.8 0.74126 0.74126 1.0</ambient>
+          <diffuse>0.8 0.74126 0.58046 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <box>
+            <size>5.65911 0.10015 3.00596</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <link name="countertop_tall_link">
+      <pose>-1.41586 0.20737 0.92078 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Countertop_Top_Taller.000">
+        <pose>0 0 -0.00019 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.159.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Countertop_Top_Taller">
+        <pose>2.384185791015625e-07 -2.9802322387695312e-08 -5.960464477539063e-08 0.0 -0.0 1.4901159417490817e-08</pose>
+        <material>
+          <ambient>0.36791 0.38159 0.38159 1.0</ambient>
+          <diffuse>0.36791 0.38159 0.31374 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.157.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="root_static">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Floor">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>8.0 8.0 0.002</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="Floor">
+        <pose>0.0 0.0 0.0 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.51303 0.37541 0.37541 1.0</ambient>
+          <diffuse>0.51303 0.37541 0.19019 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <box>
+            <size>8.0 8.0 0.002</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <link name="countertop_sink_link">
+      <pose>1.04357 0.81118 0.90952 0 0 3.14154</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Countertop_Sink.000">
+        <pose>0 0 -0.00261 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.147.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Countertop_Sink">
+        <pose>0.0 0.0 0.0 0.0 -0.0 2.3857865016907454e-08</pose>
+        <material>
+          <ambient>0.36791 0.38159 0.38159 1.0</ambient>
+          <diffuse>0.36791 0.38159 0.31374 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.146.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="countertop_corner_link">
+      <pose>0.63422 -1.78146 0.44381 0 0 -3.14159</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Countertop_Corner_Base.000">
+        <pose>0.0007 -0.00555 0.0003 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.158.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Countertop_Corner_Base">
+        <pose>0.0 0.0 2.9802322387695312e-08 0.0 -0.0 -6.357302595461078e-08</pose>
+        <material>
+          <ambient>0.36791 0.38159 0.38159 1.0</ambient>
+          <diffuse>0.36791 0.38159 0.31374 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.154.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="cabinets_root">
+      <pose>1.23355 0.35459 2.3706 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Cabinets.000">
+        <pose>-0.45157 -0.20882 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cabinets.009.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Cabinets">
+        <pose>-0.4515690207481384 -0.20881761610507965 3.337860107421875e-06 0.0 7.525231012550648e-06 3.695799932756927e-08</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cabinets.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="countertop_tall2_link">
+      <pose>-1.41531 1.20516 0.92078 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Countertop_Top_Taller2.000">
+        <pose>0 0 0.00057 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.000.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Countertop_Top_Taller2">
+        <pose>0.0 1.1920928955078125e-07 0.0 0.0 -0.0 5.960464477539063e-08</pose>
+        <material>
+          <ambient>0.36791 0.38159 0.38159 1.0</ambient>
+          <diffuse>0.36791 0.38159 0.31374 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.008.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="wall1">
+      <pose>1.60982 0.64096 1.49534 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Wall_1.col">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.10015 6.70389 3.00596</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="Wall_1">
+        <pose>0.0 0.0 -1.1920928955078125e-07 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.8 0.74126 0.74126 1.0</ambient>
+          <diffuse>0.8 0.74126 0.58046 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <box>
+            <size>0.10015 6.70389 3.00596</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+    <link name="countertop1_link">
+      <pose>1.04436 -0.18407 0.90913 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name="Countertop_Top1.000">
+        <pose>0 -0.00258 -0.00061 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.153.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="Countertop_Top1">
+        <pose>0.0 -0.0025838464498519897 -0.0003107786178588867 0.0 -0.0 0.0</pose>
+        <material>
+          <ambient>0.36791 0.38159 0.38159 1.0</ambient>
+          <diffuse>0.36791 0.38159 0.31374 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+        </material>
+        <geometry>
+          <mesh>
+            <uri>model://Kitchen_static/meshes/Cube.152.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint type="fixed" name="countertop_link">
+      <parent>root_static</parent>
+      <child>countertop_link</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="fixed" name="wall2">
+      <parent>root_static</parent>
+      <child>wall2</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="fixed" name="countertop_tall_link">
+      <parent>root_static</parent>
+      <child>countertop_tall_link</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="fixed" name="countertop1_link">
+      <parent>root_static</parent>
+      <child>countertop1_link</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="fixed" name="countertop_sink_link">
+      <parent>root_static</parent>
+      <child>countertop_sink_link</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="fixed" name="countertop_corner_link">
+      <parent>root_static</parent>
+      <child>countertop_corner_link</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="fixed" name="cabinets_root">
+      <parent>root_static</parent>
+      <child>cabinets_root</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="fixed" name="countertop_tall2_link">
+      <parent>root_static</parent>
+      <child>countertop_tall2_link</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="fixed" name="countertop_edge_link">
+      <parent>root_static</parent>
+      <child>countertop_edge_link</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+    <joint type="fixed" name="wall1">
+      <parent>root_static</parent>
+      <child>wall1</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </joint>
+  </model>
+</sdf>

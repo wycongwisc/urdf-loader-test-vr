@@ -1,0 +1,444 @@
+<?xml version="1.0"?>
+<!-- created with Phobos 1.0.1 "Capricious Choutengan" -->
+<sdf version="1.5">
+  <model name="kitchen_dynamic">
+    <link name="root_dynamic">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001</iyy>
+          <iyz>0</iyz>
+          <izz>0.001</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+    </link>
+    <link name="CabinetDoor_revolve.007">
+      <pose>-1.07047 -2.06474 1.77074 0 0 0</pose>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.04076</ixx>
+          <ixy>0</ixy>
+          <ixz>-0.0004</ixz>
+          <iyy>0.02003</iyy>
+          <iyz>0.00214</iyz>
+          <izz>0.02125</izz>
+        </inertia>
+        <pose>0.35997 -0.01108 0.36647 0 0 0</pose>
+      </inertial>
+      <collision name="CabinetDoor.008.000">
+        <pose>0.35997 -0.01108 0.69432 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.022.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="CabinetDoor.008">
+        <pose>0.35996896028518677 -0.011080265045166016 0.694316029548645 -5.960462345910855e-08 1.0554417428920715e-07 1.230682045161302e-07</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.019.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="CabinetDoor_revolve.006">
+      <pose>0.51584 -2.06474 1.77074 0 0 -1.5708</pose>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.04076</ixx>
+          <ixy>0</ixy>
+          <ixz>-0.0004</ixz>
+          <iyy>0.02003</iyy>
+          <iyz>0.00214</iyz>
+          <izz>0.02125</izz>
+        </inertia>
+        <pose>0.01108 -0.35997 0.36647 0 0 0</pose>
+      </inertial>
+      <collision name="CabinetDoor.007.000">
+        <pose>0.01108 -0.35997 0.69432 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.021.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="CabinetDoor.007">
+        <pose>0.011080265045166016 -0.35996896028518677 0.6943163871765137 -9.473106367808952e-16 -5.960462345910855e-08 1.9841792653352286e-09</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.018.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="CabinetDoor_revolve.008">
+      <pose>-1.88167 -2.06474 1.77074 0 0 0</pose>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.04076</ixx>
+          <ixy>0</ixy>
+          <ixz>-0.0004</ixz>
+          <iyy>0.02003</iyy>
+          <iyz>0.00214</iyz>
+          <izz>0.02125</izz>
+        </inertia>
+        <pose>0.35997 -0.01108 0.36647 0 0 0</pose>
+      </inertial>
+      <collision name="CabinetDoor.009.000">
+        <pose>0.35997 -0.01108 0.69432 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.023.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="CabinetDoor.009">
+        <pose>0.359968900680542 -0.011080503463745117 0.6943162679672241 -5.960462345910855e-08 5.960465188081798e-08 0.0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.020.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="CabinetDoor_revolve.005">
+      <pose>0.87159 -1.16978 1.77074 0 0 0</pose>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.04076</ixx>
+          <ixy>0</ixy>
+          <ixz>-0.0004</ixz>
+          <iyy>0.02003</iyy>
+          <iyz>0.00214</iyz>
+          <izz>0.02125</izz>
+        </inertia>
+        <pose>0.01108 -0.35997 0.36647 0 0 0</pose>
+      </inertial>
+      <collision name="CabinetDoor.004.002">
+        <pose>0.01108 -0.35997 0.69432 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.016.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="CabinetDoor.006">
+        <pose>0.011080324649810791 -0.3599686622619629 0.6943162679672241 1.0554420981634394e-07 3.3881317890172014e-21 -2.8421706042272218e-14</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.015.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="CabinetDoor_revolve.003">
+      <pose>0.87159 -0.01653 1.77074 0 0 0</pose>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.04076</ixx>
+          <ixy>-1e-05</ixy>
+          <ixz>-0.0004</ixz>
+          <iyy>0.02003</iyy>
+          <iyz>0.00214</iyz>
+          <izz>0.02125</izz>
+        </inertia>
+        <pose>0.01108 -0.35997 0.36647 0 0 0</pose>
+      </inertial>
+      <collision name="CabinetDoor.004.000">
+        <pose>0.01108 -0.35997 0.69432 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.012.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="CabinetDoor.004">
+        <pose>0.011080324649810791 -0.359968900680542 0.6943162679672241 0.0 -0.0 -2.842170943040401e-14</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.011.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="CabinetDoor_revolve.004">
+      <pose>0.87159 -1.13262 1.77074 0 0 0</pose>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.04076</ixx>
+          <ixy>-1e-05</ixy>
+          <ixz>-0.0004</ixz>
+          <iyy>0.02003</iyy>
+          <iyz>0.00214</iyz>
+          <izz>0.02125</izz>
+        </inertia>
+        <pose>0.01108 0.35997 0.36647 0 0 0</pose>
+      </inertial>
+      <collision name="CabinetDoor.004.001">
+        <pose>0.01108 0.35997 0.69432 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.013.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="CabinetDoor.005">
+        <pose>0.01108020544052124 0.3599686026573181 0.6943162679672241 0.0 -0.0 4.263256414560601e-14</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.014.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="CabinetDoor_revolve.002">
+      <pose>0.87159 2.26898 1.77074 0 0 0</pose>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.04076</ixx>
+          <ixy>-1e-05</ixy>
+          <ixz>-0.0004</ixz>
+          <iyy>0.02003</iyy>
+          <iyz>0.00214</iyz>
+          <izz>0.02125</izz>
+        </inertia>
+        <pose>0.01108 -0.35997 0.36647 0 0 0</pose>
+      </inertial>
+      <collision name="CabinetDoor.003.col">
+        <pose>0.01108 -0.35997 0.69432 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.008.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="CabinetDoor.003">
+        <pose>0.011080324649810791 -0.359968900680542 0.6943161487579346 0.0 -0.0 -2.842170943040401e-14</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.001.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="CabinetDoor_revolve">
+      <pose>0.87159 3.77577 2.10183 0 0 0</pose>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.05492</ixx>
+          <ixy>-1e-05</ixy>
+          <ixz>-0.00054</ixz>
+          <iyy>0.02418</iyy>
+          <iyz>0.00273</iyz>
+          <izz>0.02863</izz>
+        </inertia>
+        <pose>0.01108 -0.34558 0.36647 0 0 0</pose>
+      </inertial>
+      <collision name="CabinetDoor.col">
+        <pose>0.01108 -0.34558 0.36647 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.005.dae</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="CabinetDoor">
+        <pose>0.011080563068389893 -0.34557580947875977 0.3664677143096924 0.0 -0.0 0.0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.003.dae</uri>
+            <scale>1.07738 1.04823 1.07738</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="CabinetDoor_revolve.001">
+      <pose>0.87159 2.32122 2.10183 0 0 0</pose>
+      <inertial>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.05492</ixx>
+          <ixy>-1e-05</ixy>
+          <ixz>-0.00054</ixz>
+          <iyy>0.02418</iyy>
+          <iyz>0.00273</iyz>
+          <izz>0.02863</izz>
+        </inertia>
+        <pose>0.01108 -0.34558 0.36647 0 0 0</pose>
+      </inertial>
+      <collision name="CabinetDoor.col.001">
+        <pose>-0.01108 0.35997 -0.36647 0 -3.14159 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.006.dae</uri>
+            <scale>-1.0 -1.04165 -1.0</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="CabinetDoor.002">
+        <pose>0.011080443859100342 -0.34557557106018066 0.3664677143096924 -6.20874018864015e-08 -0.0 0.0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://kitchen_dynamic/meshes/Cabinets.007.dae</uri>
+            <scale>-1.0 -1.04165 -1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint type="revolute" name="CabinetDoor_revolve.002">
+      <parent>root_dynamic</parent>
+      <child>CabinetDoor_revolve.002</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <axis>
+        <xyz>0 0 1.0</xyz>
+        <limit>
+          <lower>-3.0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+    <joint type="revolute" name="CabinetDoor_revolve.007">
+      <parent>root_dynamic</parent>
+      <child>CabinetDoor_revolve.007</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <axis>
+        <xyz>0 0 1.0</xyz>
+        <limit>
+          <lower>-3.0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+    <joint type="revolute" name="CabinetDoor_revolve.006">
+      <parent>root_dynamic</parent>
+      <child>CabinetDoor_revolve.006</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <axis>
+        <xyz>0 0 1.0</xyz>
+        <limit>
+          <lower>-3.0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+    <joint type="revolute" name="CabinetDoor_revolve.008">
+      <parent>root_dynamic</parent>
+      <child>CabinetDoor_revolve.008</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <axis>
+        <xyz>0 0 1.0</xyz>
+        <limit>
+          <lower>-3.0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+    <joint type="revolute" name="CabinetDoor_revolve.005">
+      <parent>root_dynamic</parent>
+      <child>CabinetDoor_revolve.005</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <axis>
+        <xyz>0 0 1.0</xyz>
+        <limit>
+          <lower>-3.0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+    <joint type="revolute" name="CabinetDoor_revolve.003">
+      <parent>root_dynamic</parent>
+      <child>CabinetDoor_revolve.003</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <axis>
+        <xyz>0 0 1.0</xyz>
+        <limit>
+          <lower>-3.0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+    <joint type="revolute" name="CabinetDoor_revolve.004">
+      <parent>root_dynamic</parent>
+      <child>CabinetDoor_revolve.004</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <axis>
+        <xyz>0 0 1.0</xyz>
+        <limit>
+          <lower>-3.0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+    <joint type="revolute" name="CabinetDoor_revolve">
+      <parent>root_dynamic</parent>
+      <child>CabinetDoor_revolve</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <axis>
+        <xyz>0 0 1.0</xyz>
+        <limit>
+          <lower>-3.0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+    <joint type="revolute" name="CabinetDoor_revolve.001">
+      <parent>root_dynamic</parent>
+      <child>CabinetDoor_revolve.001</child>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <axis>
+        <xyz>0 0 1.0</xyz>
+        <limit>
+          <lower>-3.0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+  </model>
+</sdf>

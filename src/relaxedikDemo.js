@@ -43,21 +43,21 @@ export async function relaxedikDemo() {
     // await dataControl.init()
     window.dataControl = dataControl;
 
-    getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/sawyer_description/urdf/sawyer_gripper.urdf", (blob) => {
+    getURDFFromURL("../models/sawyer_description/urdf/sawyer_gripper.urdf", (blob) => {
         loadRobot(URL.createObjectURL(blob))
     });
 
-    getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_dynamic/urdf/kitchen_dynamic.urdf", (blob) => {
+    getURDFFromURL("../models/Kitchen_updated/Kitchen_dynamic/urdf/kitchen_dynamic.urdf", (blob) => {
         loadKitchenDynamic(URL.createObjectURL(blob))
     });
 
     // refridgerator, props (plates, microwave, bowls, etc.)
-    getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_standard/urdf/Kitchen_standard.urdf", (blob) => {
+    getURDFFromURL("../models/Kitchen_updated/Kitchen_standard/urdf/Kitchen_standard.urdf", (blob) => {
         loadKitchenStandard(URL.createObjectURL(blob))
     });
 
     // kitchen 
-    getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_static/urdf/Kitchen_static.urdf", (blob) => {
+    getURDFFromURL("../models/Kitchen_updated/Kitchen_static/urdf/Kitchen_static.urdf", (blob) => {
         loadKitchenStatic(URL.createObjectURL(blob))
     });
 
