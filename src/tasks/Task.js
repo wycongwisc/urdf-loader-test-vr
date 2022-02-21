@@ -13,11 +13,16 @@ export default class Task {
         throw new Error("Method 'update()' must be implemented");
     }
 
-    setRound(num) {
-        throw new Error("Method 'setRound(num)' must be implemented");
+    init(num) {
+        throw new Error("Method 'init' must be implemented");
     }
 
-    reset() {
-        throw new Error("Method 'reset()' must be implemented");
+    clearRound() {
+        throw new Error("Method 'clearRound()' must be implemented");
     }
+
+    displayRound() {
+        throw new Error("Method 'displayRound()' must be implemented");
+    }
+
 }

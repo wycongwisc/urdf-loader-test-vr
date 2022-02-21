@@ -3,8 +3,6 @@ import { TABLE_HEIGHT } from './globals';
 
 export default class Target {
     constructor(params) {
-
-        this.scene = params.scene;
         this.initPos = params.initPos ?? new T.Vector3(0.7, TABLE_HEIGHT, 0.75);
         this.size = params.size ?? 0.05;
         this.color = params.color ?? 0xFF0000;

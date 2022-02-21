@@ -1,4 +1,5 @@
 import PickAndPlace from "./tasks/PickAndPlace"
+import MoveTo from './tasks/MoveTo'
 import StateMachine from "javascript-state-machine"
 import * as T from 'three'
 import ThreeMeshUI from 'three-mesh-ui'
@@ -48,7 +49,7 @@ export class TaskControl {
         },
         'TASK_1': function() {
             console.log(this)
-            this.task = new PickAndPlace({ scene: this.scene });
+            this.task = new MoveTo({ scene: this.scene });
             this.task.init() 
             this.uiControl.display()
             this.uiControl.addText([

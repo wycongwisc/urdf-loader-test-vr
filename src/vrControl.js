@@ -41,6 +41,8 @@ export class VrControl {
         // transformation from THREE' reference frame to ROS's reference frame
         this.T_THREE_to_ROS= this.T_ROS_to_THREE.clone().invert();
 
+        this.EE_OFFSET_INDICATOR = undefined;
+
 
         this.controller = this.renderer.xr.getController(0); 
         this.controllerGrip = this.renderer.xr.getControllerGrip(0);
@@ -121,6 +123,7 @@ export class VrControl {
     }
 
     reset() {
+        this.scene.remove(this.EE_OFFSET_INDICATOR);
         this.state.goto('IDLE');
         this.relaxedIK.recover_vars([]);
         this.ee_goal_rel_three = {"posi": new T.Vector3(),
@@ -176,6 +179,10 @@ export class VrControl {
         this.target_cursor.position.copy( ee_goal_abs_three.posi );
         this.target_cursor.matrixWorldNeedsUpdate = true;
 
+        if (!this.state.is('IDLE')) {
+            this.updateEEOffsetIndicator(curr_ee_abs_three.posi, ee_goal_abs_three.posi);
+        }
+
         // distance difference
         let d = curr_ee_abs_three.posi.distanceTo( ee_goal_abs_three.posi  );
         // angle difference
@@ -198,6 +205,38 @@ export class VrControl {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 
+     * @param {T.Vector3} start 
+     * @param {T.Vector3} end 
+     * @returns 
+     */
+    updateEEOffsetIndicator(start, end) {
+        this.scene.remove(this.EE_OFFSET_INDICATOR);
+
+        let color; 
+        if (start.distanceTo(end) < 0.1) {
+            color = 0xffffff;
+        } else if (start.distanceTo(end) < .2) {
+            color = 0xffcc00
+        } else if (start.distanceTo(end) < .3) {
+            color = 0xff0000;
+        } else {
+            this.scene.remove(this.EE_OFFSET_INDICATOR);
+            this.state.goto('IDLE');
+            return;
+        }
+
+        this.EE_OFFSET_INDICATOR = new T.Line(new T.BufferGeometry().setFromPoints([
+            start,
+            end
+        ]), new T.LineBasicMaterial({
+            color,
+        }))
+
+        this.scene.add(this.EE_OFFSET_INDICATOR);
     }
 
     getPose(controller) {

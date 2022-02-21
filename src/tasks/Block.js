@@ -5,7 +5,7 @@ export default class Block {
     constructor(params) {
         this.target = params.target;
 
-        this.initPos = params.initPos ?? new T.Vector3(1, TABLE_HEIGHT, 0.2);
+        this.initPos = params.initPos ?? new T.Vector3(1, 1, 1);
         this.initAngle = params.initAngle ?? 0;
         this.color = params.color ?? 0xFF0000;
         this.vel = params.vel;
@@ -27,7 +27,7 @@ export default class Block {
                 this.size[2],
                 1, 1, 1 
             ),
-            new T.MeshStandardMaterial({ color: this.color })
+            new T.MeshStandardMaterial({ color: this.color, wireframe: params.wireframe })
         );
 
         this.initPos.y += this.size[1] / 2;

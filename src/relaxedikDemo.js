@@ -46,6 +46,9 @@ export async function relaxedikDemo() {
 
     const teleportVR = new TeleportVR(scene, camera);
 
+    const gridHelper = new T.GridHelper( 10, 20, 0x121A21, 0x121A21 )
+    scene.add( gridHelper );
+
     getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/sawyer_description/urdf/sawyer_gripper.urdf", (blob) => {
         loadRobot(URL.createObjectURL(blob))
     });
