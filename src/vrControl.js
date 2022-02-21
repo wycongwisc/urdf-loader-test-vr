@@ -9,20 +9,21 @@ import { rotQuaternion, getCurrEEpose, changeReferenceFrame, relToAbs, absToRel 
 import StateMachine from 'javascript-state-machine';
 import { isZero } from 'mathjs';
 import { Vector3 } from 'three';
+import TeleportVR from 'teleportvr'
 
 
 export class VrControl {
     constructor(params) {
 
-        this.relaxedIK = params.relaxedIK
-        this.renderer = params.renderer
-        this.scene = params.scene
+        this.relaxedIK = params.relaxedIK;
+        this.renderer = params.renderer;
+        this.scene = params.scene;
+        this.teleportVR = params.teleportVR;
         this.intervalID = undefined;
         this.controlMapping = params.controlMapping;
         const uiControl = params.uiControl;
         this.target_cursor = params.target_cursor;
         this.robotInfo = params.robot_info;
-        this.scale = 2
 
         this.lastSqueeze = 0;
         this.defaultPosition = new T.Vector3();
@@ -54,6 +55,12 @@ export class VrControl {
 
         this.controller.addEventListener('select', this.select.bind(this));
         this.controller.addEventListener('squeeze', this.squeeze.bind(this))
+
+        this.controllerGrip.addEventListener('connected', e => {
+            this.teleportVR.add(0, this.controllerGrip, e.data.gamepad)
+        })
+
+
 
         this.state = new StateMachine({
             init: 'IDLE',

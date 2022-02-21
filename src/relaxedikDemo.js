@@ -18,6 +18,7 @@ import ThreeMeshUI from 'three-mesh-ui'
 import { TaskControl } from './taskControl.js'
 import { DataControl } from './dataControl';
 import { UiControl } from './uiControl';
+import TeleportVR from 'teleportvr';
 
 export async function relaxedikDemo() {
 
@@ -43,23 +44,25 @@ export async function relaxedikDemo() {
     // await dataControl.init()
     window.dataControl = dataControl;
 
+    const teleportVR = new TeleportVR(scene, camera);
+
     getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/sawyer_description/urdf/sawyer_gripper.urdf", (blob) => {
         loadRobot(URL.createObjectURL(blob))
     });
 
-    getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_dynamic/urdf/kitchen_dynamic.urdf", (blob) => {
-        loadKitchenDynamic(URL.createObjectURL(blob))
-    });
+    // getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_dynamic/urdf/kitchen_dynamic.urdf", (blob) => {
+    //     loadKitchenDynamic(URL.createObjectURL(blob))
+    // });
 
-    // refridgerator, props (plates, microwave, bowls, etc.)
-    getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_standard/urdf/Kitchen_standard.urdf", (blob) => {
-        loadKitchenStandard(URL.createObjectURL(blob))
-    });
+    // // refridgerator, props (plates, microwave, bowls, etc.)
+    // getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_standard/urdf/Kitchen_standard.urdf", (blob) => {
+    //     loadKitchenStandard(URL.createObjectURL(blob))
+    // });
 
-    // kitchen 
-    getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_static/urdf/Kitchen_static.urdf", (blob) => {
-        loadKitchenStatic(URL.createObjectURL(blob))
-    });
+    // // kitchen 
+    // getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_static/urdf/Kitchen_static.urdf", (blob) => {
+    //     loadKitchenStatic(URL.createObjectURL(blob))
+    // });
 
     createText("How to control:", "inputs", "h3");
 
@@ -250,50 +253,50 @@ export async function relaxedikDemo() {
         }
     }
 
-    let kitchenTransformation = (kitchen) => {
-        kitchen.rotation.x = -Math.PI / 2;
-        kitchen.rotation.z = Math.PI;
-        kitchen.position.x = -0.5
-        kitchen.position.z = -0.7
-    }
+    // let kitchenTransformation = (kitchen) => {
+    //     kitchen.rotation.x = -Math.PI / 2;
+    //     kitchen.rotation.z = Math.PI;
+    //     kitchen.position.x = -0.5
+    //     kitchen.position.z = -0.7
+    // }
 
-    let loadKitchenStatic = (kitchenFile) => {
-        const manager = new T.LoadingManager();
-        const loader = new URDFLoader(manager);
-        loader.load(kitchenFile, result => {
-            window.kitchenStatic = result;
-        });
-        manager.onLoad = () => {
-            scene.add(window.kitchenStatic);
-            kitchenTransformation(window.kitchenStatic)
-        }
-    }
+    // let loadKitchenStatic = (kitchenFile) => {
+    //     const manager = new T.LoadingManager();
+    //     const loader = new URDFLoader(manager);
+    //     loader.load(kitchenFile, result => {
+    //         window.kitchenStatic = result;
+    //     });
+    //     manager.onLoad = () => {
+    //         scene.add(window.kitchenStatic);
+    //         kitchenTransformation(window.kitchenStatic)
+    //     }
+    // }
 
-    let loadKitchenStandard = (kitchenFile) => {
-        const manager = new T.LoadingManager();
-        const loader = new URDFLoader(manager);
-        loader.load(kitchenFile, result => {
-            window.kitchenStandard = result;
-        });
-        manager.onLoad = () => {
-            scene.add(window.kitchenStandard);
-            kitchenTransformation(window.kitchenStandard)
-            window.kitchenStandard.position.y = 0.92
-        }
-    }
+    // let loadKitchenStandard = (kitchenFile) => {
+    //     const manager = new T.LoadingManager();
+    //     const loader = new URDFLoader(manager);
+    //     loader.load(kitchenFile, result => {
+    //         window.kitchenStandard = result;
+    //     });
+    //     manager.onLoad = () => {
+    //         scene.add(window.kitchenStandard);
+    //         kitchenTransformation(window.kitchenStandard)
+    //         window.kitchenStandard.position.y = 0.92
+    //     }
+    // }
 
-    let loadKitchenDynamic = (kitchenFile) => {
-        const manager = new T.LoadingManager();
-        const loader = new URDFLoader(manager);
-        loader.load(kitchenFile, result => {
-            window.kitchenDynamic = result;
-        });
-        manager.onLoad = () => {
-            scene.add(window.kitchenDynamic);
-            kitchenTransformation(window.kitchenDynamic)
-        }
+    // let loadKitchenDynamic = (kitchenFile) => {
+    //     const manager = new T.LoadingManager();
+    //     const loader = new URDFLoader(manager);
+    //     loader.load(kitchenFile, result => {
+    //         window.kitchenDynamic = result;
+    //     });
+    //     manager.onLoad = () => {
+    //         scene.add(window.kitchenDynamic);
+    //         kitchenTransformation(window.kitchenDynamic)
+    //     }
 
-    }
+    // }
 
     async function load_config() {
         console.log("loading robot config");
@@ -335,6 +338,7 @@ export async function relaxedikDemo() {
             controlMapping
         });
 
+
         const vrControl = new VrControl({
             renderer,
             scene,
@@ -342,7 +346,8 @@ export async function relaxedikDemo() {
             robot_info,
             target_cursor,
             controlMapping,
-            uiControl
+            uiControl,
+            teleportVR,
         })
 
 
@@ -395,7 +400,7 @@ export async function relaxedikDemo() {
     renderer.setAnimationLoop( function () {
 
         ThreeMeshUI.update();
-
+        teleportVR.update();
         renderer.render( scene, camera );
     
     } );
