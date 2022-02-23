@@ -8,15 +8,20 @@ export class UiControl {
 
         // default settings for UI elements
 
-        // this.FONT_FAMILY = '../node_modules/three-mesh-ui/examples/assets/Roboto-msdf.json';
-        // this.FONT_TEXTURE = '../node_modules/three-mesh-ui/examples/assets/Roboto-msdf.png';
+        // TODO: change this
+        console.log(location.hostname)
 
-        this.FONT_FAMILY = '/urdf-loader-test-vr/assets/Roboto-msdf.json';
-        this.FONT_TEXTURE = '/urdf-loader-test-vr/assets/Roboto-msdf.png';
+        if (location.hostname === 'localhost') {
+            this.FONT_FAMILY = './assets/Roboto-msdf.json';
+            this.FONT_TEXTURE = './assets/Roboto-msdf.png';
+        } else {
+            this.FONT_FAMILY = '/urdf-loader-test-vr/assets/Roboto-msdf.json';
+            this.FONT_TEXTURE = '/urdf-loader-test-vr/assets/Roboto-msdf.png';
+        }
 
         this.DEFAULT_CONTAINER = {
             width: 1.2,
-            height: 1,
+            height: 1.1,
             padding: 0.05,
             justifyContent: 'center',
             alignContent: 'left',
@@ -121,6 +126,17 @@ export class UiControl {
 
         this.container.add(...buttons);
 
+    }
+
+    addTaskCounter(task) {
+        const counter = new ThreeMeshUI.Text({
+            content: `
+            Task: ${task.currRound + 1} / ${task.NUM_ROUNDS}
+            `,
+            fontSize: 0.05
+        });
+        this.container.add(counter);
+        return counter;
     }
 
     hide() {

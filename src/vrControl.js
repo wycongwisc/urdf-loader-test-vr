@@ -62,8 +62,6 @@ export class VrControl {
             this.teleportVR.add(0, this.controllerGrip, e.data.gamepad)
         })
 
-
-
         this.state = new StateMachine({
             init: 'IDLE',
             transitions: [
@@ -80,16 +78,18 @@ export class VrControl {
             }
         })
 
-        let stereoToggle = document.querySelector('#stereo-toggle');
+        const stereoToggle = document.querySelector('#stereo-toggle');
         stereoToggle.addEventListener('click', (e) => {
             this.renderer.xr.stereo = e.target.checked
         })
 
-        let parallaxToggle = document.querySelector('#parallax-toggle');
+        const parallaxToggle = document.querySelector('#parallax-toggle');
         parallaxToggle.addEventListener('click', (e) => {
             this.renderer.xr.parallax = e.target.checked;
             this.renderer.xr.defaultPosition = this.defaultPosition;
         })
+
+
         
     }
 
@@ -104,7 +104,6 @@ export class VrControl {
     }
 
     select() {
-
         switch(this.state.state) {
             case 'IDLE':
                 this.state.activateRemoteControl();
@@ -115,7 +114,11 @@ export class VrControl {
             case 'DRAG_CONTROL':
                 this.state.deactivateDragControl();
                 this.state.dragTimeout = true;
-                this.reset();
+                setTimeout(() => {
+                    this.state.dragTimeout = false;
+                }, 1000)
+                this.scene.remove(this.EE_OFFSET_INDICATOR);
+                //this.reset();
                 break;
             default:
                 break;
@@ -145,10 +148,6 @@ export class VrControl {
                 this.state.activateDragControl();
                 return false;
             }
-
-        } else if (this.state.is('IDLE') && this.state.dragTimeout === true) {
-            
-            this.state.dragTimeout = false;
 
         } else if (this.state.is('REMOTE_CONTROL')) {
 

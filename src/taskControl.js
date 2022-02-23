@@ -71,11 +71,12 @@ export class TaskControl {
                         
                         Pressing the grip button will make the robot return to its original position.
 
-                        Complete the task by picking up the block with the robot and placing it inside the red circle.
+                        Complete the task by moving the end effector to the indicator.
 
                     `,
                 })
             ])
+            this.counter = this.uiControl.addTaskCounter(this.task);
             // this.uiControl.addButtons([{
             //     name: 'Next',
             //     onClick: () => {
@@ -110,6 +111,7 @@ export class TaskControl {
                     `,
                 })
             ])
+            this.counter = this.uiControl.addTaskCounter(this.task);
             // this.uiControl.addButtons([{
             //     name: 'Previous',
             //     onClick: () => {
@@ -132,6 +134,9 @@ export class TaskControl {
         if (this.task.currRound < this.task.rounds.length - 1) {
             this.task.currRound++;
             this.task.displayRound();
+            this.counter.set({ content: `
+                Task: ${this.task.currRound + 1} / ${this.task.NUM_ROUNDS}
+            `,})
         } else {
             if (this.state.is('TASK_1')) {
                 this.state.next();
@@ -139,6 +144,7 @@ export class TaskControl {
                 this.state.stop();
             }
         }
+
     }
 
     // this is called in relaxedikDemo.js about every 5 ms
