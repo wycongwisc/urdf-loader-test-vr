@@ -110,6 +110,27 @@ export function getRandom(min, max) {
     return (Math.random() * (max - min) + min);
 }
 
+
+const output = []
+
+export function recursiveSearch(object, key, value) {
+    object[key].forEach(item => {
+        searchItem(item, key, value);
+    })
+
+    return output;
+}
+
+function searchItem(item, key, value) {
+    item[key].forEach(child => {
+        if (child.name === value) {
+            output.push(child);
+        } else if (child[key]) {
+            searchItem(child, key, value);
+        }
+    })
+}
+
 // https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
 export function getBrowser() {
     // Opera 8.0+

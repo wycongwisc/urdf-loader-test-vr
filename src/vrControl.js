@@ -153,6 +153,7 @@ export class VrControl {
         } else if (this.state.is('REMOTE_CONTROL')) {
 
             const deltaPosi = new T.Vector3(); 
+
             deltaPosi.subVectors(ctrlPose.posi, prevCtrlPose.posi)
             this.ee_goal_rel_three.posi.add(deltaPosi);
 

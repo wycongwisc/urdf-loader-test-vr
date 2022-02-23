@@ -8,6 +8,7 @@ export class TaskControl {
     constructor(params) {
         this.scene = params.scene
         this.camera = params.camera;
+        this.gripper = params.gripper
 
         const that = this;
         this.uiControl = params.uiControl;
@@ -49,7 +50,7 @@ export class TaskControl {
         },
         'TASK_1': function() {
             console.log(this)
-            this.task = new MoveTo({ scene: this.scene });
+            this.task = new MoveTo({ scene: this.scene, gripper: this.gripper });
             this.task.init() 
             this.uiControl.display()
             this.uiControl.addText([

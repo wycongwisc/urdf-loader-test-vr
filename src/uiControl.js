@@ -8,8 +8,11 @@ export class UiControl {
 
         // default settings for UI elements
 
-        this.FONT_FAMILY = '../node_modules/three-mesh-ui/examples/assets/Roboto-msdf.json';
-        this.FONT_TEXTURE = '../node_modules/three-mesh-ui/examples/assets/Roboto-msdf.png';
+        // this.FONT_FAMILY = '../node_modules/three-mesh-ui/examples/assets/Roboto-msdf.json';
+        // this.FONT_TEXTURE = '../node_modules/three-mesh-ui/examples/assets/Roboto-msdf.png';
+
+        this.FONT_FAMILY = '/urdf-loader-test-vr/assets/Roboto-msdf.json';
+        this.FONT_TEXTURE = '/urdf-loader-test-vr/assets/Roboto-msdf.png';
 
         this.DEFAULT_CONTAINER = {
             width: 1.2,

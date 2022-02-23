@@ -9,9 +9,9 @@ import { VrControl } from './vrControl.js'
 
 import init, {RelaxedIK} from "../relaxed_ik_web/pkg/relaxed_ik_web.js";
 import * as yaml from 'js-yaml';
-import { getCurrEEpose } from './utils';
+import { getCurrEEpose, recursiveSearch } from './utils';
 import { ControlMapping} from './controlMapping';
-import { create } from 'mathjs';
+import { chainDependencies, create } from 'mathjs';
 
 import ThreeMeshUI from 'three-mesh-ui'
 
@@ -321,6 +321,17 @@ export async function relaxedikDemo() {
 
         let relaxedIK = new RelaxedIK(robot_info, robot_nn_config);
         
+        let gripper = recursiveSearch(window.robot, 'children', 'right_gripper_base')[0].clone();
+
+        // clone() does not make a deep copy of material, need to do that here
+        gripper.traverse((child) => {
+            if (child.isMesh) {
+                child.material = child.material instanceof Array ? 
+                    child.material.map((material) => material.clone()) : 
+                    child.material.clone();
+            }
+        });
+
         const uiControl = new UiControl({
             scene,
         })
@@ -328,7 +339,8 @@ export async function relaxedikDemo() {
         const taskControl = new TaskControl({ 
             scene, 
             camera,
-            uiControl 
+            uiControl,
+            gripper, 
         });
 
         window.taskControl = taskControl;
@@ -354,7 +366,8 @@ export async function relaxedikDemo() {
         })
 
 
-        console.log(window.robot)
+
+        // console.log(JSON.stringify(window.robot))
         
         let data = [];
         setInterval( function(){ 
