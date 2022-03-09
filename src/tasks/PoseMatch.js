@@ -9,7 +9,7 @@ import {
 } from "../utils.js";
 import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET, TABLE_HEIGHT } from "./globals"
 
-export default class MoveTo extends Task {
+export default class PoseMatch extends Task {
     constructor(params) {
         super();
 
@@ -19,6 +19,7 @@ export default class MoveTo extends Task {
         this.clock = new T.Clock({ autoStart: false });
         this.currRound = 0;
         this.NUM_ROUNDS = 3;
+        this.NAME = 'pose-match'
         this.rounds = [];
     }
 

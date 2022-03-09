@@ -341,6 +341,7 @@ export async function relaxedikDemo() {
             camera,
             uiControl,
             gripper, 
+            dataControl
         });
 
         window.taskControl = taskControl;
@@ -365,19 +366,15 @@ export async function relaxedikDemo() {
             teleportVR,
         })
 
-
-
-        // console.log(JSON.stringify(window.robot))
-        
         let data = [];
         setInterval( function(){ 
             const curr_ee_abs_three = getCurrEEpose();
 
             let update;
             if (renderer.xr.isPresenting) {
-                update = vrControl.step()
+                update = vrControl.update()
             } else {
-                update = mouseControl.step();
+                update = mouseControl.step()
             }
 
             if (update) {
@@ -412,13 +409,13 @@ export async function relaxedikDemo() {
 
 
     // render();
-
     renderer.setAnimationLoop( function () {
 
         ThreeMeshUI.update();
         teleportVR.update();
         renderer.render( scene, camera );
     
+
     } );
     
 }

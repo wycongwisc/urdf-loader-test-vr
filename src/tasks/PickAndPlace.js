@@ -26,6 +26,8 @@ export default class PickAndPlace extends Task {
         this.NUM_ROUNDS = 3;
         this.rounds = [];
 
+        this.NAME = 'pick-and-place'
+
         this.options = {
             randomizeTargetSize: false,
             randomizeBlockSize: false,

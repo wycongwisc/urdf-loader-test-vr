@@ -2,7 +2,7 @@ import { generateUUID } from 'three/src/math/MathUtils';
 
 export class DataControl {
     constructor(params) {
-        this.SCRIPT_PATH = "https://script.google.com/macros/s/AKfycbzlyTXFtoV2CwMrnZjv4hwwHRuxwK6eg0CGizhtn-1M4YEctgFSWavKmvgY0JH5mL5S/exec"
+        this.SCRIPT_PATH = "https://script.google.com/macros/s/AKfycbwn_vDLFDm-PtGx4Q2JGS-qv9SJGP-v1bXSNS_l3yKExnSF_e47BG9nMprlx5syqjgm/exec"
         this.SESSION_ID = generateUUID();
 
         this.post([[new Date(), navigator.platform]], { type: 'session' })
@@ -15,6 +15,7 @@ export class DataControl {
      */
     post(data, options = {}) {
 
+        return;
         // add the SESSION ID to the beginning of each row
         for (const row of data) {
             row.unshift(this.SESSION_ID)

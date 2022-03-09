@@ -97,6 +97,7 @@ export class MouseControl {
         this.updateRates = [];
         this.relaxedIKRates = [];
         this.preStepTime = undefined;
+        
     }
 
     resizeCanvas() {

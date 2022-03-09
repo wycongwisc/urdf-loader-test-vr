@@ -5,11 +5,12 @@
 import * as T from 'three';
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 // import { degToRad, getCurrEEpose, mathjsMatToThreejsVector3 } from './utils';
-import { rotQuaternion, getCurrEEpose, changeReferenceFrame, relToAbs, absToRel } from './utils';
+import { rotQuaternion, getCurrEEpose, changeReferenceFrame, relToAbs, absToRel, threejsVector3ToMathjsMat } from './utils';
 import StateMachine from 'javascript-state-machine';
 import { isZero } from 'mathjs';
 import { Vector3 } from 'three';
 import TeleportVR from 'teleportvr'
+import { update } from 'three-mesh-ui';
 
 
 export class VrControl {
@@ -21,35 +22,53 @@ export class VrControl {
         this.teleportVR = params.teleportVR;
         this.intervalID = undefined;
         this.controlMapping = params.controlMapping;
-        const uiControl = params.uiControl;
         this.target_cursor = params.target_cursor;
         this.robotInfo = params.robot_info;
+
+        this.uiControl = params.uiControl;
 
         this.lastSqueeze = 0;
         this.defaultPosition = new T.Vector3();
         this.defaultPosition.set(1.5, 1.5, 0)
 
         this.init_ee_abs_three = getCurrEEpose();
-        this.ee_goal_rel_three = {"posi": new T.Vector3(),
-        "ori": new T.Quaternion().identity()};
+        this.ee_goal_rel_three = {
+            "posi": new T.Vector3(),
+            "ori": new T.Quaternion().identity()
+        };
 
-        this.ee_goal_rel_ros = {"posi": new T.Vector3(),
-                                "ori": new T.Quaternion().identity()};
+        this.ee_goal_rel_ros = {
+            "posi": new T.Vector3(),
+            "ori": new T.Quaternion().identity()
+        };
         
         // transformation from ROS' reference frame to THREE's reference frame
         this.T_ROS_to_THREE = new T.Matrix4().makeRotationFromEuler(new T.Euler(1.57079632679, 0., 0.));
         // transformation from THREE' reference frame to ROS's reference frame
         this.T_THREE_to_ROS= this.T_ROS_to_THREE.clone().invert();
 
+
         this.EE_OFFSET_INDICATOR = undefined;
 
+        this.workspaceCenter = [
+            window.robot.position.x - .2, 
+            window.robot.position.y + 1.35, 
+            window.robot.position.z
+        ]
+        this.workspaceRadius = 1.2
+        this.workspaceIndicator = new T.Mesh( 
+            new T.SphereGeometry( this.workspaceRadius, 32, 32 ), 
+            new T.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.2 })
+        );
+        this.workspaceIndicator.position.set(...this.workspaceCenter);
+
+        // controller
 
         this.controller = this.renderer.xr.getController(0); 
         this.controllerGrip = this.renderer.xr.getControllerGrip(0);
         const controllerModelFactory = new XRControllerModelFactory()
         this.model = controllerModelFactory.createControllerModel(this.controllerGrip);
         this.controllerGrip.add(this.model);
-
         this.scene.add( this.controllerGrip );
 
         this.select = this.select.bind(this);
@@ -59,8 +78,10 @@ export class VrControl {
         this.controller.addEventListener('squeeze', this.squeeze.bind(this))
 
         this.controllerGrip.addEventListener('connected', e => {
-            this.teleportVR.add(0, this.controllerGrip, e.data.gamepad)
+            this.teleportVR.add(0, this.controllerGrip, this.controller, e.data.gamepad)
         })
+
+        const that = this;
 
         this.state = new StateMachine({
             init: 'IDLE',
@@ -69,12 +90,33 @@ export class VrControl {
                 { name: 'activateRemoteControl', from: 'IDLE', to: 'REMOTE_CONTROL' },
                 { name: 'deactivateDragControl', from: 'DRAG_CONTROL', to: 'IDLE' },
                 { name: 'deactivateRemoteControl', from: 'REMOTE_CONTROL', to: 'IDLE' },
+                { name: 'activatePlayback', from: 'IDLE', to: 'PLAYBACK'}, 
+                { name: 'deactivatePlayback', from: 'PLAYBACK', to: 'IDLE'}, 
                 { name: 'goto', from: '*', to: function(s) { return s } }
             ],
             data: {
                 dragTimeout: false,
+                isRecording: false,
             },
             methods: {
+                onActivateDragControl: function() {
+                    that.scene.remove(that.ray);
+                },
+                onActivateRemoteControl: function() {
+                    that.scene.remove(that.ray);
+                },
+                onDeactivateDragControl: function() {
+                    that.scene.add(that.ray);
+                },
+                onDeactivateRemoteControl: function() {
+                    that.scene.add(that.ray);
+                },
+                onActivatePlayback: function() {
+                    that.playbackData = JSON.parse(localStorage.getItem('recordData'));
+                },
+                onDeactivatePlayback: function() {
+                },
+                
             }
         })
 
@@ -87,10 +129,54 @@ export class VrControl {
         parallaxToggle.addEventListener('click', (e) => {
             this.renderer.xr.parallax = e.target.checked;
             this.renderer.xr.defaultPosition = this.defaultPosition;
+        })     
+
+        // REMOVE THIS 
+        localStorage.clear();
+        
+        this.raycaster = new T.Raycaster();
+        this.ray = new T.ArrowHelper(new T.Vector3(0, 0, 1), new T.Vector3(0, 0, 0), 300, 0xFFFFFF, 1, 1);
+
+        this.uiControl.RECORDING_BUTTON.setupState({
+            state: 'selected',
+            attributes: this.uiControl.BUTTON_SELECTED_ATTRIBUTES,
+            onSet: () => {
+                if (this.state.is('IDLE')) {
+                    this.playbackFrameIndex = 0;
+                    this.state.isRecording = true;
+                }
+            }
         })
 
+        this.uiControl.STOP_RECORDING_BUTTON.setupState({
+            state: 'selected',
+            attributes: this.uiControl.BUTTON_SELECTED_ATTRIBUTES,
+            onSet: () => {
+                if (this.state.is('IDLE') && this.state.isRecording) {
+                    this.state.isRecording = false;
+                    localStorage.setItem('recordData', JSON.stringify(this.recordData));
+                    this.recordData = [];
+                }
+            }
+        })
 
-        
+        this.uiControl.PLAY_RECORDING_BUTTON.setupState({
+            state: 'selected',
+            attributes: this.uiControl.BUTTON_SELECTED_ATTRIBUTES,
+            onSet: () => {
+                if (this.state.is('IDLE') && !this.state.isRecording && localStorage.getItem('recordData')) {
+                    this.state.activatePlayback();
+                } else if (this.state.is('PLAYBACK')) {
+                    console.log('PAUSE')
+                    this.state.deactivatePlayback();
+
+                }
+            }
+        })
+
+        this.recordData = [];
+        this.playbackData = [];
+        this.playbackFrameIndex = 0;
     }
 
     squeeze() {
@@ -106,7 +192,11 @@ export class VrControl {
     select() {
         switch(this.state.state) {
             case 'IDLE':
-                this.state.activateRemoteControl();
+                if (this.uiControl.update(this.raycaster, false)) {
+                    this.uiControl.update(this.raycaster, true);
+                } else {
+                    this.state.activateRemoteControl();
+                }
                 break;
             case 'REMOTE_CONTROL':
                 this.state.deactivateRemoteControl();
@@ -129,16 +219,57 @@ export class VrControl {
         this.scene.remove(this.EE_OFFSET_INDICATOR);
         this.state.goto('IDLE');
         this.relaxedIK.recover_vars([]);
-        this.ee_goal_rel_three = {"posi": new T.Vector3(),
-                                "ori": new T.Quaternion().identity()};
+        this.ee_goal_rel_three = {
+            "posi": new T.Vector3(),
+            "ori": new T.Quaternion().identity()
+        };
     }
 
-    step() {
+    update() {
 
         const curr_ee_abs_three  = getCurrEEpose();
-        const ctrlPose = this.getPose(this.controller)
+        const ctrlPose = this.getControllerPose();
         const prevCtrlPose = this.prevCtrlPose;
         this.prevCtrlPose = ctrlPose;
+
+        if (this.state.is('PLAYBACK') || this.state.is('IDLE')) {
+            this.raycaster.set(ctrlPose.posi, this.controller.getWorldDirection(new T.Vector3()).negate());
+            this.ray.position.copy(this.raycaster.ray.origin);
+            this.ray.setDirection(this.raycaster.ray.direction);
+            if (this.state.is('IDLE') && this.ray.parent !== this.scene) {
+                this.scene.add(this.ray);
+            }
+            this.uiControl.update(this.raycaster);
+        }
+
+        if (this.state.is('PLAYBACK')) {
+            console.log('playtback')
+            const jointArr = Object.entries(window.robot.joints).filter(joint => joint[1]._jointType != "fixed" && joint[1].type != "URDFMimicJoint");
+            jointArr.forEach((joint, index) => {
+                let jointInfo;
+                if ((jointInfo = this.playbackData[this.playbackFrameIndex].find((e) => e[0] === index))) {
+                    console.log(jointInfo)
+                    // joint[1].jointValue[0] = jointInfo[1];
+                    window.robot.setJointValue(joint[0],  jointInfo[1]);
+                }
+            })   
+            if (this.playbackFrameIndex < this.playbackData.length - 1) {
+                this.playbackFrameIndex++;
+            } else {
+                this.playbackFrameIndex = 0;
+                this.state.deactivatePlayback();
+            }
+            return true;
+        }
+
+
+        if (curr_ee_abs_three.posi.distanceTo(new T.Vector3(...this.workspaceCenter)) > this.workspaceRadius
+            && this.workspaceIndicator.parent !== this.scene) {
+            this.scene.add(this.workspaceIndicator);
+        } else if (curr_ee_abs_three.posi.distanceTo(new T.Vector3(...this.workspaceCenter)) < this.workspaceRadius
+            && this.workspaceIndicator.parent === this.scene) {
+            this.scene.remove(this.workspaceIndicator);
+        }
 
         const init_ee_abs_three = this.init_ee_abs_three;
 
@@ -188,13 +319,13 @@ export class VrControl {
         // angle difference
         let a = curr_ee_abs_three.ori.angleTo( ee_goal_abs_three.ori );
 
+        let didJointsUpdate = false;
         if ( d > 1e-3 || a > 1e-3 ) {
             const res = this.relaxedIK.solve ([
                 ee_goal_rel_ros.posi.x,
                 ee_goal_rel_ros.posi.y,
-                ee_goal_rel_ros.posi.z],
-                [ee_goal_rel_ros.ori.w, ee_goal_rel_ros.ori.x, ee_goal_rel_ros.ori.y, ee_goal_rel_ros.ori.z]);
-            
+                ee_goal_rel_ros.posi.z
+            ], [ee_goal_rel_ros.ori.w, ee_goal_rel_ros.ori.x, ee_goal_rel_ros.ori.y, ee_goal_rel_ros.ori.z]);
             const jointArr = Object.entries(window.robot.joints).filter(joint => joint[1]._jointType != "fixed" && joint[1].type != "URDFMimicJoint");
             jointArr.forEach( joint => {
                 const i = this.robotInfo.joint_ordering.indexOf(joint[0]);
@@ -202,9 +333,21 @@ export class VrControl {
                     window.robot.setJointValue(joint[0],  res[i]);
                 }
             })   
-            return true;
+            didJointsUpdate = true;
         }
-        return false;
+
+        if (this.state.isRecording) {
+            const row = [];
+            let jointArr = Object.entries(window.robot.joints).filter(joint => joint[1]._jointType != "fixed" && joint[1].type != "URDFMimicJoint");
+            jointArr.forEach((joint, index) => {
+                let i = this.robotInfo.joint_ordering.indexOf(joint[0]);
+                if (i != -1) {
+                    row.push([index, joint[1].jointValue[0]]);
+                }
+            }) 
+            this.recordData.push(row);
+        }
+        return didJointsUpdate;
     }
 
     /**
@@ -239,10 +382,10 @@ export class VrControl {
         this.scene.add(this.EE_OFFSET_INDICATOR);
     }
 
-    getPose(controller) {
+    getControllerPose() {
         return { 
-            "posi": controller.getWorldPosition(new T.Vector3()),
-            "ori": controller.getWorldQuaternion(new T.Quaternion()),
+            "posi": this.controllerGrip.getWorldPosition(new T.Vector3()),
+            "ori": this.controllerGrip.getWorldQuaternion(new T.Quaternion()),
         } 
     }
 }
