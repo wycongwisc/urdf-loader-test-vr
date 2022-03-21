@@ -14,8 +14,7 @@ export class DataControl {
      * @param {Object} options 
      */
     post(data, options = {}) {
-
-        return;
+        // return;
         // add the SESSION ID to the beginning of each row
         for (const row of data) {
             row.unshift(this.SESSION_ID)

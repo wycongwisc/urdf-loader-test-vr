@@ -1,0 +1,535 @@
+<?xml version="1.0"?>
+<!-- created with Phobos 1.0.1 "Capricious Choutengan" -->
+  <robot name="tables_and_knobs_scene">
+
+    <link name="knob">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.002.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.003.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="knob.001">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder.001">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.004.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col.001">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.005.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="knob.002">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder.002">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.006.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col.002">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.007.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="knob.003">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder.003">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.008.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col.003">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.009.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="knob.004">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder.004">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.010.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col.004">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.011.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="knob.005">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder.005">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.012.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col.005">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.013.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="knob.006">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder.006">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.014.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col.006">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.015.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="knob.007">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder.007">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.016.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col.007">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.017.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="knob.008">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder.008">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.018.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col.008">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.019.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="knob.009">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder.009">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.020.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col.009">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.021.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="knob.010">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder.010">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.022.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col.010">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.023.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="knob.011">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder.011">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.024.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col.011">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.025.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="knob.012">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder.012">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.026.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col.012">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.027.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="knob.013">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Cylinder.013">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.028.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+        <material name="Red Material"/>
+      </visual>
+      <collision name="Cylinder.col.013">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Cylinder.029.dae" scale="0.034 0.034 0.05921"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="scene_root">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+    </link>
+
+    <link name="table_1">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Table.001">
+        <origin xyz="0 0 0" rpy="1.57072 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Mesh.008.dae" scale="0.01 0.01 0.01"/>
+        </geometry>
+        <material name="Legs"/>
+      </visual>
+      <collision name="Table.col.001">
+        <origin xyz="0 0 0" rpy="1.57072 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Mesh.012.dae" scale="0.01 0.01 0.01"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="table_2">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Table.002">
+        <origin xyz="0 0 0" rpy="1.58372 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Mesh.009.dae" scale="0.01 0.01 0.01"/>
+        </geometry>
+        <material name="Legs"/>
+      </visual>
+      <collision name="Table.col.002">
+        <origin xyz="0 0 0" rpy="1.58372 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Mesh.013.dae" scale="0.01 0.01 0.01"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="table_3">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Table">
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Mesh.003.dae" scale="0.01 0.01 0.01"/>
+        </geometry>
+        <material name="Legs"/>
+      </visual>
+      <collision name="Table.col">
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Mesh.011.dae" scale="0.01 0.01 0.01"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="table_4">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual name="Table.003">
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Mesh.010.dae" scale="0.01 0.01 0.01"/>
+        </geometry>
+        <material name="Legs"/>
+      </visual>
+      <collision name="Table.col.003">
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <geometry>
+          <mesh filename="package://Tables_and_Knobs/meshes/dae/Mesh.014.dae" scale="0.01 0.01 0.01"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="knob" type="continuous">
+      <origin xyz="-0.37235 0.36354 0.08462" rpy="-8e-05 0 0"/>
+      <parent link="table_1"/>
+      <child link="knob"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="knob.001" type="continuous">
+      <origin xyz="-0.26365 -0.02096 0.08465" rpy="-8e-05 0 0"/>
+      <parent link="table_1"/>
+      <child link="knob.001"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="knob.002" type="continuous">
+      <origin xyz="-0.3608 -0.35745 0.08468" rpy="-8e-05 0 0"/>
+      <parent link="table_1"/>
+      <child link="knob.002"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="knob.003" type="continuous">
+      <origin xyz="-0.54114 -0.57797 0.0847" rpy="-8e-05 0 0"/>
+      <parent link="table_1"/>
+      <child link="knob.003"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="knob.004" type="continuous">
+      <origin xyz="-0.40559 -0.44768 0.07887" rpy="0 0.01293 -1.5708"/>
+      <parent link="table_2"/>
+      <child link="knob.004"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="knob.005" type="continuous">
+      <origin xyz="-0.26062 -0.12277 0.08307" rpy="0 0.01293 -1.5708"/>
+      <parent link="table_2"/>
+      <child link="knob.005"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="knob.006" type="continuous">
+      <origin xyz="-0.42234 0.37242 0.08947" rpy="0 0.01293 -1.5708"/>
+      <parent link="table_2"/>
+      <child link="knob.006"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="knob.007" type="continuous">
+      <origin xyz="0.34433 0.5622 0.08465" rpy="0 0 0"/>
+      <parent link="table_3"/>
+      <child link="knob.007"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="knob.008" type="continuous">
+      <origin xyz="0.21727 0.02673 0.08465" rpy="0 0 0"/>
+      <parent link="table_3"/>
+      <child link="knob.008"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="knob.009" type="continuous">
+      <origin xyz="0.26071 -0.31507 0.08465" rpy="0 0 0"/>
+      <parent link="table_3"/>
+      <child link="knob.009"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="knob.010" type="continuous">
+      <origin xyz="0.47408 -0.58207 0.08465" rpy="0 0 0"/>
+      <parent link="table_3"/>
+      <child link="knob.010"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="knob.011" type="continuous">
+      <origin xyz="0.36976 0.54674 0.08465" rpy="0 0 -1.5708"/>
+      <parent link="table_4"/>
+      <child link="knob.011"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="knob.012" type="continuous">
+      <origin xyz="0.28221 0.02353 0.08465" rpy="0 0 -1.5708"/>
+      <parent link="table_4"/>
+      <child link="knob.012"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="knob.013" type="continuous">
+      <origin xyz="0.41804 -0.44346 0.08465" rpy="0 0 -1.5708"/>
+      <parent link="table_4"/>
+      <child link="knob.013"/>
+      <axis xyz="0 0 1.0"/>
+      <limit effort="0" velocity="0"/>
+    </joint>
+
+    <joint name="table_1" type="fixed">
+      <origin xyz="1.97876 0.05933 1.00019" rpy="8e-05 0 0"/>
+      <parent link="scene_root"/>
+      <child link="table_1"/>
+    </joint>
+
+    <joint name="table_2" type="fixed">
+      <origin xyz="0.02165 2.03392 1.00019" rpy="-0.01293 0 1.5708"/>
+      <parent link="scene_root"/>
+      <child link="table_2"/>
+    </joint>
+
+    <joint name="table_3" type="fixed">
+      <origin xyz="-1.94873 0.02132 1.00019" rpy="0 0 0"/>
+      <parent link="scene_root"/>
+      <child link="table_3"/>
+    </joint>
+
+    <joint name="table_4" type="fixed">
+      <origin xyz="0.01643 -2.00453 1.00019" rpy="0 0 1.5708"/>
+      <parent link="scene_root"/>
+      <child link="table_4"/>
+    </joint>
+
+    <material name="Legs">
+      <color rgba="0.8 0.8 0.8 1.0"/>
+    </material>
+
+    <material name="Red Material">
+      <color rgba="0.8 0.8 0.8 1.0"/>
+    </material>
+
+  </robot>

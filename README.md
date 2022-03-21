@@ -2,7 +2,7 @@
 
 The application is hosted [here](https://wycongwisc.github.io/urdf-loader-test-vr/).
 
-## Data
+## Data Collection
 
 *NOTE: Data collection is currently disabled.*
 
@@ -11,8 +11,9 @@ Currently, data is stored in Google Sheets using Google Apps Scripts and the Goo
 - The `master` spreadsheet stores the ID of the spreadsheet that subsequent POST requests will write to. This value will update dynamically; once a sheet reaches 500,000 rows the script will automatically create a new spreadsheet and update the current sheet ID. The script is also linked to this spreadsheet (go to Extensions > `Apps Script).
 - The `sessions` spreadsheet stores a randomely generated session ID, a timestamp, and the operating system of the user each time the application is loaded.
 - The `task` spreadsheet stores the session ID, the task name, and the time it took to complete the task.
-- All other spreadsheets contain data about the robot which is logged every 5 milleseconds. Each entry also contains a session ID which corresponds to those in the `sessions` spreadsheet. The name of each spreadsheet is the timestamp of the first entry.
+- All other spreadsheets contain data about the robot joints which is logged every 5 milleseconds. Each entry also contains a session ID which corresponds to those in the `sessions` spreadsheet. The name of each spreadsheet is the timestamp of the first entry.
 
+For a tutorial on how this was set up, see [Setting up a Google Sheets Backend with Google Apps Scripts](google-sheets-api-tutorial.md).
 
 ## Debugging VR
 

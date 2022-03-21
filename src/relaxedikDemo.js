@@ -53,6 +53,10 @@ export async function relaxedikDemo() {
         loadRobot(URL.createObjectURL(blob))
     });
 
+    getURDFFromURL("./models/Tables_and_Knobs/urdf/tables_and_knobs_scene.urdf", (blob) => {
+        loadScene(URL.createObjectURL(blob))
+    });
+
     // getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_dynamic/urdf/kitchen_dynamic.urdf", (blob) => {
     //     loadKitchenDynamic(URL.createObjectURL(blob))
     // });
@@ -256,6 +260,21 @@ export async function relaxedikDemo() {
         }
     }
 
+    const loadScene = (urdfScene) => {
+        const manager = new T.LoadingManager();
+        const loader = new URDFLoader(manager);
+        loader.load(urdfScene, result => {
+            window.urdfScene = result;
+        });
+        manager.onLoad = () => {
+            scene.add(window.urdfScene);
+            window.urdfScene.rotation.x = -Math.PI / 2;
+            window.urdfScene.scale.x = 0.7;
+            window.urdfScene.scale.y = 0.7;
+            window.urdfScene.scale.z = 0.7;
+        }
+    }
+
     // let kitchenTransformation = (kitchen) => {
     //     kitchen.rotation.x = -Math.PI / 2;
     //     kitchen.rotation.z = Math.PI;
@@ -388,7 +407,8 @@ export async function relaxedikDemo() {
             row.push(new Date());
             for (const joint of ["head_pan", "right_j0", "right_j1", "right_j1_2", "right_j2", "right_j2_2", "right_j3", "right_j4", "right_j4_2", "right_j5", "right_j6"]) {
                 let currJoint = window.robot.joints[joint];
-                row.push(currJoint.position.x + ' ' + currJoint.position.y + ' ' + currJoint.position.z + ', ' + currJoint.quaternion.x + ' ' + currJoint.quaternion.y + ' ' + currJoint.quaternion.z + ' ' + currJoint.quaternion.w);
+                // row.push(currJoint.position.x + ' ' + currJoint.position.y + ' ' + currJoint.position.z + ', ' + currJoint.quaternion.x + ' ' + currJoint.quaternion.y + ' ' + currJoint.quaternion.z + ' ' + currJoint.quaternion.w);
+                row.push(currJoint.jointValue[0])
             }
             data.push(row)
 
@@ -410,12 +430,9 @@ export async function relaxedikDemo() {
 
     // render();
     renderer.setAnimationLoop( function () {
-
         ThreeMeshUI.update();
         teleportVR.update();
         renderer.render( scene, camera );
-    
-
     } );
     
 }
