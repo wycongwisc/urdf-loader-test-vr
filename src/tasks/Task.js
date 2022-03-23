@@ -13,16 +13,7 @@ export default class Task {
         throw new Error("Method 'update()' must be implemented");
     }
 
-    init(num) {
-        throw new Error("Method 'init' must be implemented");
+    destruct() {
+        throw new Error("Method 'destruct()' must be implemented");
     }
-
-    clearRound() {
-        throw new Error("Method 'clearRound()' must be implemented");
-    }
-
-    displayRound() {
-        throw new Error("Method 'displayRound()' must be implemented");
-    }
-
 }

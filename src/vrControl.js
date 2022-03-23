@@ -28,8 +28,8 @@ export class VrControl {
         this.uiControl = params.uiControl;
 
         this.lastSqueeze = 0;
-        this.defaultPosition = new T.Vector3();
-        this.defaultPosition.set(1.5, 1.5, 0)
+        this.initPosition = new T.Vector3();
+        this.initPosition.set(1.5, 1.5, 0)
 
         this.init_ee_abs_three = getCurrEEpose();
         this.ee_goal_rel_three = {
@@ -113,8 +113,12 @@ export class VrControl {
                 },
                 onActivatePlayback: function() {
                     that.playbackData = JSON.parse(localStorage.getItem('recordData'));
+                    that.scene.remove(that.EE_OFFSET_INDICATOR);
+                    that.scene.remove(that.target_cursor);
                 },
                 onDeactivatePlayback: function() {
+                    that.scene.add(that.EE_OFFSET_INDICATOR);
+                    that.scene.add(that.target_cursor);
                 },
                 
             }
@@ -128,7 +132,7 @@ export class VrControl {
         const parallaxToggle = document.querySelector('#parallax-toggle');
         parallaxToggle.addEventListener('click', (e) => {
             this.renderer.xr.parallax = e.target.checked;
-            this.renderer.xr.defaultPosition = this.defaultPosition;
+            this.renderer.xr.initPosition = this.initPosition;
         })     
 
         // REMOVE THIS 
@@ -137,42 +141,72 @@ export class VrControl {
         this.raycaster = new T.Raycaster();
         this.ray = new T.ArrowHelper(new T.Vector3(0, 0, 1), new T.Vector3(0, 0, 0), 300, 0xFFFFFF, 1, 1);
 
-        this.uiControl.RECORDING_BUTTON.setupState({
-            state: 'selected',
-            attributes: this.uiControl.BUTTON_SELECTED_ATTRIBUTES,
-            onSet: () => {
-                if (this.state.is('IDLE')) {
-                    this.playbackFrameIndex = 0;
-                    this.state.isRecording = true;
-                }
-            }
-        })
+        this.uiControl.addButtons(
+            this.uiControl.ROBOT_SWITCH_PANEL,
+            [
+                {
+                    name: 'Sawyer',
+                    onClick: () => {
+                        if (this.state.is('IDLE')) {
+                            if (window.currentRobot === 'sawyer') return;
+                            
+                            this.scene.remove(window.robot);
+                            window.loadRobot(window.sawyerRobotFile);
+                            window.currentRobot = 'sawyer'
+                        }
+                    }
+                },
+                {
+                    name: 'ur5',
+                    onClick: () => {
+                        if (this.state.is('IDLE')) {
+                            if (window.currentRobot === 'ur5') return;
+                            
+                            this.scene.remove(window.robot);
+                            window.loadRobot(window.ur5RobotFile);
+                            window.currentRobot = 'ur5'
+                        }
+                    }
+                },
+            ]
+        )
 
-        this.uiControl.STOP_RECORDING_BUTTON.setupState({
-            state: 'selected',
-            attributes: this.uiControl.BUTTON_SELECTED_ATTRIBUTES,
-            onSet: () => {
-                if (this.state.is('IDLE') && this.state.isRecording) {
-                    this.state.isRecording = false;
-                    localStorage.setItem('recordData', JSON.stringify(this.recordData));
-                    this.recordData = [];
+        this.uiControl.addButtons(
+            this.uiControl.RECORDING_PANEL,
+            [
+                {
+                    name: 'Record',
+                    onClick: () => {
+                        if (this.state.is('IDLE')) {
+                            this.playbackFrameIndex = 0;
+                            this.state.isRecording = true;
+                        }
+                    }
+                },
+                {
+                    name: 'Stop',
+                    onClick: () => {
+                        if (this.state.is('IDLE') && this.state.isRecording) {
+                            this.state.isRecording = false;
+                            localStorage.setItem('recordData', JSON.stringify(this.recordData));
+                            this.recordData = [];
+                        }
+                    }
+                },
+                {
+                    name: 'Play',
+                    onClick: () => {
+                        if (this.state.is('IDLE') && !this.state.isRecording && localStorage.getItem('recordData')) {
+                            this.state.activatePlayback();
+                        } else if (this.state.is('PLAYBACK')) {
+                            console.log('PAUSE')
+                            this.state.deactivatePlayback();
+        
+                        }
+                    }
                 }
-            }
-        })
-
-        this.uiControl.PLAY_RECORDING_BUTTON.setupState({
-            state: 'selected',
-            attributes: this.uiControl.BUTTON_SELECTED_ATTRIBUTES,
-            onSet: () => {
-                if (this.state.is('IDLE') && !this.state.isRecording && localStorage.getItem('recordData')) {
-                    this.state.activatePlayback();
-                } else if (this.state.is('PLAYBACK')) {
-                    console.log('PAUSE')
-                    this.state.deactivatePlayback();
-
-                }
-            }
-        })
+            ]
+        )
 
         this.recordData = [];
         this.playbackData = [];
@@ -308,10 +342,12 @@ export class VrControl {
         let ee_goal_abs_three = relToAbs(ee_goal_rel_three, init_ee_abs_three);
 
         this.target_cursor.position.copy( ee_goal_abs_three.posi );
+        this.target_cursor.quaternion.copy( ee_goal_abs_three.ori );
+        this.target_cursor.translateZ(.1);
         this.target_cursor.matrixWorldNeedsUpdate = true;
 
         if (!this.state.is('IDLE')) {
-            this.updateEEOffsetIndicator(curr_ee_abs_three.posi, ee_goal_abs_three.posi);
+            this.updateEEOffsetIndicator(curr_ee_abs_three.posi, this.target_cursor.position);
         }
 
         // distance difference
@@ -330,7 +366,7 @@ export class VrControl {
             jointArr.forEach( joint => {
                 const i = this.robotInfo.joint_ordering.indexOf(joint[0]);
                 if (i != -1) {
-                    window.robot.setJointValue(joint[0],  res[i]);
+                    window.robot.setJointValue(joint[0], res[i]);
                 }
             })   
             didJointsUpdate = true;

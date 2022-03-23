@@ -3,6 +3,8 @@ import { Object3D } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import Task from './Task'
 import Block from './Block';
+import Goal from './Goal';
+import StateMachine from "javascript-state-machine"
 
 import {
     getRandomDimensions3, getRandom, getBrowser, threejsVector3ToMathjsMat
@@ -14,87 +16,85 @@ export default class PoseMatch extends Task {
         super();
 
         this.scene = params.scene;
-        this.gripper = params.gripper
+        this.gripper = params.gripper;
 
         this.clock = new T.Clock({ autoStart: false });
-        this.currRound = 0;
-        this.NUM_ROUNDS = 3;
-        this.NAME = 'pose-match'
-        this.rounds = [];
-    }
+        this.NAME = 'pose-match';
 
-    init() {
-        this.clearRound();
-        this.currRound = 0;
+        const that = this;
 
-        console.log(this.gripper)
+        this.rounds = {
+            '1': {
+                goal: new Goal({ 
+                    obj: this.gripper.clone(),
+                    pos: [1, 1, 0],
+                    ori: [0, Math.PI/2, Math.PI/2]
+                })
+            },
+            '2': {
+                goal: new Goal({
+                    obj: this.gripper.clone(),
+                    pos: [.5, 1, .5],
+                    ori: [0, 0, Math.PI/4]
+                })
+            },
+            '3': {
+                goal: new Goal({
+                    obj: this.gripper.clone(),
+                    pos: [.5, 1, -.5],
+                    ori: [Math.PI/3, Math.PI/2, 0]
+                })
+            }
+        }
 
-        const GOAL_POSITIONS = [
-            [1, 1, 0],
-            [.5, 1, .5],
-            [.5, 1, -.5]
-        ]
-
-        // TODO: transorm gripper to THREE space
-        const GOAL_ORIENTATIONS = [
-            [0, Math.PI/2, Math.PI/2],
-            [0, 0, Math.PI/4],
-            [Math.PI/3, Math.PI/2, 0],
-        ]
-
-        for (let i = 0; i < this.NUM_ROUNDS; i++) {
-            const gripper = this.gripper.clone();
-            gripper.position.set(...GOAL_POSITIONS[i]);
-            gripper.rotation.set(...GOAL_ORIENTATIONS[i])
-            gripper.quaternion.normalize();
-            gripper.traverse((child) => {
-                if (child.isMesh) {
-                    if (child.material instanceof Array) {
-                        child.material.forEach((item) => {
-                            item.transparent = true;
-                            item.opacity = 0.4;
-                        })
-                    } else {
-                        child.material.transparent = true;
-                        child.material.opacity = 0.4;
+        this.state = new StateMachine({
+            init: 'IDLE',
+            transitions: [
+                { name: 'start', from: 'IDLE', to: '1' },
+                { name: 'next', from: ['1', '2', '3'], to: function() {
+                    return this.state === '3' ? 'IDLE' : `${Number(this.state) + 1}`
+                }},
+                { name: 'previous', from: ['1', '2', '3'], to: function() {
+                    return this.state === '1' ? 'IDLE' : `${Number(this.state) -1}`
+                }},
+                { name: 'stop', from: ['1', '2', '3'], to: 'IDLE'}
+            ],
+            data: {
+                goal: undefined,
+                NUM_ROUNDS: 3
+            },
+            methods: {
+                onBeforeTransition: function() {
+                    that.scene.remove(this.goal?.obj);
+                    this.goal = undefined;
+                },
+                onAfterTransition: function() {
+                    if (['1', '2', '3'].includes(this.state)) {
+                        this.goal = that.rounds[this.state].goal;
+                        that.scene.add(this.goal?.obj);
                     }
                 }
-            });
-            
-            gripper.add(new T.AxesHelper(.2));
-
-            this.rounds.push({ goal: gripper });
-        }
-
-        this.displayRound();
+            }
+        })
     }
 
-    displayRound() {
-        if (this.rounds.length === 0) {
-            return;
-        }
-        this.scene.add(this.rounds[this.currRound].goal);
-    } 
-
-    clearRound() {
-        if (this.rounds.length === 0) {
-            return;
-        }
-        this.scene.remove(this.rounds[this.currRound].goal);
+    destruct() { 
+        this.state.stop() 
     }
 
     // this is called every 5 ms
     update(ee_pose) {
+        if (!this.state.is('IDLE')) {
+            const goal = this.state.goal;
+            const gripper = new T.Object3D();
+            gripper.position.copy(new T.Vector3(ee_pose.posi.x, ee_pose.posi.y, ee_pose.posi.z));
+            gripper.quaternion.copy(new T.Quaternion(ee_pose.ori.x, ee_pose.ori.y, ee_pose.ori.z, ee_pose.ori.w).normalize());
 
-        const goal = this.rounds[this.currRound].goal;
-        const gripper = new T.Object3D();
-        gripper.position.copy(new T.Vector3(ee_pose.posi.x, ee_pose.posi.y, ee_pose.posi.z));
-        gripper.quaternion.copy(new T.Quaternion(ee_pose.ori.x, ee_pose.ori.y, ee_pose.ori.z, ee_pose.ori.w).normalize());
-
-        // https://gamedev.stackexchange.com/questions/75072/how-can-i-compare-two-quaternions-for-logical-equality
-        if (gripper.position.distanceTo(goal.position) < 0.02
-            && Math.abs(gripper.quaternion.dot(goal.quaternion)) > 1 - .02) {
-            window.taskControl.finishRound();
+            // https://gamedev.stackexchange.com/questions/75072/how-can-i-compare-two-quaternions-for-logical-equality
+            if (gripper.position.distanceTo(goal.obj.position) < 0.02
+                && Math.abs(gripper.quaternion.dot(goal.obj.quaternion)) > 1 - .02) {
+                window.taskControl.finishRound();
+            }
         }
 
     }

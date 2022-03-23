@@ -21,7 +21,7 @@ export class UiControl {
             this.FONT_TEXTURE = '/urdf-loader-test-vr/assets/Roboto-msdf.png';
         }
 
-        this.buttons = [];
+        this.buttons = new Map();
         
         this.BUTTON_OPTIONS = {
             width: 0.4,
@@ -59,91 +59,71 @@ export class UiControl {
             fontColor: new T.Color( 0x222222 )
         };
 
-        //
-        this.setDefaults();
-    }
+        this.TEXT_PANEL = new ThreeMeshUI.Block({
+            width: 1.2,
+            height: 1.1,
+            padding: 0.05,
+            justifyContent: 'center',
+            alignContent: 'left',
+            fontFamily: this.FONT_FAMILY,
+            fontTexture: this.FONT_TEXTURE
+        }),
 
-    setDefaults() {
-        this.DEFAULTS = {
-            TEXT_PANEL: new ThreeMeshUI.Block({
-                width: 1.2,
-                height: 1.1,
-                padding: 0.05,
-                justifyContent: 'center',
-                alignContent: 'left',
-                fontFamily: this.FONT_FAMILY,
-                fontTexture: this.FONT_TEXTURE
-            }),
-            NAVIGATION_PANEL: new ThreeMeshUI.Block({
-                justifyContent: 'center',
-                alignContent: 'center',
-                // backgroundColor: new T.Color( 0xFF0000 ),
-                contentDirection: 'row-reverse',
-                fontFamily: this.FONT_FAMILY,
-                fontTexture: this.FONT_TEXTURE,
-                fontSize: 0.07,
-                padding: 0.02,
-                borderRadius: 0.11
-            }),
-            RECORDING_PANEL: new ThreeMeshUI.Block({
-                justifyContent: 'center',
-                alignContent: 'center',
-                // backgroundColor: new T.Color( 0xFF0000 ),
-                fontFamily: this.FONT_FAMILY,
-                fontTexture: this.FONT_TEXTURE,
-                fontSize: 0.07,
-                padding: 0.02,
-                borderRadius: 0.11
-            }),
-        }
+        this.TEXT_PANEL.position.set( 2, 1.6, 0 );
+        this.TEXT_PANEL.rotation.y = -Math.PI/2;
 
-        this.DEFAULTS.TEXT_PANEL.position.set( 2, 1.6, 0 );
-        this.DEFAULTS.TEXT_PANEL.rotation.y = -Math.PI/2;
+        this.NAVIGATION_PANEL = new ThreeMeshUI.Block({
+            justifyContent: 'center',
+            alignContent: 'center',
+            // backgroundColor: new T.Color( 0xFF0000 ),
+            contentDirection: 'row-reverse',
+            fontFamily: this.FONT_FAMILY,
+            fontTexture: this.FONT_TEXTURE,
+            fontSize: 0.07,
+            padding: 0.02,
+            borderRadius: 0.11
+        }),
 
-        this.DEFAULTS.NAVIGATION_PANEL.position.set( 1.9, .92, 0 );
-        this.DEFAULTS.NAVIGATION_PANEL.rotateY(-Math.PI/2)
-        this.DEFAULTS.NAVIGATION_PANEL.rotateX(-Math.PI/6);
+        this.NAVIGATION_PANEL.position.set( 1.9, .92, 0 );
+        this.NAVIGATION_PANEL.rotateY(-Math.PI/2)
+        this.NAVIGATION_PANEL.rotateX(-Math.PI/6);
 
-        this.DEFAULTS.RECORDING_PANEL.position.set( 2, 1.6, -.9 );
-        this.DEFAULTS.RECORDING_PANEL.rotation.y = -Math.PI/2;
-        
+        this.RECORDING_PANEL = new ThreeMeshUI.Block({
+            justifyContent: 'center',
+            alignContent: 'center',
+            // backgroundColor: new T.Color( 0xFF0000 ),
+            fontFamily: this.FONT_FAMILY,
+            fontTexture: this.FONT_TEXTURE,
+            fontSize: 0.07,
+            padding: 0.02,
+            borderRadius: 0.11
+        }),
 
-        if (!this.RECORDING_BUTTON) {
-            this.RECORDING_BUTTON = new ThreeMeshUI.Block(this.BUTTON_OPTIONS);
-            this.RECORDING_BUTTON.add(new ThreeMeshUI.Text({ content: `Record` }));
-            this.RECORDING_BUTTON.setupState(this.BUTTON_HOVER_STATE);
-            this.RECORDING_BUTTON.setupState(this.BUTTON_IDLE_STATE);
-        } 
-        
-        this.buttons.push(this.RECORDING_BUTTON);
-        this.DEFAULTS.RECORDING_PANEL.add(this.RECORDING_BUTTON);
+        this.RECORDING_PANEL.position.set( 2, 1.6, -.9 );
+        this.RECORDING_PANEL.rotation.y = -Math.PI/2;
 
-        if (!this.STOP_RECORDING_BUTTON) {
-            this.STOP_RECORDING_BUTTON = new ThreeMeshUI.Block(this.BUTTON_OPTIONS);
-            this.STOP_RECORDING_BUTTON.add(new ThreeMeshUI.Text({ content: `Stop` }));
-            this.STOP_RECORDING_BUTTON.setupState(this.BUTTON_HOVER_STATE);
-            this.STOP_RECORDING_BUTTON.setupState(this.BUTTON_IDLE_STATE);
-        } 
+        this.ROBOT_SWITCH_PANEL = new ThreeMeshUI.Block({
+            justifyContent: 'center',
+            alignContent: 'center',
+            // backgroundColor: new T.Color( 0xFF0000 ),
+            fontFamily: this.FONT_FAMILY,
+            fontTexture: this.FONT_TEXTURE,
+            fontSize: 0.07,
+            padding: 0.02,
+            borderRadius: 0.11
+        }),
 
-        this.buttons.push(this.STOP_RECORDING_BUTTON);
-        this.DEFAULTS.RECORDING_PANEL.add(this.STOP_RECORDING_BUTTON);
-
-        if (!this.PLAY_RECORDING_BUTTON) {
-            this.PLAY_RECORDING_BUTTON = new ThreeMeshUI.Block(this.BUTTON_OPTIONS);
-            this.PLAY_RECORDING_BUTTON.add(new ThreeMeshUI.Text({ content: `Play/Pause` }));
-            this.PLAY_RECORDING_BUTTON.setupState(this.BUTTON_HOVER_STATE);
-            this.PLAY_RECORDING_BUTTON.setupState(this.BUTTON_IDLE_STATE);
-        } 
-
-        this.buttons.push(this.PLAY_RECORDING_BUTTON);
-        this.DEFAULTS.RECORDING_PANEL.add(this.PLAY_RECORDING_BUTTON);
-    
+        this.ROBOT_SWITCH_PANEL.position.set( 2, 1.6, .9 );
+        this.ROBOT_SWITCH_PANEL.rotation.y = -Math.PI/2;
     }
 
     display() {
-        for (const panel in this.DEFAULTS) {
-            this.scene.add(this.DEFAULTS[panel]);
-        }
+        this.scene.add(
+            this.TEXT_PANEL,
+            this.NAVIGATION_PANEL,
+            this.RECORDING_PANEL,
+            this.ROBOT_SWITCH_PANEL
+        )
     }
 
     /**
@@ -173,7 +153,7 @@ export class UiControl {
             button.setupState(this.BUTTON_HOVER_STATE);
             button.setupState(this.BUTTON_IDLE_STATE);
 
-            this.buttons.push(button);
+            this.buttons.set(option.name, button);
 
             container.add(button);
         }
@@ -181,7 +161,7 @@ export class UiControl {
 
     addTaskCounter(container, task) {
         const counter = new ThreeMeshUI.Text({
-            content: `Task: ${task.currRound + 1} / ${task.NUM_ROUNDS}`,
+            content: `Task: ${task.state.state} / ${task.state.NUM_ROUNDS}`,
             fontSize: 0.05
         });
         container.add(counter);
@@ -189,15 +169,51 @@ export class UiControl {
     }
 
     hide() {
-        for (const panel in this.DEFAULTS) {
-            this.scene.remove(this.DEFAULTS[panel]);
-        }
+        this.scene.remove(
+            this.TEXT_PANEL,
+            this.NAVIGATION_PANEL,
+            this.RECORDING_PANEL,
+            this.ROBOT_SWITCH_PANEL
+        )
     }
 
     reset() {
         this.hide();
-        this.buttons = [];
-        this.setDefaults();
+        
+        this.buttons.delete('Restart');
+        this.buttons.delete('Next');
+        this.buttons.delete('Previous');
+
+        // only need to reset panels that change
+        this.TEXT_PANEL = new ThreeMeshUI.Block({
+            width: 1.2,
+            height: 1.1,
+            padding: 0.05,
+            justifyContent: 'center',
+            alignContent: 'left',
+            fontFamily: this.FONT_FAMILY,
+            fontTexture: this.FONT_TEXTURE
+        }),
+
+        this.TEXT_PANEL.position.set( 2, 1.6, 0 );
+        this.TEXT_PANEL.rotation.y = -Math.PI/2;
+
+        this.NAVIGATION_PANEL = new ThreeMeshUI.Block({
+            justifyContent: 'center',
+            alignContent: 'center',
+            // backgroundColor: new T.Color( 0xFF0000 ),
+            contentDirection: 'row-reverse',
+            fontFamily: this.FONT_FAMILY,
+            fontTexture: this.FONT_TEXTURE,
+            fontSize: 0.07,
+            padding: 0.02,
+            borderRadius: 0.11
+        }),
+
+        this.NAVIGATION_PANEL.position.set( 1.9, .92, 0 );
+        this.NAVIGATION_PANEL.rotateY(-Math.PI/2)
+        this.NAVIGATION_PANEL.rotateX(-Math.PI/6);
+
         this.display();
     }
 
@@ -212,16 +228,16 @@ export class UiControl {
             return true;
         }
 
-        this.buttons.forEach( ( obj ) => {
-            if ( ( !intersect || obj !== intersect.object ) && obj.isUI ) {
-                obj.setState( 'idle' );
+        this.buttons.forEach( ( button ) => {
+            if ( ( !intersect || button !== intersect.object ) && button.isUI ) {
+                button.setState( 'idle' );
             }
         } );
         return false;
     }
 
     raycast(raycaster) {
-        return this.buttons.reduce( ( closestIntersection, obj ) => {
+        return Array.from(this.buttons.values()).reduce( ( closestIntersection, obj ) => {
             const intersection = raycaster.intersectObject( obj, true );
             if ( !intersection[ 0 ] ) return closestIntersection;
             if ( !closestIntersection || intersection[ 0 ].distance < closestIntersection.distance ) {

@@ -3,6 +3,7 @@ import URDFLoader from 'urdf-loader';
 import { initScene } from './sceneInit';
 import { getURDFFromURL } from './robotFunctions/loaderHelper';
 import { createButton, createSlider, createCanvas, createText, createToggleSwitch, createBr, createSelect } from './ui/inputAdders';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 import { MouseControl } from './mouseControl.js';
 import { VrControl } from './vrControl.js'
@@ -50,12 +51,31 @@ export async function relaxedikDemo() {
     scene.add( gridHelper );
 
     getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/sawyer_description/urdf/sawyer_gripper.urdf", (blob) => {
-        loadRobot(URL.createObjectURL(blob))
+        window.sawyerRobotFile = URL.createObjectURL(blob)
+        window.loadRobot(window.sawyerRobotFile);
+        window.currentRobot = 'sawyer'
     });
 
-    getURDFFromURL("./models/Tables_and_Knobs/urdf/tables_and_knobs_scene.urdf", (blob) => {
-        loadScene(URL.createObjectURL(blob))
+    getURDFFromURL("https://raw.githubusercontent.com/yepw/robot_configs/master/ur5_description/urdf/ur5_gripper.urdf", (blob) => {
+        window.ur5RobotFile = URL.createObjectURL(blob)
     });
+
+    // const loader = new GLTFLoader();
+
+    // loader.load('./models/table/scene.gltf', (gltf) => {
+    //     const table = gltf.scene;
+    //     scene.add(table);
+    //     table.rotation.y = -Math.PI / 2;
+    //     table.position.x = 1;
+    //     table.scale.set(.011, .011, .011);
+    //     table.traverse(child => {
+    //         child.castShadow = true;
+    //     });
+    // })
+
+    // getURDFFromURL("./models/Tables_and_Knobs/urdf/tables_and_knobs_scene.urdf", (blob) => {
+    //     loadScene(URL.createObjectURL(blob))
+    // });
 
     // getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_dynamic/urdf/kitchen_dynamic.urdf", (blob) => {
     //     loadKitchenDynamic(URL.createObjectURL(blob))
@@ -203,13 +223,13 @@ export async function relaxedikDemo() {
     controlMappingSelect.onchange();
 
     // transformation from ROS' reference frame to THREE's reference frame
-    let T_ROS_to_THREE = new T.Matrix4().makeRotationFromEuler(new T.Euler(1.57079632679, 0., 0.));
+    const T_ROS_to_THREE = new T.Matrix4().makeRotationFromEuler(new T.Euler(1.57079632679, 0., 0.));
     // transformation from THREE' reference frame to ROS's reference frame
-    let T_THREE_to_ROS = T_ROS_to_THREE.clone().invert();
+    const T_THREE_to_ROS = T_ROS_to_THREE.clone().invert();
 
     function onCamMove() {
-        let m4 = T_ROS_to_THREE.clone().multiply( camera.matrixWorld.clone());
-        let m3 = new T.Matrix3().setFromMatrix4(m4);
+        const m4 = T_ROS_to_THREE.clone().multiply( camera.matrixWorld.clone());
+        const m3 = new T.Matrix3().setFromMatrix4(m4);
         controlMapping.updateCamPose(m3);
     }
 
@@ -217,12 +237,12 @@ export async function relaxedikDemo() {
 
     onCamMove();
 
-    let geometry = new T.SphereGeometry( 0.015, 32, 32 );
-    let material = new T.MeshBasicMaterial( {color: 0xffff00} );
+    const geometry = new T.SphereGeometry( 0.015, 32, 32 );
+    const material = new T.MeshBasicMaterial( {color: 0xffff00} );
     target_cursor = new T.Mesh( geometry, material );
     scene.add( target_cursor );
 
-    let loadRobot = (robotFile) => {
+    window.loadRobot = (robotFile) => {
         const manager = new T.LoadingManager();
         const loader = new URDFLoader(manager);
         loader.load(robotFile, result => {
@@ -233,9 +253,7 @@ export async function relaxedikDemo() {
             window.robot.rotation.x = -Math.PI / 2;
             window.robot.position.y = 0.02;
             window.robot.position.x = .25;
-            window.robot.scale.x = 1.15;
-            window.robot.scale.y = 1.15;
-            window.robot.scale.z = 1.15;
+            window.robot.scale.set(1.15, 1.15, 1.15);
             window.robot.traverse(c => {
                 c.castShadow = true;
                 if (c.material) {
@@ -260,20 +278,20 @@ export async function relaxedikDemo() {
         }
     }
 
-    const loadScene = (urdfScene) => {
-        const manager = new T.LoadingManager();
-        const loader = new URDFLoader(manager);
-        loader.load(urdfScene, result => {
-            window.urdfScene = result;
-        });
-        manager.onLoad = () => {
-            scene.add(window.urdfScene);
-            window.urdfScene.rotation.x = -Math.PI / 2;
-            window.urdfScene.scale.x = 0.7;
-            window.urdfScene.scale.y = 0.7;
-            window.urdfScene.scale.z = 0.7;
-        }
-    }
+    // const loadScene = (urdfScene) => {
+    //     const manager = new T.LoadingManager();
+    //     const loader = new URDFLoader(manager);
+    //     loader.load(urdfScene, result => {
+    //         window.urdfScene = result;
+    //     });
+    //     manager.onLoad = () => {
+    //         scene.add(window.urdfScene);
+    //         window.urdfScene.rotation.x = -Math.PI / 2;
+    //         window.urdfScene.scale.x = 0.7;
+    //         window.urdfScene.scale.y = 0.7;
+    //         window.urdfScene.scale.z = 0.7;
+    //     }
+    // }
 
     // let kitchenTransformation = (kitchen) => {
     //     kitchen.rotation.x = -Math.PI / 2;
@@ -338,9 +356,10 @@ export async function relaxedikDemo() {
             }
         })    
 
-        let relaxedIK = new RelaxedIK(robot_info, robot_nn_config);
+        const relaxedIK = new RelaxedIK(robot_info, robot_nn_config);
         
-        let gripper = recursiveSearch(window.robot, 'children', 'right_gripper_base')[0].clone();
+        // TODO: use traverse() instead
+        const gripper = recursiveSearch(window.robot, 'children', 'right_gripper_base')[0].clone();
 
         // clone() does not make a deep copy of material, need to do that here
         gripper.traverse((child) => {
@@ -426,7 +445,6 @@ export async function relaxedikDemo() {
 
     //     requestAnimationFrame(render);
     // }
-
 
     // render();
     renderer.setAnimationLoop( function () {

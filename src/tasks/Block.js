@@ -1,5 +1,4 @@
 import * as T from 'three';
-import { TABLE_HEIGHT } from './globals';
 
 export default class Block {
     constructor(params) {
