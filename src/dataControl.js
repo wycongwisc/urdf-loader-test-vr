@@ -1,9 +1,9 @@
-import { generateUUID } from 'three/src/math/MathUtils';
+import { v4 as id } from 'uuid'
 
 export class DataControl {
     constructor(params) {
-        this.SCRIPT_PATH = "https://script.google.com/macros/s/AKfycbwn_vDLFDm-PtGx4Q2JGS-qv9SJGP-v1bXSNS_l3yKExnSF_e47BG9nMprlx5syqjgm/exec"
-        this.SESSION_ID = generateUUID();
+        this.SCRIPT_PATH = "https://script.google.com/macros/s/AKfycbxmjy-ujCM6TRiPAmXTwtpDxs3M4V30DN_ZuLCHxh-h-ZMENiWVMKmsj7vO8mbxDAjJ/exec"
+        this.SESSION_ID = id();
 
         this.post([[new Date(), navigator.platform]], { type: 'session' })
     }

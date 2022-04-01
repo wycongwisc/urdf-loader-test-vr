@@ -4,25 +4,29 @@ import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
 export function initScene() {
 
-    let scene, camera, renderer, controls;
-
     // scene
-    scene = new T.Scene();
+    const scene = new T.Scene();
     scene.background = new T.Color(0x2c3e50);
 
-    camera = new T.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.001, 1000);
-    camera.position.set(3, 3, 3);
-    camera.lookAt(0, 0, 0);
+    // camera
+    const camera = new T.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.001, 1000);
+    camera.position.set(2, 2, 2);
+    camera.lookAt(0, 1, 0);
+    
+    const cameraGroup = new T.Group();
+    cameraGroup.position.set(3, 10, 2);
 
-    renderer = new T.WebGLRenderer({ antialias: true });
+    // renderer
+    const renderer = new T.WebGLRenderer({ antialias: true });
     renderer.outputEncoding = T.sRGBEncoding;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = T.PCFSoftShadowMap;
     document.body.appendChild(renderer.domElement);
 
+    // renderer (vr)
     renderer.xr.enabled = true;
     document.body.appendChild( VRButton.createButton( renderer ) );
-
+    
     const directionalLight = new T.DirectionalLight(0xffffff, 1.0);
     directionalLight.castShadow = true;
     directionalLight.shadow.mapSize.setScalar(1024);
@@ -38,7 +42,7 @@ export function initScene() {
     ground.receiveShadow = true;
     scene.add(ground);
 
-    controls = new OrbitControls(camera, renderer.domElement);
+    const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.y = 1;
     controls.update();
 

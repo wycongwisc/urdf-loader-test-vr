@@ -1,6 +1,6 @@
 import * as T from 'three';
 
-export const TABLE_HEIGHT = 0.96;
+export const TABLE_HEIGHT = 0.88;
 
 export const SCENE_OFFSET = [1, 0, 0];
 

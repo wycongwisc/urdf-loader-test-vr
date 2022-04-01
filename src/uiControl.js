@@ -99,7 +99,7 @@ export class UiControl {
             borderRadius: 0.11
         }),
 
-        this.RECORDING_PANEL.position.set( 2, 1.6, -.9 );
+        this.RECORDING_PANEL.position.set( 2, 1.75, -.9 );
         this.RECORDING_PANEL.rotation.y = -Math.PI/2;
 
         this.ROBOT_SWITCH_PANEL = new ThreeMeshUI.Block({
@@ -113,8 +113,36 @@ export class UiControl {
             borderRadius: 0.11
         }),
 
-        this.ROBOT_SWITCH_PANEL.position.set( 2, 1.6, .9 );
+        this.ROBOT_SWITCH_PANEL.position.set( 2, 1.85, .9 );
         this.ROBOT_SWITCH_PANEL.rotation.y = -Math.PI/2;
+
+        this.CONTROLLER_SWITCH_PANEL = new ThreeMeshUI.Block({
+            justifyContent: 'center',
+            alignContent: 'center',
+            // backgroundColor: new T.Color( 0xFF0000 ),
+            fontFamily: this.FONT_FAMILY,
+            fontTexture: this.FONT_TEXTURE,
+            fontSize: 0.07,
+            padding: 0.02,
+            borderRadius: 0.11
+        }),
+
+        this.CONTROLLER_SWITCH_PANEL.position.set( 2, 1.35, .9 );
+        this.CONTROLLER_SWITCH_PANEL.rotation.y = -Math.PI/2;
+
+        this.REFRESH_PANEL = new ThreeMeshUI.Block({
+            justifyContent: 'center',
+            alignContent: 'center',
+            // backgroundColor: new T.Color( 0xFF0000 ),
+            fontFamily: this.FONT_FAMILY,
+            fontTexture: this.FONT_TEXTURE,
+            fontSize: 0.07,
+            padding: 0.02,
+            borderRadius: 0.11
+        }),
+
+        this.REFRESH_PANEL.position.set( 2, 1.25, -.9 );
+        this.REFRESH_PANEL.rotation.y = -Math.PI/2;
     }
 
     display() {
@@ -122,7 +150,9 @@ export class UiControl {
             this.TEXT_PANEL,
             this.NAVIGATION_PANEL,
             this.RECORDING_PANEL,
-            this.ROBOT_SWITCH_PANEL
+            this.ROBOT_SWITCH_PANEL,
+            this.CONTROLLER_SWITCH_PANEL,
+            this.REFRESH_PANEL,
         )
     }
 
@@ -173,7 +203,9 @@ export class UiControl {
             this.TEXT_PANEL,
             this.NAVIGATION_PANEL,
             this.RECORDING_PANEL,
-            this.ROBOT_SWITCH_PANEL
+            this.ROBOT_SWITCH_PANEL,
+            this.CONTROLLER_SWITCH_PANEL,
+            this.REFRESH_PANEL,
         )
     }
 

@@ -23,26 +23,12 @@ import TeleportVR from 'teleportvr';
 
 export async function relaxedikDemo() {
 
-    let scene, camera, renderer, camControls, target_cursor;
-
-    // Load robot
-    
-    // const manager = new T.LoadingManager();
-    // const loader = new URDFLoader(manager);
-
-    let init_scene = initScene();
-    scene = init_scene[0];
-    camera = init_scene[1];
-    renderer = init_scene[2];
-    camControls = init_scene[3];
-    camera.position.set(2, 2, 2);
-    camera.lookAt(0, 1, 0);
+    const [scene, camera, renderer, camControls] = initScene();
 
     window.robot = {};
     let jointSliders = [];
 
     const dataControl = new DataControl();
-    // await dataControl.init()
     window.dataControl = dataControl;
 
     const teleportVR = new TeleportVR(scene, camera);
@@ -59,37 +45,6 @@ export async function relaxedikDemo() {
     getURDFFromURL("https://raw.githubusercontent.com/yepw/robot_configs/master/ur5_description/urdf/ur5_gripper.urdf", (blob) => {
         window.ur5RobotFile = URL.createObjectURL(blob)
     });
-
-    // const loader = new GLTFLoader();
-
-    // loader.load('./models/table/scene.gltf', (gltf) => {
-    //     const table = gltf.scene;
-    //     scene.add(table);
-    //     table.rotation.y = -Math.PI / 2;
-    //     table.position.x = 1;
-    //     table.scale.set(.011, .011, .011);
-    //     table.traverse(child => {
-    //         child.castShadow = true;
-    //     });
-    // })
-
-    // getURDFFromURL("./models/Tables_and_Knobs/urdf/tables_and_knobs_scene.urdf", (blob) => {
-    //     loadScene(URL.createObjectURL(blob))
-    // });
-
-    // getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_dynamic/urdf/kitchen_dynamic.urdf", (blob) => {
-    //     loadKitchenDynamic(URL.createObjectURL(blob))
-    // });
-
-    // // refridgerator, props (plates, microwave, bowls, etc.)
-    // getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_standard/urdf/Kitchen_standard.urdf", (blob) => {
-    //     loadKitchenStandard(URL.createObjectURL(blob))
-    // });
-
-    // // kitchen 
-    // getURDFFromURL("https://raw.githubusercontent.com/wycongwisc/robot-files/master/Kitchen_updated/Kitchen_static/urdf/Kitchen_static.urdf", (blob) => {
-    //     loadKitchenStatic(URL.createObjectURL(blob))
-    // });
 
     createText("How to control:", "inputs", "h3");
 
@@ -239,7 +194,7 @@ export async function relaxedikDemo() {
 
     const geometry = new T.SphereGeometry( 0.015, 32, 32 );
     const material = new T.MeshBasicMaterial( {color: 0xffff00} );
-    target_cursor = new T.Mesh( geometry, material );
+    const target_cursor = new T.Mesh( geometry, material );
     scene.add( target_cursor );
 
     window.loadRobot = (robotFile) => {
@@ -253,7 +208,6 @@ export async function relaxedikDemo() {
             window.robot.rotation.x = -Math.PI / 2;
             window.robot.position.y = 0.02;
             window.robot.position.x = .25;
-            window.robot.scale.set(1.15, 1.15, 1.15);
             window.robot.traverse(c => {
                 c.castShadow = true;
                 if (c.material) {
@@ -277,66 +231,6 @@ export async function relaxedikDemo() {
             });
         }
     }
-
-    // const loadScene = (urdfScene) => {
-    //     const manager = new T.LoadingManager();
-    //     const loader = new URDFLoader(manager);
-    //     loader.load(urdfScene, result => {
-    //         window.urdfScene = result;
-    //     });
-    //     manager.onLoad = () => {
-    //         scene.add(window.urdfScene);
-    //         window.urdfScene.rotation.x = -Math.PI / 2;
-    //         window.urdfScene.scale.x = 0.7;
-    //         window.urdfScene.scale.y = 0.7;
-    //         window.urdfScene.scale.z = 0.7;
-    //     }
-    // }
-
-    // let kitchenTransformation = (kitchen) => {
-    //     kitchen.rotation.x = -Math.PI / 2;
-    //     kitchen.rotation.z = Math.PI;
-    //     kitchen.position.x = -0.5
-    //     kitchen.position.z = -0.7
-    // }
-
-    // let loadKitchenStatic = (kitchenFile) => {
-    //     const manager = new T.LoadingManager();
-    //     const loader = new URDFLoader(manager);
-    //     loader.load(kitchenFile, result => {
-    //         window.kitchenStatic = result;
-    //     });
-    //     manager.onLoad = () => {
-    //         scene.add(window.kitchenStatic);
-    //         kitchenTransformation(window.kitchenStatic)
-    //     }
-    // }
-
-    // let loadKitchenStandard = (kitchenFile) => {
-    //     const manager = new T.LoadingManager();
-    //     const loader = new URDFLoader(manager);
-    //     loader.load(kitchenFile, result => {
-    //         window.kitchenStandard = result;
-    //     });
-    //     manager.onLoad = () => {
-    //         scene.add(window.kitchenStandard);
-    //         kitchenTransformation(window.kitchenStandard)
-    //         window.kitchenStandard.position.y = 0.92
-    //     }
-    // }
-
-    // let loadKitchenDynamic = (kitchenFile) => {
-    //     const manager = new T.LoadingManager();
-    //     const loader = new URDFLoader(manager);
-    //     loader.load(kitchenFile, result => {
-    //         window.kitchenDynamic = result;
-    //     });
-    //     manager.onLoad = () => {
-    //         scene.add(window.kitchenDynamic);
-    //         kitchenTransformation(window.kitchenDynamic)
-    //     }
-
-    // }
 
     async function load_config() {
         console.log("loading robot config");
@@ -374,16 +268,6 @@ export async function relaxedikDemo() {
             scene,
         })
 
-        const taskControl = new TaskControl({ 
-            scene, 
-            camera,
-            uiControl,
-            gripper, 
-            dataControl
-        });
-
-        window.taskControl = taskControl;
-
         const mouseControl = new MouseControl({
             relaxedIK,
             jointSliders,
@@ -392,8 +276,8 @@ export async function relaxedikDemo() {
             controlMapping
         });
 
-
         const vrControl = new VrControl({
+            camera,
             renderer,
             scene,
             relaxedIK,
@@ -401,12 +285,23 @@ export async function relaxedikDemo() {
             target_cursor,
             controlMapping,
             uiControl,
-            teleportVR,
+            teleportVR
         })
+
+        const taskControl = new TaskControl({ 
+            scene, 
+            camera,
+            uiControl,
+            gripper, 
+            dataControl,
+            vrControl,
+            target_cursor
+        });
 
         let data = [];
         setInterval( function(){ 
             const curr_ee_abs_three = getCurrEEpose();
+            const timestamp = Date.now();
 
             let update;
             if (renderer.xr.isPresenting) {
@@ -420,20 +315,22 @@ export async function relaxedikDemo() {
                 let m3 = new T.Matrix3().setFromMatrix4(m4);
                 controlMapping.updateEEPose(m3);
             } 
-            taskControl.update(curr_ee_abs_three)
 
-            let row = [];
-            row.push(new Date());
-            for (const joint of ["head_pan", "right_j0", "right_j1", "right_j1_2", "right_j2", "right_j2_2", "right_j3", "right_j4", "right_j4_2", "right_j5", "right_j6"]) {
-                let currJoint = window.robot.joints[joint];
+            taskControl.update(curr_ee_abs_three, timestamp);
+
+            const row = [timestamp, window.currentRobot, vrControl.state.state];
+            for (const joint of ["right_j0", "right_j1", "right_j2", "right_j3", "right_j4", "right_j5", "right_j6"]) {
+                const currJoint = window.robot.joints[joint];
                 // row.push(currJoint.position.x + ' ' + currJoint.position.y + ' ' + currJoint.position.z + ', ' + currJoint.quaternion.x + ' ' + currJoint.quaternion.y + ' ' + currJoint.quaternion.z + ' ' + currJoint.quaternion.w);
                 row.push(currJoint.jointValue[0])
             }
-            data.push(row)
+            data.push(row);
 
             // POST request every 500 * 5 = 2500 ms
             if (data.length === 500) {
-                dataControl.post(data);
+                dataControl.post(data, {
+                    type: 'robot'
+                });
                 data = [];
             }
         }, 5);

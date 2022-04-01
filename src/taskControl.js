@@ -2,14 +2,17 @@ import PickAndPlace from "./tasks/PickAndPlace"
 import PoseMatch from './tasks/PoseMatch'
 import StateMachine from "javascript-state-machine"
 import * as T from 'three'
-import ThreeMeshUI from 'three-mesh-ui'
+import UI from 'three-mesh-ui'
 
 export class TaskControl {
     constructor(params) {
         this.scene = params.scene
         this.camera = params.camera;
         this.gripper = params.gripper
+
+        this.vrControl = params.vrControl;
         this.dataControl = params.dataControl;
+        this.target_cursor = params.target_cursor;
 
         this.setState = this.setState.bind(this);
 
@@ -19,26 +22,21 @@ export class TaskControl {
             init: 'IDLE',
             transitions: [
                 { name: 'start', from: 'IDLE', to: '1'},
-                { name: 'next', from: ['1', '2'], to: function() {
-                    return this.state === '2' ? 'IDLE' : `${Number(this.state) + 1}`
+                { name: 'next', from: ['1', '2', '3', '4'], to: function() {
+                    return this.state === '4' ? 'IDLE' : `${Number(this.state) + 1}`
                 }},
-                { name: 'previous', from: ['1', '2'], to: function() {
+                { name: 'previous', from: ['1', '2', '3', '4'], to: function() {
                     return this.state === '1' ? 'IDLE' : `${Number(this.state) - 1}`
                 }},
-                { name: 'stop', from: ['1', '2'], to: 'IDLE'},
+                { name: 'stop', from: ['1', '2', '3', '4'], to: 'IDLE'},
             ],
             methods: {
-                onBeforeTransition: function () { 
-                    that.task?.destruct()
-                },
-                onAfterTransition: function() {
+                onTransition: function(state) {
+                    that.task?.destruct();
                     that.uiControl.reset();
-                    that.setState(this.state);
+                    that.vrControl.reset();
+                    that.setState(state.to);
                 }
-                // onStop: that.setTask['NONE'],
-                // onStart: that.setTask['TASK_1'],
-                // onNext: that.setTask['TASK_2'],
-                // onPrevious: that.setTask['TASK_1']
             }
         })
 
@@ -50,40 +48,32 @@ export class TaskControl {
             case 'IDLE':
                 this.task = undefined;
                 this.uiControl.addText(this.uiControl.TEXT_PANEL, [
-                    new ThreeMeshUI.Text({ content: 'No task', fontSize: 0.1 }),
+                    new UI.Text({ fontSize: 0.1, content: 'No task' }),
                 ]),
                 this.uiControl.addButtons(
                     this.uiControl.NAVIGATION_PANEL,
-                    [{ name: 'Restart', onClick: () => { this.state.start() } }]
+                    [
+                        { name: 'Restart', onClick: () => this.state.start() }
+                    ]
                 )
                 break;
             case '1': 
-                this.task = new PoseMatch({ scene: this.scene, gripper: this.gripper });
-                this.task.state.start(); 
-                this.startTime = Date.now();
+                this.task = new PoseMatch({ 
+                    scene: this.scene, 
+                    gripper: this.gripper, 
+                    disabledControlModes: ['DRAG_CONTROL'], 
+                    taskControl: this, 
+                    dataControl: this.dataControl,
+                    target_cursor: this.target_cursor
+                });
                 this.uiControl.addText(
                     this.uiControl.TEXT_PANEL, 
                     [
-                        new ThreeMeshUI.Text( {
-                            fontSize: 0.075,
-                            content: `Introduction to Mimicry Control:`
-                        }),
-                        new ThreeMeshUI.Text( {
-                            fontSize: 0.1,
-                            content: `
-                            Remote Control`,
-                        }),
-                        new ThreeMeshUI.Text( {
-                            fontSize: 0.05,
-                            content: `
-
-                                Squeeze the trigger to activate and deactivate remote control. 
-                                
-                                Pressing the grip button will make the robot return to its original position.
-
-                                Complete the task by moving the end effector to the indicator.
-
-                            `,
+                        new UI.Text({ fontSize: 0.075, content: `Introduction to Remote Control:` }),
+                        new UI.Text({ fontSize: 0.1, content: `\nPose Matching\n` }),
+                        new UI.Text({ fontSize: 0.05, content: `\nSqueeze the trigger to activate and deactivate remote control.             
+                            \nPressing the grip button will make the robot return to its original position.
+                            \nComplete the task by moving the end effector to the indicator.\n\n`,
                         })
                     ]
                 )
@@ -91,42 +81,26 @@ export class TaskControl {
                 this.uiControl.addButtons(
                     this.uiControl.NAVIGATION_PANEL,
                     [
-                        {
-                            name: 'Next',
-                            onClick: () => {
-                                this.state.next();
-                            }
-                        }
+                        { name: 'Next', onClick: () => this.state.next() },
                     ]
                 )
                 break;
             case '2':
-                this.task = new PickAndPlace({ scene: this.scene });
-                this.task.state.start();
-                this.startTime = Date.now();
+                this.task = new PickAndPlace({
+                    scene: this.scene, 
+                    disabledControlModes: ['DRAG_CONTROL'], 
+                    taskControl: this, 
+                    dataControl: this.dataControl,
+                    target_cursor: this.target_cursor
+                });
                 this.uiControl.addText(
                     this.uiControl.TEXT_PANEL,
                     [
-                        new ThreeMeshUI.Text( {
-                            fontSize: 0.075,
-                            content: `Introduction to Mimicry Control:`
-                        }),
-                        new ThreeMeshUI.Text( {
-                            fontSize: 0.1,
-                            content: `
-                            Drag Control`,
-                        }),
-                        new ThreeMeshUI.Text( {
-                            fontSize: 0.05,
-                            content: `
-
-                                Move your controller to the robot\'s end effector to activate drag control. Squeeze the trigger while drag control is active to exit drag control.
-                                
-                                Pressing the grip button will make the robot return to its original position.
-
-                                Complete the task by picking up the block with the robot and placing it inside the red circle.
-
-                            `,
+                        new UI.Text({ fontSize: 0.075, content: `Introduction to Remote Control:` }),
+                        new UI.Text({ fontSize: 0.1, content: `\nPick and Place\n` }),
+                        new UI.Text({ fontSize: 0.05, content: `\nSqueeze the trigger to activate and deactivate remote control.             
+                            \nPressing the grip button will make the robot return to its original position.
+                            \nComplete the task by moving the end effector to the indicator.\n\n`,
                         })
                     ]
                 )
@@ -134,18 +108,65 @@ export class TaskControl {
                 this.uiControl.addButtons(
                     this.uiControl.NAVIGATION_PANEL,
                     [
-                        {
-                            name: 'Next',
-                            onClick: () => {
-                                this.state.stop();
-                            }
-                        },
-                        {
-                            name: 'Previous',
-                            onClick: () => {
-                                this.state.previous();
-                            }
-                        }
+                        { name: 'Next', onClick: () => this.state.next() },
+                        { name: 'Previous', onClick: () => this.state.previous() }
+                    ]
+                )
+                break;
+            case '3': 
+                this.task = new PoseMatch({ 
+                    scene: this.scene, 
+                    gripper: this.gripper, 
+                    disabledControlModes: ['REMOTE_CONTROL'], 
+                    taskControl: this, 
+                    dataControl: this.dataControl,
+                    target_cursor: this.target_cursor
+                });
+                this.uiControl.addText(
+                    this.uiControl.TEXT_PANEL, 
+                    [
+                        new UI.Text({ fontSize: 0.075, content: `Introduction to Drag Control:` }),
+                        new UI.Text({ fontSize: 0.1, content: `\nPose Matching\n` }),
+                        new UI.Text({ fontSize: 0.05, content: `\nMove your controller to the robot\'s end effector to activate drag control. Squeeze the trigger while drag control is active to exit drag control.
+                            \nPressing the grip button will make the robot return to its original position.
+                            \nComplete the task by picking up the block with the robot and placing it inside the red circle.\n\n`,
+                        })
+                    ]
+                )
+                this.counter = this.uiControl.addTaskCounter(this.uiControl.TEXT_PANEL, this.task);
+                this.uiControl.addButtons(
+                    this.uiControl.NAVIGATION_PANEL,
+                    [
+                        { name: 'Next', onClick: () => this.state.next() },
+                        { name: 'Previous', onClick: () => this.state.previous() }
+                    ]
+                )
+                break;
+            case '4':
+                this.task = new PickAndPlace({ 
+                    scene: this.scene, 
+                    disabledControlModes: ['REMOTE_CONTROL'], 
+                    taskControl: this, 
+                    dataControl: this.dataControl,
+                    target_cursor: this.target_cursor 
+                });
+                this.uiControl.addText(
+                    this.uiControl.TEXT_PANEL,
+                    [
+                        new UI.Text({ fontSize: 0.075, content: `Introduction to Drag Control:` }),
+                        new UI.Text({ fontSize: 0.1, content: `\nPick and Place\n` }),
+                        new UI.Text({ fontSize: 0.05, content: `\nMove your controller to the robot\'s end effector to activate drag control. Squeeze the trigger while drag control is active to exit drag control.
+                            \nPressing the grip button will make the robot return to its original position.
+                            \nComplete the task by picking up the block with the robot and placing it inside the red circle.\n\n`,
+                        })
+                    ]
+                )
+                this.counter = this.uiControl.addTaskCounter(this.uiControl.TEXT_PANEL, this.task);
+                this.uiControl.addButtons(
+                    this.uiControl.NAVIGATION_PANEL,
+                    [
+                        { name: 'Next', onClick: () => this.state.next() },
+                        { name: 'Previous', onClick: () => this.state.previous() }
                     ]
                 )
                 break;
@@ -154,23 +175,28 @@ export class TaskControl {
         }
     }
 
-    finishRound() {
+    /**
+     * 
+     * @param {Object} data information about the round that just completed
+     */
+    finishRound(data) {
         this.dataControl.post([[
-            this.task.NAME, (Date.now() - this.startTime)
+            data.endTime, this.task.id, this.task.name, data.startTime
         ]], { type: 'task' })
 
+        // go to the next round
         this.task.state.next();
 
         if (!this.task.state.is('IDLE')) {
             this.counter.set({ content: `Task: ${this.task.state.state} / ${this.task.state.NUM_ROUNDS}`,})
-            this.startTime = Date.now();
         } else {
+            // go to the next task
             this.state.next();
         }
     }
 
     // this is called in relaxedikDemo.js about every 5 ms
-    update(ee_pose) {
-        if (!this.state.is('IDLE')) this.task.update(ee_pose);
+    update(ee_pose, timestamp) {
+        if (!this.state.is('IDLE')) this.task.update(ee_pose, timestamp);
     }
 }

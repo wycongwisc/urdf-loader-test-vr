@@ -7,10 +7,10 @@ import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerM
 // import { degToRad, getCurrEEpose, mathjsMatToThreejsVector3 } from './utils';
 import { rotQuaternion, getCurrEEpose, changeReferenceFrame, relToAbs, absToRel, threejsVector3ToMathjsMat } from './utils';
 import StateMachine from 'javascript-state-machine';
-import { isZero } from 'mathjs';
+import { OculusHandModel } from 'three/examples/jsm/webxr/OculusHandModel.js';
+import { OculusHandPointerModel } from 'three/examples/jsm/webxr/OculusHandPointerModel.js';
+import { XRHandModelFactory } from 'three/examples/jsm/webxr/XRHandModelFactory.js';
 import { Vector3 } from 'three';
-import TeleportVR from 'teleportvr'
-import { update } from 'three-mesh-ui';
 
 
 export class VrControl {
@@ -18,6 +18,7 @@ export class VrControl {
 
         this.relaxedIK = params.relaxedIK;
         this.renderer = params.renderer;
+        this.camera = params.camera;
         this.scene = params.scene;
         this.teleportVR = params.teleportVR;
         this.intervalID = undefined;
@@ -50,36 +51,83 @@ export class VrControl {
 
         this.EE_OFFSET_INDICATOR = undefined;
 
-        this.workspaceCenter = [
-            window.robot.position.x - .2, 
-            window.robot.position.y + 1.35, 
-            window.robot.position.z
-        ]
-        this.workspaceRadius = 1.2
-        this.workspaceIndicator = new T.Mesh( 
-            new T.SphereGeometry( this.workspaceRadius, 32, 32 ), 
-            new T.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.2 })
-        );
-        this.workspaceIndicator.position.set(...this.workspaceCenter);
+        // this.workspaceCenter = [
+        //     window.robot.position.x - .2, 
+        //     window.robot.position.y + 1.35, 
+        //     window.robot.position.z
+        // ]
+        // this.workspaceRadius = 1.2
+        // this.workspaceIndicator = new T.Mesh( 
+        //     new T.SphereGeometry( this.workspaceRadius, 32, 32 ), 
+        //     new T.MeshBasicMaterial({ color: 0xFF0000, wireframe: true })
+        // );
+        // this.workspaceIndicator.position.set(...this.workspaceCenter);
+        // this.scene.add(this.workspaceIndicator);
 
         // controller
 
-        this.controller = this.renderer.xr.getController(0); 
-        this.controllerGrip = this.renderer.xr.getControllerGrip(0);
-        const controllerModelFactory = new XRControllerModelFactory()
-        this.model = controllerModelFactory.createControllerModel(this.controllerGrip);
-        this.controllerGrip.add(this.model);
-        this.scene.add( this.controllerGrip );
+        const controllerModelFactory = new XRControllerModelFactory();
+
+        // controller 1
+
+        const handModelFactory = new XRHandModelFactory();
+
+        this.controller1 = this.renderer.xr.getController(0); 
+        this.scene.add(this.controller1);
+
+        this.controller1Grip = this.renderer.xr.getControllerGrip(0);
+        this.controller1Grip.add(controllerModelFactory.createControllerModel(this.controller1Grip));    
+        this.scene.add(this.controller1Grip);
+
+        this.controller1Grip.addEventListener('connected', e => {
+            this.teleportVR.add(0, this.controller1Grip, this.controller1, e.data.gamepad);
+            this.teleportVR.setControlState(this.state);
+        });
+
+        // this.hand1 = this.renderer.xr.getHand(0);
+        // this.hand1.add(handModelFactory.createHandModel(this.hand1));
+        // this.scene.add(this.hand1);
+
+        // this.hand1 = this.renderer.xr.getHand(0);
+        // this.hand1.add(new OculusHandModel(this.hand1));
+        // this.handPointer1 = new OculusHandPointerModel(this.hand1, this.controller1);
+        // this.hand1.add(this.handPointer1);
+
+        // this.scene.add(this.hand1);
+
+        // controller 2
+
+        this.controller2 = this.renderer.xr.getController(1); 
+        this.scene.add(this.controller2);
+
+        this.controller2Grip = this.renderer.xr.getControllerGrip(1);
+        this.controller2Grip.add(controllerModelFactory.createControllerModel(this.controller2Grip));    
+        this.scene.add(this.controller2Grip);
+
+        this.controller2Grip.addEventListener('connected', e => {
+            this.teleportVR.add(1, this.controller2Grip, this.controller2, e.data.gamepad);
+            this.left = (e.data.handedness) === 'left' ? 2 : 1;
+        });
+
+        //
+
+        this.teleportVR.setControlState(this.state);
+        this.renderer.xr.addEventListener('sessionstart', () => {
+            this.teleportVR.set(-1.5, 0, 1.5);
+        })
+
+        this.controller = this.controller1;
+        this.controllerGrip = this.controller1Grip;
 
         this.select = this.select.bind(this);
         this.squeeze = this.squeeze.bind(this);
 
-        this.controller.addEventListener('select', this.select.bind(this));
-        this.controller.addEventListener('squeeze', this.squeeze.bind(this))
+        this.controller.addEventListener('select', this.select);
+        this.controller.addEventListener('squeeze', this.squeeze);
 
-        this.controllerGrip.addEventListener('connected', e => {
-            this.teleportVR.add(0, this.controllerGrip, this.controller, e.data.gamepad)
-        })
+        // this.controllerGrip.addEventListener('connected', e => {
+        //     this.teleportVR.add(0, this.controllerGrip, this.controller, e.data.gamepad, this.state);
+        // })
 
         const that = this;
 
@@ -120,6 +168,9 @@ export class VrControl {
                     that.scene.add(that.EE_OFFSET_INDICATOR);
                     that.scene.add(that.target_cursor);
                 },
+                onTransition: function(state) {
+                    if (window.task?.disabledControlModes.includes(state.to)) return false;
+                }
                 
             }
         })
@@ -140,6 +191,38 @@ export class VrControl {
         
         this.raycaster = new T.Raycaster();
         this.ray = new T.ArrowHelper(new T.Vector3(0, 0, 1), new T.Vector3(0, 0, 0), 300, 0xFFFFFF, 1, 1);
+
+        this.uiControl.addButtons(
+            this.uiControl.CONTROLLER_SWITCH_PANEL,
+            [
+                {
+                    name: 'Left Hand',
+                    onClick: () => {
+                        this.controller.removeEventListener('select', this.select);
+                        this.controller.removeEventListener('squeeze', this.squeeze);
+
+                        this.controller = this.left === 1 ? this.controller1 : this.controller2;
+                        this.controllerGrip = this.left === 1 ? this.controller1Grip : this.controller2Grip;
+
+                        this.controller.addEventListener('select', this.select);
+                        this.controller.addEventListener('squeeze', this.squeeze);
+                    }
+                },
+                {
+                    name: 'Right Hand',
+                    onClick: () => {
+                        this.controller.removeEventListener('select', this.select);
+                        this.controller.removeEventListener('squeeze', this.squeeze);
+
+                        this.controller = this.left === 2 ? this.controller1 : this.controller2;
+                        this.controllerGrip = this.left === 2 ? this.controller1Grip : this.controller2Grip;
+
+                        this.controller.addEventListener('select', this.select);
+                        this.controller.addEventListener('squeeze', this.squeeze);
+                    }
+                },
+            ]
+        )
 
         this.uiControl.addButtons(
             this.uiControl.ROBOT_SWITCH_PANEL,
@@ -168,6 +251,18 @@ export class VrControl {
                         }
                     }
                 },
+            ]
+        )
+
+        this.uiControl.addButtons(
+            this.uiControl.REFRESH_PANEL,
+            [
+                {
+                    name: 'Refresh',
+                    onClick: () => {
+                        window.location.reload();
+                    }
+                }
             ]
         )
 
@@ -259,9 +354,10 @@ export class VrControl {
         };
     }
 
-    update() {
 
-        const curr_ee_abs_three  = getCurrEEpose();
+    // this method needs to be cleaned up a bit
+    update() {
+        const curr_ee_abs_three = getCurrEEpose();
         const ctrlPose = this.getControllerPose();
         const prevCtrlPose = this.prevCtrlPose;
         this.prevCtrlPose = ctrlPose;
@@ -296,14 +392,13 @@ export class VrControl {
             return true;
         }
 
-
-        if (curr_ee_abs_three.posi.distanceTo(new T.Vector3(...this.workspaceCenter)) > this.workspaceRadius
-            && this.workspaceIndicator.parent !== this.scene) {
-            this.scene.add(this.workspaceIndicator);
-        } else if (curr_ee_abs_three.posi.distanceTo(new T.Vector3(...this.workspaceCenter)) < this.workspaceRadius
-            && this.workspaceIndicator.parent === this.scene) {
-            this.scene.remove(this.workspaceIndicator);
-        }
+        // if (curr_ee_abs_three.posi.distanceTo(new T.Vector3(...this.workspaceCenter)) > this.workspaceRadius
+        //     && this.workspaceIndicator.parent !== this.scene) {
+        //     this.scene.add(this.workspaceIndicator);
+        // } else if (curr_ee_abs_three.posi.distanceTo(new T.Vector3(...this.workspaceCenter)) < this.workspaceRadius
+        //     && this.workspaceIndicator.parent === this.scene) {
+        //     this.scene.remove(this.workspaceIndicator);
+        // }
 
         const init_ee_abs_three = this.init_ee_abs_three;
 
@@ -343,7 +438,9 @@ export class VrControl {
 
         this.target_cursor.position.copy( ee_goal_abs_three.posi );
         this.target_cursor.quaternion.copy( ee_goal_abs_three.ori );
-        this.target_cursor.translateZ(.1);
+
+        if (!this.state.is('DRAG_CONTROL')) this.target_cursor.translateZ(.075);
+
         this.target_cursor.matrixWorldNeedsUpdate = true;
 
         if (!this.state.is('IDLE')) {
@@ -395,12 +492,14 @@ export class VrControl {
     updateEEOffsetIndicator(start, end) {
         this.scene.remove(this.EE_OFFSET_INDICATOR);
 
+        const length = start.distanceTo(end);
+
         let color; 
-        if (start.distanceTo(end) < 0.1) {
+        if (length < 0.1) {
             color = 0xffffff;
-        } else if (start.distanceTo(end) < .2) {
+        } else if (length < 0.2) {
             color = 0xffcc00
-        } else if (start.distanceTo(end) < .3) {
+        } else if (length < 0.3) {
             color = 0xff0000;
         } else {
             this.scene.remove(this.EE_OFFSET_INDICATOR);
@@ -408,12 +507,10 @@ export class VrControl {
             return;
         }
 
-        this.EE_OFFSET_INDICATOR = new T.Line(new T.BufferGeometry().setFromPoints([
-            start,
-            end
-        ]), new T.LineBasicMaterial({
-            color,
-        }))
+        this.EE_OFFSET_INDICATOR = new T.Line(
+            new T.BufferGeometry().setFromPoints([start, end]), 
+            new T.LineBasicMaterial({ transparent: true, opacity: 0.25, color })
+        )
 
         this.scene.add(this.EE_OFFSET_INDICATOR);
     }
