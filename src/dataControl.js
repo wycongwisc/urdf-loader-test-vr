@@ -2,7 +2,7 @@ import { v4 as id } from 'uuid'
 
 export class DataControl {
     constructor(params) {
-        this.SCRIPT_PATH = "https://script.google.com/macros/s/AKfycbxmjy-ujCM6TRiPAmXTwtpDxs3M4V30DN_ZuLCHxh-h-ZMENiWVMKmsj7vO8mbxDAjJ/exec"
+        this.SCRIPT_PATH = "https://script.google.com/macros/s/AKfycbzRreCDuXeCZunD7SPcxixA9vpid86hBRC2-CEbD12NP2ljSs9zmQ9CNr6qWjjdRtNH/exec";
         this.SESSION_ID = id();
 
         this.post([[new Date(), navigator.platform]], { type: 'session' })

@@ -81,21 +81,7 @@ export class VrControl {
 
         this.controller1Grip.addEventListener('connected', e => {
             this.teleportVR.add(0, this.controller1Grip, this.controller1, e.data.gamepad);
-            this.teleportVR.setControlState(this.state);
         });
-
-        // this.hand1 = this.renderer.xr.getHand(0);
-        // this.hand1.add(handModelFactory.createHandModel(this.hand1));
-        // this.scene.add(this.hand1);
-
-        // this.hand1 = this.renderer.xr.getHand(0);
-        // this.hand1.add(new OculusHandModel(this.hand1));
-        // this.handPointer1 = new OculusHandPointerModel(this.hand1, this.controller1);
-        // this.hand1.add(this.handPointer1);
-
-        // this.scene.add(this.hand1);
-
-        // controller 2
 
         this.controller2 = this.renderer.xr.getController(1); 
         this.scene.add(this.controller2);
@@ -148,16 +134,29 @@ export class VrControl {
             },
             methods: {
                 onActivateDragControl: function() {
+                    console.log('here');
                     that.scene.remove(that.ray);
+                    that.controllerGrip.traverse((child) => {
+                        if (child instanceof T.Mesh) {
+                            child.visible = false;
+                        }
+                    })
                 },
                 onActivateRemoteControl: function() {
                     that.scene.remove(that.ray);
                 },
                 onDeactivateDragControl: function() {
                     that.scene.add(that.ray);
+                    that.controllerGrip.traverse((child) => {
+                        if (child instanceof T.Mesh) {
+                            child.visible = true;
+                        }
+                    })
+                    that.target_cursor.material.color.setHex(0xFFFFFF);
                 },
                 onDeactivateRemoteControl: function() {
                     that.scene.add(that.ray);
+                    that.target_cursor.material.color.setHex(0xFFFFFF);
                 },
                 onActivatePlayback: function() {
                     that.playbackData = JSON.parse(localStorage.getItem('recordData'));
@@ -200,10 +199,8 @@ export class VrControl {
                     onClick: () => {
                         this.controller.removeEventListener('select', this.select);
                         this.controller.removeEventListener('squeeze', this.squeeze);
-
                         this.controller = this.left === 1 ? this.controller1 : this.controller2;
                         this.controllerGrip = this.left === 1 ? this.controller1Grip : this.controller2Grip;
-
                         this.controller.addEventListener('select', this.select);
                         this.controller.addEventListener('squeeze', this.squeeze);
                     }
@@ -213,10 +210,8 @@ export class VrControl {
                     onClick: () => {
                         this.controller.removeEventListener('select', this.select);
                         this.controller.removeEventListener('squeeze', this.squeeze);
-
                         this.controller = this.left === 2 ? this.controller1 : this.controller2;
                         this.controllerGrip = this.left === 2 ? this.controller1Grip : this.controller2Grip;
-
                         this.controller.addEventListener('select', this.select);
                         this.controller.addEventListener('squeeze', this.squeeze);
                     }
@@ -296,7 +291,6 @@ export class VrControl {
                         } else if (this.state.is('PLAYBACK')) {
                             console.log('PAUSE')
                             this.state.deactivatePlayback();
-        
                         }
                     }
                 }
@@ -439,7 +433,7 @@ export class VrControl {
         this.target_cursor.position.copy( ee_goal_abs_three.posi );
         this.target_cursor.quaternion.copy( ee_goal_abs_three.ori );
 
-        if (!this.state.is('DRAG_CONTROL')) this.target_cursor.translateZ(.075);
+        // if (!this.state.is('DRAG_CONTROL')) this.target_cursor.translateZ(.075);
 
         this.target_cursor.matrixWorldNeedsUpdate = true;
 
@@ -496,21 +490,29 @@ export class VrControl {
 
         let color; 
         if (length < 0.1) {
-            color = 0xffffff;
+            color = 0x00FF00;
         } else if (length < 0.2) {
             color = 0xffcc00
         } else if (length < 0.3) {
             color = 0xff0000;
         } else {
+            switch(this.state.state) {
+                case 'DRAG_CONTROL':
+                    this.state.deactivateDragControl();
+                    break;
+                case 'REMOTE_CONTROL':
+                    this.state.deactivateRemoteControl();
+                    break;
+            }
             this.scene.remove(this.EE_OFFSET_INDICATOR);
-            this.state.goto('IDLE');
             return;
         }
 
         this.EE_OFFSET_INDICATOR = new T.Line(
             new T.BufferGeometry().setFromPoints([start, end]), 
-            new T.LineBasicMaterial({ transparent: true, opacity: 0.25, color })
+            new T.LineBasicMaterial({ transparent: true, opacity: 1, color })
         )
+        this.target_cursor.material.color.setHex(color);
 
         this.scene.add(this.EE_OFFSET_INDICATOR);
     }

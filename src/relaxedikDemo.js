@@ -46,6 +46,19 @@ export async function relaxedikDemo() {
         window.ur5RobotFile = URL.createObjectURL(blob)
     });
 
+    // getURDFFromURL("./models/Tables_and_Knobs/urdf/tables_and_knobs_scene.urdf", (blob) => {
+    //     loadScene(URL.createObjectURL(blob))
+    // });
+
+    const loadingManager = new T.LoadingManager(() => {
+        console.log('fade')
+        const loadingScreen = document.querySelector('#loading-screen');
+        loadingScreen.classList.add('fade-out');
+        loadingScreen.addEventListener( 'transitionend', (event) => {
+            event.target.remove();
+        });
+    })
+
     createText("How to control:", "inputs", "h3");
 
     createText("1. Click the red dot below.", "inputs", "p");
@@ -193,17 +206,18 @@ export async function relaxedikDemo() {
     onCamMove();
 
     const geometry = new T.SphereGeometry( 0.015, 32, 32 );
-    const material = new T.MeshBasicMaterial( {color: 0xffff00} );
+    const material = new T.MeshBasicMaterial( {color: 0xFFFFFF} );
     const target_cursor = new T.Mesh( geometry, material );
+    target_cursor.renderOrder = Infinity;
+    target_cursor.material.depthTest = false;
+    target_cursor.material.depthWrite = false;
+    //target_cursor.onBeforeRender = function (renderer) { renderer.clearDepth(); }
     scene.add( target_cursor );
 
     window.loadRobot = (robotFile) => {
-        const manager = new T.LoadingManager();
-        const loader = new URDFLoader(manager);
+        const loader = new URDFLoader(loadingManager);
         loader.load(robotFile, result => {
             window.robot = result;
-        });
-        manager.onLoad = () => {
             scene.add(window.robot);
             window.robot.rotation.x = -Math.PI / 2;
             window.robot.position.y = 0.02;
@@ -229,8 +243,23 @@ export async function relaxedikDemo() {
             init().then( () => {
                 load_config();
             });
-        }
+        });
     }
+
+    // const loadScene = (urdfScene) => {
+    //     const manager = new T.LoadingManager();
+    //     const loader = new URDFLoader(manager);
+    //     loader.load(urdfScene, result => {
+    //         window.urdfScene = result;
+    //     });
+    //     manager.onLoad = () => {
+    //         scene.add(window.urdfScene);
+    //         window.urdfScene.rotation.x = -Math.PI / 2;
+    //         window.urdfScene.scale.x = 0.61;
+    //         window.urdfScene.scale.y = 0.61;
+    //         window.urdfScene.scale.z = 0.61;
+    //     }
+    // }
 
     async function load_config() {
         console.log("loading robot config");
@@ -299,9 +328,11 @@ export async function relaxedikDemo() {
         });
 
         let data = [];
+
         setInterval( function(){ 
+            // onsole.log(Date.now());
+
             const curr_ee_abs_three = getCurrEEpose();
-            const timestamp = Date.now();
 
             let update;
             if (renderer.xr.isPresenting) {
@@ -316,6 +347,7 @@ export async function relaxedikDemo() {
                 controlMapping.updateEEPose(m3);
             } 
 
+            const timestamp = Date.now();
             taskControl.update(curr_ee_abs_three, timestamp);
 
             const row = [timestamp, window.currentRobot, vrControl.state.state];
