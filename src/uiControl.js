@@ -1,4 +1,4 @@
-import ThreeMeshUI from 'three-mesh-ui'
+import UI from 'three-mesh-ui'
 import * as T from 'three'
 import { ZeroSlopeEnding } from 'three';
 import { sackurTetrodeDependencies } from 'mathjs';
@@ -7,11 +7,6 @@ import { sackurTetrodeDependencies } from 'mathjs';
 export class UiControl {
     constructor(params) {
         this.scene = params.scene;
-
-        // default settings for UI elements
-
-        // TODO: change this
-        console.log(location.hostname)
 
         if (location.hostname === 'localhost') {
             this.FONT_FAMILY = './assets/Roboto-msdf.json';
@@ -59,7 +54,7 @@ export class UiControl {
             fontColor: new T.Color( 0x222222 )
         };
 
-        this.TEXT_PANEL = new ThreeMeshUI.Block({
+        this.INSTRUCTION_PANEL = new UI.Block({
             width: 1.2,
             height: 1.1,
             padding: 0.05,
@@ -69,10 +64,10 @@ export class UiControl {
             fontTexture: this.FONT_TEXTURE
         }),
 
-        this.TEXT_PANEL.position.set( 2, 1.6, 0 );
-        this.TEXT_PANEL.rotation.y = -Math.PI/2;
+        this.INSTRUCTION_PANEL.position.set( 2, 1.6, 0 );
+        this.INSTRUCTION_PANEL.rotation.y = -Math.PI/2;
 
-        this.NAVIGATION_PANEL = new ThreeMeshUI.Block({
+        this.NAVIGATION_PANEL = new UI.Block({
             justifyContent: 'center',
             alignContent: 'center',
             // backgroundColor: new T.Color( 0xFF0000 ),
@@ -88,7 +83,7 @@ export class UiControl {
         this.NAVIGATION_PANEL.rotateY(-Math.PI/2)
         this.NAVIGATION_PANEL.rotateX(-Math.PI/6);
 
-        this.RECORDING_PANEL = new ThreeMeshUI.Block({
+        this.RECORDING_PANEL = new UI.Block({
             justifyContent: 'center',
             alignContent: 'center',
             // backgroundColor: new T.Color( 0xFF0000 ),
@@ -102,7 +97,7 @@ export class UiControl {
         this.RECORDING_PANEL.position.set( 2, 1.75, -.9 );
         this.RECORDING_PANEL.rotation.y = -Math.PI/2;
 
-        this.ROBOT_SWITCH_PANEL = new ThreeMeshUI.Block({
+        this.ROBOT_SWITCH_PANEL = new UI.Block({
             justifyContent: 'center',
             alignContent: 'center',
             // backgroundColor: new T.Color( 0xFF0000 ),
@@ -116,7 +111,7 @@ export class UiControl {
         this.ROBOT_SWITCH_PANEL.position.set( 2, 1.85, .9 );
         this.ROBOT_SWITCH_PANEL.rotation.y = -Math.PI/2;
 
-        this.CONTROLLER_SWITCH_PANEL = new ThreeMeshUI.Block({
+        this.CONTROLLER_SWITCH_PANEL = new UI.Block({
             justifyContent: 'center',
             alignContent: 'center',
             // backgroundColor: new T.Color( 0xFF0000 ),
@@ -130,7 +125,7 @@ export class UiControl {
         this.CONTROLLER_SWITCH_PANEL.position.set( 2, 1.35, .9 );
         this.CONTROLLER_SWITCH_PANEL.rotation.y = -Math.PI/2;
 
-        this.REFRESH_PANEL = new ThreeMeshUI.Block({
+        this.REFRESH_PANEL = new UI.Block({
             justifyContent: 'center',
             alignContent: 'center',
             // backgroundColor: new T.Color( 0xFF0000 ),
@@ -147,18 +142,19 @@ export class UiControl {
 
     display() {
         this.scene.add(
-            this.TEXT_PANEL,
+            this.INSTRUCTION_PANEL,
             this.NAVIGATION_PANEL,
             this.RECORDING_PANEL,
             this.ROBOT_SWITCH_PANEL,
             this.CONTROLLER_SWITCH_PANEL,
             this.REFRESH_PANEL,
+            this.CONTROLS_PANEL
         )
     }
 
     /**
      * 
-     * @param {*} text array of ThreeMeshUI.Text objects
+     * @param {*} text array of UI.Text objects
      */
     addText(container, text) {
         container.add(...text)
@@ -171,8 +167,8 @@ export class UiControl {
     addButtons(container, options) {  
 
         for (const option of options) {
-            const button = new ThreeMeshUI.Block(this.BUTTON_OPTIONS);
-            button.add(new ThreeMeshUI.Text({ content: option.name }));
+            const button = new UI.Block(this.BUTTON_OPTIONS);
+            button.add(new UI.Text({ content: option.name }));
 
             button.setupState({
                 state: 'selected',
@@ -190,7 +186,7 @@ export class UiControl {
     }
 
     addTaskCounter(container, task) {
-        const counter = new ThreeMeshUI.Text({
+        const counter = new UI.Text({
             content: `Task: ${task.state.state} / ${task.state.NUM_ROUNDS}`,
             fontSize: 0.05
         });
@@ -200,12 +196,13 @@ export class UiControl {
 
     hide() {
         this.scene.remove(
-            this.TEXT_PANEL,
+            this.INSTRUCTION_PANEL,
             this.NAVIGATION_PANEL,
             this.RECORDING_PANEL,
             this.ROBOT_SWITCH_PANEL,
             this.CONTROLLER_SWITCH_PANEL,
             this.REFRESH_PANEL,
+            this.CONTROLS_PANEL
         )
     }
 
@@ -217,7 +214,7 @@ export class UiControl {
         this.buttons.delete('Previous');
 
         // only need to reset panels that change
-        this.TEXT_PANEL = new ThreeMeshUI.Block({
+        this.INSTRUCTION_PANEL = new UI.Block({
             width: 1.2,
             height: 1.1,
             padding: 0.05,
@@ -227,10 +224,10 @@ export class UiControl {
             fontTexture: this.FONT_TEXTURE
         }),
 
-        this.TEXT_PANEL.position.set( 2, 1.6, 0 );
-        this.TEXT_PANEL.rotation.y = -Math.PI/2;
+        this.INSTRUCTION_PANEL.position.set( 2, 1.6, 0 );
+        this.INSTRUCTION_PANEL.rotation.y = -Math.PI/2;
 
-        this.NAVIGATION_PANEL = new ThreeMeshUI.Block({
+        this.NAVIGATION_PANEL = new UI.Block({
             justifyContent: 'center',
             alignContent: 'center',
             // backgroundColor: new T.Color( 0xFF0000 ),

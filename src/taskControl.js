@@ -47,7 +47,7 @@ export class TaskControl {
         switch(state) {
             case 'IDLE':
                 this.task = undefined;
-                this.ui.addText(this.ui.TEXT_PANEL, [
+                this.ui.addText(this.ui.INSTRUCTION_PANEL, [
                     new UI.Text({ fontSize: 0.1, content: 'No task' }),
                 ]),
                 this.ui.addButtons(
@@ -67,7 +67,7 @@ export class TaskControl {
                     target_cursor: this.target_cursor
                 });
                 this.ui.addText(
-                    this.ui.TEXT_PANEL, 
+                    this.ui.INSTRUCTION_PANEL, 
                     [
                         new UI.Text({ fontSize: 0.075, content: `Introduction to Drag Control:` }),
                         new UI.Text({ fontSize: 0.1, content: `\nPose Matching\n` }),
@@ -77,7 +77,7 @@ export class TaskControl {
                         })
                     ]
                 )
-                this.counter = this.ui.addTaskCounter(this.ui.TEXT_PANEL, this.task);
+                this.counter = this.ui.addTaskCounter(this.ui.INSTRUCTION_PANEL, this.task);
                 this.ui.addButtons(
                     this.ui.NAVIGATION_PANEL,
                     [
@@ -95,7 +95,7 @@ export class TaskControl {
                     target_cursor: this.target_cursor 
                 });
                 this.ui.addText(
-                    this.ui.TEXT_PANEL,
+                    this.ui.INSTRUCTION_PANEL,
                     [
                         new UI.Text({ fontSize: 0.075, content: `Introduction to Drag Control:` }),
                         new UI.Text({ fontSize: 0.1, content: `\nPick and Place\n` }),
@@ -105,7 +105,7 @@ export class TaskControl {
                         })
                     ]
                 )
-                this.counter = this.ui.addTaskCounter(this.ui.TEXT_PANEL, this.task);
+                this.counter = this.ui.addTaskCounter(this.ui.INSTRUCTION_PANEL, this.task);
                 this.ui.addButtons(
                     this.ui.NAVIGATION_PANEL,
                     [
@@ -124,7 +124,7 @@ export class TaskControl {
                     target_cursor: this.target_cursor
                 });
                 this.ui.addText(
-                    this.ui.TEXT_PANEL, 
+                    this.ui.INSTRUCTION_PANEL, 
                     [
                         new UI.Text({ fontSize: 0.075, content: `Introduction to Remote Control:` }),
                         new UI.Text({ fontSize: 0.1, content: `\nPose Matching\n` }),
@@ -134,7 +134,7 @@ export class TaskControl {
                         })
                     ]
                 )
-                this.counter = this.ui.addTaskCounter(this.ui.TEXT_PANEL, this.task);
+                this.counter = this.ui.addTaskCounter(this.ui.INSTRUCTION_PANEL, this.task);
                 this.ui.addButtons(
                     this.ui.NAVIGATION_PANEL,
                     [
@@ -152,7 +152,7 @@ export class TaskControl {
                     target_cursor: this.target_cursor
                 });
                 this.ui.addText(
-                    this.ui.TEXT_PANEL,
+                    this.ui.INSTRUCTION_PANEL,
                     [
                         new UI.Text({ fontSize: 0.075, content: `Introduction to Remote Control:` }),
                         new UI.Text({ fontSize: 0.1, content: `\nPick and Place\n` }),
@@ -162,7 +162,7 @@ export class TaskControl {
                         })
                     ]
                 )
-                this.counter = this.ui.addTaskCounter(this.ui.TEXT_PANEL, this.task);
+                this.counter = this.ui.addTaskCounter(this.ui.INSTRUCTION_PANEL, this.task);
                 this.ui.addButtons(
                     this.ui.NAVIGATION_PANEL,
                     [

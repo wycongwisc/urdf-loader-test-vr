@@ -125,4 +125,8 @@ export default class PoseMatch extends Task {
             }
         }
     }
+
+    log(timestamp, force) {
+        
+    }
 }

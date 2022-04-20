@@ -69,7 +69,7 @@ export default class PickAndPlace extends Task {
                 this.state.target = new Target({ initPos: new T.Vector3(1, TABLE_HEIGHT, -0.5) });
                 break;
             case '3':
-                this.state.block = new Block({ initPos: new T.Vector3(0.4, TABLE_HEIGHT, 0) });
+                this.state.block = new Block({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0) });
                 this.state.target = new Target({ initPos: new T.Vector3(0.5, TABLE_HEIGHT, 0.5) });
                 break;
             default:

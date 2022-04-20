@@ -59,35 +59,35 @@ export async function relaxedikDemo() {
         });
     })
 
-    createText("How to control:", "inputs", "h3");
+    // createText("How to control:", "inputs", "h3");
 
-    createText("1. Click the red dot below.", "inputs", "p");
-    createText("2. Move your mouse to control the robot.", "inputs", "p");
-    createText("3. Scroll mouse wheel to move the robot up and down.", "inputs", "p");
-    createText("4. Right-click to switch to rotation mode.", "inputs", "p");
-    createText("5. Press the ESC button on your keyboard to unlock your cursor.", "inputs", "p");
+    // createText("1. Click the red dot below.", "inputs", "p");
+    // createText("2. Move your mouse to control the robot.", "inputs", "p");
+    // createText("3. Scroll mouse wheel to move the robot up and down.", "inputs", "p");
+    // createText("4. Right-click to switch to rotation mode.", "inputs", "p");
+    // createText("5. Press the ESC button on your keyboard to unlock your cursor.", "inputs", "p");
 
-    createBr("inputs");
-    createBr("inputs");
+    // createBr("inputs");
+    // createBr("inputs");
 
-    createText("Task Options:", "inputs", "h3");
-    createText("Warning: changing task settings will reset the task", "inputs", "p");
-    createToggleSwitch("randomize-target-size", "inputs", "", "Randomize Target Size", false);
-    createToggleSwitch("randomize-block-size", "inputs", "", "Randomize Block Size", false);
-    createToggleSwitch("randomize-target-position", "inputs", "", "Randomize Target Position", false);
-    createToggleSwitch("randomize-block-position", "inputs", "", "Randomize Block Position", false);
-    createToggleSwitch("moving-target", "inputs", "", "Moving Target", false);
-    createToggleSwitch("moving-block", "inputs", "", "Moving Block", false);
+    // createText("Task Options:", "inputs", "h3");
+    // createText("Warning: changing task settings will reset the task", "inputs", "p");
+    // createToggleSwitch("randomize-target-size", "inputs", "", "Randomize Target Size", false);
+    // createToggleSwitch("randomize-block-size", "inputs", "", "Randomize Block Size", false);
+    // createToggleSwitch("randomize-target-position", "inputs", "", "Randomize Target Position", false);
+    // createToggleSwitch("randomize-block-position", "inputs", "", "Randomize Block Position", false);
+    // createToggleSwitch("moving-target", "inputs", "", "Moving Target", false);
+    // createToggleSwitch("moving-block", "inputs", "", "Moving Block", false);
 
-    createBr("inputs");
-    createBr("inputs");
+    // createBr("inputs");
+    // createBr("inputs");
 
-    createText("VR Options:", "inputs", "h3");
-    createToggleSwitch ("stereo", "inputs", "Mono", "Stereo", true);
-    createToggleSwitch ("parallax", "inputs", "No Parallax", "Parallax", true);
+    // createText("VR Options:", "inputs", "h3");
+    // createToggleSwitch ("stereo", "inputs", "Mono", "Stereo", true);
+    // createToggleSwitch ("parallax", "inputs", "No Parallax", "Parallax", true);
 
-    createBr("inputs");
-    createBr("inputs");
+    // createBr("inputs");
+    // createBr("inputs");
 
     createText("Options:", "inputs", "h3");
     createToggleSwitch ("cursor-or-robot", "inputs", "Move robot", "Move cursor", true);
@@ -313,6 +313,7 @@ export async function relaxedikDemo() {
             robot_info,
             target_cursor,
             controlMapping,
+            dataControl,
             uiControl,
             teleportVR
         })
@@ -329,19 +330,21 @@ export async function relaxedikDemo() {
 
         let data = [];
 
-        setInterval( function(){ 
+
+        // remove mouse control 
+        setTimeout(function update(){ 
             // onsole.log(Date.now());
 
             const curr_ee_abs_three = getCurrEEpose();
 
-            let update;
+            let updated;
             if (renderer.xr.isPresenting) {
-                update = vrControl.update()
+                updated = vrControl.update()
             } else {
-                update = mouseControl.step()
+                updated = mouseControl.step()
             }
 
-            if (update) {
+            if (updated) {
                 let m4 = T_ROS_to_THREE.clone().multiply( new T.Matrix4().makeRotationFromQuaternion(curr_ee_abs_three.ori));
                 let m3 = new T.Matrix3().setFromMatrix4(m4);
                 controlMapping.updateEEPose(m3);
@@ -349,6 +352,12 @@ export async function relaxedikDemo() {
 
             const timestamp = Date.now();
             taskControl.update(curr_ee_abs_three, timestamp);
+
+            if (renderer.xr.isPresenting) {
+                vrControl.log(timestamp);
+            }
+
+            // add a log() method for taskControl
 
             const row = [timestamp, window.currentRobot, vrControl.state.state];
             for (const joint of ["right_j0", "right_j1", "right_j2", "right_j3", "right_j4", "right_j5", "right_j6"]) {
@@ -365,6 +374,7 @@ export async function relaxedikDemo() {
                 });
                 data = [];
             }
+            setTimeout(update, 5);
         }, 5);
 
     }

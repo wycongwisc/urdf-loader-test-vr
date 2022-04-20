@@ -25,13 +25,15 @@ export class VrControl {
         this.controlMapping = params.controlMapping;
         this.target_cursor = params.target_cursor;
         this.robotInfo = params.robot_info;
+        this.dataControl = params.dataControl;
 
-        this.uiControl = params.uiControl;
+        this.ui = params.uiControl;
+
+        this.data = [];
+
+        this.SPAWN_POSITION = [0.25, 0, 0.5];
 
         this.lastSqueeze = 0;
-        this.initPosition = new T.Vector3();
-        this.initPosition.set(1.5, 1.5, 0)
-
         this.init_ee_abs_three = getCurrEEpose();
         this.ee_goal_rel_three = {
             "posi": new T.Vector3(),
@@ -69,9 +71,6 @@ export class VrControl {
         const controllerModelFactory = new XRControllerModelFactory();
 
         // controller 1
-
-        const handModelFactory = new XRHandModelFactory();
-
         this.controller1 = this.renderer.xr.getController(0); 
         this.scene.add(this.controller1);
 
@@ -99,7 +98,7 @@ export class VrControl {
 
         this.teleportVR.setControlState(this.state);
         this.renderer.xr.addEventListener('sessionstart', () => {
-            this.teleportVR.set(-1.5, 0, 1.5);
+            this.teleportVR.set(...this.SPAWN_POSITION);
         })
 
         this.controller = this.controller1;
@@ -174,25 +173,14 @@ export class VrControl {
             }
         })
 
-        const stereoToggle = document.querySelector('#stereo-toggle');
-        stereoToggle.addEventListener('click', (e) => {
-            this.renderer.xr.stereo = e.target.checked
-        })
-
-        const parallaxToggle = document.querySelector('#parallax-toggle');
-        parallaxToggle.addEventListener('click', (e) => {
-            this.renderer.xr.parallax = e.target.checked;
-            this.renderer.xr.initPosition = this.initPosition;
-        })     
-
         // REMOVE THIS 
         localStorage.clear();
         
         this.raycaster = new T.Raycaster();
         this.ray = new T.ArrowHelper(new T.Vector3(0, 0, 1), new T.Vector3(0, 0, 0), 300, 0xFFFFFF, 1, 1);
-
-        this.uiControl.addButtons(
-            this.uiControl.CONTROLLER_SWITCH_PANEL,
+        
+        this.ui.addButtons(
+            this.ui.CONTROLLER_SWITCH_PANEL,
             [
                 {
                     name: 'Left Hand',
@@ -219,8 +207,8 @@ export class VrControl {
             ]
         )
 
-        this.uiControl.addButtons(
-            this.uiControl.ROBOT_SWITCH_PANEL,
+        this.ui.addButtons(
+            this.ui.ROBOT_SWITCH_PANEL,
             [
                 {
                     name: 'Sawyer',
@@ -249,8 +237,8 @@ export class VrControl {
             ]
         )
 
-        this.uiControl.addButtons(
-            this.uiControl.REFRESH_PANEL,
+        this.ui.addButtons(
+            this.ui.REFRESH_PANEL,
             [
                 {
                     name: 'Refresh',
@@ -261,8 +249,8 @@ export class VrControl {
             ]
         )
 
-        this.uiControl.addButtons(
-            this.uiControl.RECORDING_PANEL,
+        this.ui.addButtons(
+            this.ui.RECORDING_PANEL,
             [
                 {
                     name: 'Record',
@@ -315,8 +303,8 @@ export class VrControl {
     select() {
         switch(this.state.state) {
             case 'IDLE':
-                if (this.uiControl.update(this.raycaster, false)) {
-                    this.uiControl.update(this.raycaster, true);
+                if (this.ui.update(this.raycaster, false)) {
+                    this.ui.update(this.raycaster, true);
                 } else {
                     this.state.activateRemoteControl();
                 }
@@ -348,7 +336,6 @@ export class VrControl {
         };
     }
 
-
     // this method needs to be cleaned up a bit
     update() {
         const curr_ee_abs_three = getCurrEEpose();
@@ -363,7 +350,7 @@ export class VrControl {
             if (this.state.is('IDLE') && this.ray.parent !== this.scene) {
                 this.scene.add(this.ray);
             }
-            this.uiControl.update(this.raycaster);
+            this.ui.update(this.raycaster);
         }
 
         if (this.state.is('PLAYBACK')) {
@@ -475,6 +462,31 @@ export class VrControl {
             this.recordData.push(row);
         }
         return didJointsUpdate;
+    }
+
+    log(timestamp) {
+        const camera = this.camera;
+        const control1 = this.controller1Grip;
+        const control2 = this.controller2Grip;
+
+        const worldDirection = new T.Vector3();
+        camera.getWorldDirection(worldDirection);
+
+        this.data.push([
+            timestamp, 
+            `${camera.position.x} ${camera.position.y} ${camera.position.z}`,
+            `${camera.quaternion.x} ${camera.quaternion.y} ${camera.quaternion.z} ${camera.quaternion.w}`,
+            `${worldDirection.x} ${worldDirection.y} ${worldDirection.z}`,
+            `${control1.position.x} ${control1.position.y} ${control1.position.z}`,
+            `${control1.quaternion.x} ${control1.quaternion.y} ${control1.quaternion.z} ${control1.quaternion.w}`,
+            `${control2.position.x} ${control2.position.y} ${control2.position.z}`,
+            `${control2.quaternion.x} ${control2.quaternion.y} ${control2.quaternion.z} ${control2.quaternion.w}`,
+        ]);
+
+        if (this.data.length === 500) {
+            this.dataControl.post(this.data, { type: 'user' });
+            this.data = [];
+        }
     }
 
     /**
