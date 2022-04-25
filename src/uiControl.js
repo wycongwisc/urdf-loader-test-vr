@@ -138,6 +138,29 @@ export class UiControl {
 
         this.REFRESH_PANEL.position.set( 2, 1.25, -.9 );
         this.REFRESH_PANEL.rotation.y = -Math.PI/2;
+
+        this.CONTROLS_PANEL = new UI.Block({
+            width: 1.2,
+            height: .4,
+            padding: 0.05,
+            justifyContent: 'center',
+            alignContent: 'left',
+            fontFamily: this.FONT_FAMILY,
+            fontTexture: this.FONT_TEXTURE
+        }),
+
+        this.CONTROLS_PANEL.position.set( 1.9, 2.4, 0 );
+        this.CONTROLS_PANEL.rotateY(-Math.PI/2)
+        this.CONTROLS_PANEL.rotateX(Math.PI/8);
+
+        this.addText(this.CONTROLS_PANEL,
+            [
+                new UI.Text({ fontSize: 0.065, content: `How to Teleport:` }),
+                new UI.Text({ fontSize: 0.05, content: `\nMove the joystick to select a location and orientation. Push down on the joystick to teleport.`
+                })
+            ]
+        )
+
     }
 
     display() {

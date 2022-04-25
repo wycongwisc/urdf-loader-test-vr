@@ -12,7 +12,7 @@ export class TaskControl {
 
         this.vrControl = params.vrControl;
         this.dataControl = params.dataControl;
-        this.target_cursor = params.target_cursor;
+        this.targetCursor = params.targetCursor;
 
         this.setState = this.setState.bind(this);
 
@@ -64,7 +64,7 @@ export class TaskControl {
                     disabledControlModes: ['REMOTE_CONTROL'], 
                     taskControl: this, 
                     dataControl: this.dataControl,
-                    target_cursor: this.target_cursor
+                    targetCursor: this.targetCursor
                 });
                 this.ui.addText(
                     this.ui.INSTRUCTION_PANEL, 
@@ -92,7 +92,7 @@ export class TaskControl {
                     disabledControlModes: ['REMOTE_CONTROL'], 
                     taskControl: this, 
                     dataControl: this.dataControl,
-                    target_cursor: this.target_cursor 
+                    targetCursor: this.targetCursor 
                 });
                 this.ui.addText(
                     this.ui.INSTRUCTION_PANEL,
@@ -121,7 +121,7 @@ export class TaskControl {
                     disabledControlModes: ['DRAG_CONTROL'], 
                     taskControl: this, 
                     dataControl: this.dataControl,
-                    target_cursor: this.target_cursor
+                    targetCursor: this.targetCursor
                 });
                 this.ui.addText(
                     this.ui.INSTRUCTION_PANEL, 
@@ -149,7 +149,7 @@ export class TaskControl {
                     disabledControlModes: ['DRAG_CONTROL'], 
                     taskControl: this, 
                     dataControl: this.dataControl,
-                    target_cursor: this.target_cursor
+                    targetCursor: this.targetCursor
                 });
                 this.ui.addText(
                     this.ui.INSTRUCTION_PANEL,
@@ -183,21 +183,25 @@ export class TaskControl {
     finishRound(data) {
         this.dataControl.post([[
             data.endTime, this.task.id, this.task.name, data.startTime
-        ]], { type: 'task' })
+        ]], 'task')
 
         // go to the next round
         this.task.state.next();
 
+        // next round exists
         if (!this.task.state.is('IDLE')) {
             this.counter.set({ content: `Task: ${this.task.state.state} / ${this.task.state.NUM_ROUNDS}`,})
         } else {
-            // go to the next task
             this.state.next();
         }
     }
 
     // this is called in relaxedikDemo.js about every 5 ms
-    update(ee_pose, timestamp) {
-        if (!this.state.is('IDLE')) this.task.update(ee_pose, timestamp);
+    update(eePose, timestamp) {
+        this.task?.update(eePose, timestamp);
+    }
+
+    log(timestamp) {
+        this.task?.log(timestamp);
     }
 }

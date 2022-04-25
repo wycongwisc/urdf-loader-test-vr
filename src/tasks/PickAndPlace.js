@@ -18,10 +18,8 @@ export default class PickAndPlace extends Task {
             taskControl: params.taskControl,
             disabledControlModes: params.disabledControlModes,
             dataControl: params.dataControl,
-            target_cursor: params.target_cursor
+            targetCursor: params.targetCursor
         });
-
-        this.data = [];
 
         const that = this;
         this.state = new StateMachine({
@@ -83,6 +81,7 @@ export default class PickAndPlace extends Task {
             this.state.block?.mesh,
             this.state.target?.mesh
         );
+        this.dataControl.flush(this.name);
     }
 
     loadTable() {
@@ -102,13 +101,13 @@ export default class PickAndPlace extends Task {
 
     /**
      * Constrcts an object representing the gripper in THREE space (there is probably a better way to do this)
-     * @param {*} ee_pose 
+     * @param {*} eePose 
      * @returns
      */
-    computeGripper(ee_pose) {
+    computeGripper(eePose) {
         const gripper = new T.Object3D();
-        gripper.position.copy(new T.Vector3(ee_pose.posi.x, ee_pose.posi.y, ee_pose.posi.z));
-        gripper.quaternion.copy(new T.Quaternion(ee_pose.ori.x, ee_pose.ori.y, ee_pose.ori.z, ee_pose.ori.w));
+        gripper.position.copy(new T.Vector3(eePose.posi.x, eePose.posi.y, eePose.posi.z));
+        gripper.quaternion.copy(new T.Quaternion(eePose.ori.x, eePose.ori.y, eePose.ori.z, eePose.ori.w));
         
         // get tip of the gripper
         gripper.quaternion.multiply(EE_TO_THREE_ROT_OFFSET)
@@ -117,36 +116,18 @@ export default class PickAndPlace extends Task {
     }
 
      // this is called every 5 ms
-    update(ee_pose, timestamp) {
+    update(eePose, timestamp) {
         if (!this.clock.running) {
             this.clock.start();
             return;
         }
 
-        const delta = this.clock.getDelta();
+        this.eePose = eePose;
+
+        // const delta = this.clock.getDelta();
         const block = this.state.block;
         const target = this.state.target;
-        const gripper = this.computeGripper(ee_pose);
-
-        this.data.push([
-            timestamp, 
-            this.id,
-            this.state.state,
-            this.target_cursor.position.x + ' ' + this.target_cursor.position.y + ' ' + this.target_cursor.position.z + ' ',
-            this.target_cursor.quaternion.x + ' ' + this.target_cursor.quaternion.y + ' ' + this.target_cursor.quaternion.z + ' ' + this.target_cursor.quaternion.w,
-            ee_pose.posi.x + ' ' + ee_pose.posi.y + ' ' + ee_pose.posi.z,
-            ee_pose.ori.x + ' ' + ee_pose.ori.y + ' ' + ee_pose.ori.z + ' ' + ee_pose.ori.w,
-            block.mesh.position.x + ' ' + block.mesh.position.y + ' ' + block.mesh.position.z,
-            block.mesh.quaternion.x + ' ' + block.mesh.quaternion.y + ' ' + block.mesh.quaternion.z + ' ' + block.mesh.quaternion.w,
-            target.mesh.position.x + ' ' + target.mesh.position.y + ' ' + target.mesh.position.z,
-            target.mesh.quaternion.x + ' ' + target.mesh.quaternion.y + ' ' + target.mesh.quaternion.z + ' ' + block.mesh.quaternion.w,
-            block.grasped,
-        ]);
-
-        if (this.data.length === 500) {
-            this.dataControl.post(this.data, { type: this.name });
-            this.data = [];
-        }
+        const gripper = this.computeGripper(eePose);
 
         if (!this.state.is('IDLE')) {
             if (!block.grasped && gripper.position.distanceTo(block.mesh.position) < 0.02) {
@@ -159,10 +140,6 @@ export default class PickAndPlace extends Task {
             }
     
             if (block.mesh.position.distanceTo(target.mesh.position) < 0.02) {
-                if (this.data.length !== 0) {
-                    this.dataControl.post(this.data, { type: this.name });
-                    this.data = [];
-                }
                 this.taskControl.finishRound({
                     startTime: this.state.startTime,
                     endTime: timestamp
@@ -171,21 +148,42 @@ export default class PickAndPlace extends Task {
     
             block.mesh.updateMatrixWorld();
     
-            if (target.vel) {
-                if ((target.vel.z < 0 && target.mesh.position.z <= -1) ||
-                    (target.vel.z > 0 && target.mesh.position.z >= 1)) {
-                    target.vel.negate(); 
-                }
-                target.mesh.position.add(target.vel.clone().multiplyScalar(delta));
-            }
+            // if (target.vel) {
+            //     if ((target.vel.z < 0 && target.mesh.position.z <= -1) ||
+            //         (target.vel.z > 0 && target.mesh.position.z >= 1)) {
+            //         target.vel.negate(); 
+            //     }
+            //     target.mesh.position.add(target.vel.clone().multiplyScalar(delta));
+            // }
     
-            if (block.vel) {
-                if ((block.vel.z < 0 && block.mesh.position.z <= -1) ||
-                    (block.vel.z > 0 && block.mesh.position.z >= 1)) {
-                    block.vel.negate(); 
-                }
-                block.mesh.position.add(block.vel.clone().multiplyScalar(delta));
-            }
+            // if (block.vel) {
+            //     if ((block.vel.z < 0 && block.mesh.position.z <= -1) ||
+            //         (block.vel.z > 0 && block.mesh.position.z >= 1)) {
+            //         block.vel.negate(); 
+            //     }
+            //     block.mesh.position.add(block.vel.clone().multiplyScalar(delta));
+            // }
         }
+    }
+
+    log(timestamp) {
+        const eePose = this.eePose;
+        const block = this.state.block;
+        const target = this.state.target;
+
+        this.dataControl.push([
+            timestamp, 
+            this.id,
+            this.state.state,
+            this.targetCursor.position.x + ' ' + this.targetCursor.position.y + ' ' + this.targetCursor.position.z + ' ',
+            this.targetCursor.quaternion.x + ' ' + this.targetCursor.quaternion.y + ' ' + this.targetCursor.quaternion.z + ' ' + this.targetCursor.quaternion.w,
+            eePose.posi.x + ' ' + eePose.posi.y + ' ' + eePose.posi.z,
+            eePose.ori.x + ' ' + eePose.ori.y + ' ' + eePose.ori.z + ' ' + eePose.ori.w,
+            block.mesh.position.x + ' ' + block.mesh.position.y + ' ' + block.mesh.position.z,
+            block.mesh.quaternion.x + ' ' + block.mesh.quaternion.y + ' ' + block.mesh.quaternion.z + ' ' + block.mesh.quaternion.w,
+            target.mesh.position.x + ' ' + target.mesh.position.y + ' ' + target.mesh.position.z,
+            target.mesh.quaternion.x + ' ' + target.mesh.quaternion.y + ' ' + target.mesh.quaternion.z + ' ' + block.mesh.quaternion.w,
+            block.grasped,
+        ], this.name);
     }
 }

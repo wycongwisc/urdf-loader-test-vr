@@ -207,12 +207,12 @@ export async function relaxedikDemo() {
 
     const geometry = new T.SphereGeometry( 0.015, 32, 32 );
     const material = new T.MeshBasicMaterial( {color: 0xFFFFFF} );
-    const target_cursor = new T.Mesh( geometry, material );
-    target_cursor.renderOrder = Infinity;
-    target_cursor.material.depthTest = false;
-    target_cursor.material.depthWrite = false;
-    //target_cursor.onBeforeRender = function (renderer) { renderer.clearDepth(); }
-    scene.add( target_cursor );
+    const targetCursor = new T.Mesh( geometry, material );
+    targetCursor.renderOrder = Infinity;
+    targetCursor.material.depthTest = false;
+    targetCursor.material.depthWrite = false;
+    //targetCursor.onBeforeRender = function (renderer) { renderer.clearDepth(); }
+    scene.add( targetCursor );
 
     window.loadRobot = (robotFile) => {
         const loader = new URDFLoader(loadingManager);
@@ -301,7 +301,7 @@ export async function relaxedikDemo() {
             relaxedIK,
             jointSliders,
             robot_info,
-            target_cursor,
+            targetCursor,
             controlMapping
         });
 
@@ -311,7 +311,7 @@ export async function relaxedikDemo() {
             scene,
             relaxedIK,
             robot_info,
-            target_cursor,
+            targetCursor,
             controlMapping,
             dataControl,
             uiControl,
@@ -325,55 +325,47 @@ export async function relaxedikDemo() {
             gripper, 
             dataControl,
             vrControl,
-            target_cursor
+            targetCursor
         });
 
         let data = [];
 
+        setTimeout(function update() { 
 
-        // remove mouse control 
-        setTimeout(function update(){ 
-            // onsole.log(Date.now());
+            // curr_ee_abs_three
+            const eePose = getCurrEEpose();
 
-            const curr_ee_abs_three = getCurrEEpose();
-
-            let updated;
-            if (renderer.xr.isPresenting) {
-                updated = vrControl.update()
+            // TODO: remove mouse control
+            if (!renderer.xr.isPresenting) {
+                if (mouseControl.step()) {
+                    let m4 = T_ROS_to_THREE.clone().multiply( new T.Matrix4().makeRotationFromQuaternion(eePose.ori));
+                    let m3 = new T.Matrix3().setFromMatrix4(m4);
+                    controlMapping.updateEEPose(m3);
+                } 
             } else {
-                updated = mouseControl.step()
-            }
+                if (vrControl.update()) {
+                    let m4 = T_ROS_to_THREE.clone().multiply( new T.Matrix4().makeRotationFromQuaternion(eePose.ori));
+                    let m3 = new T.Matrix3().setFromMatrix4(m4);
+                    controlMapping.updateEEPose(m3);
+                } 
 
-            if (updated) {
-                let m4 = T_ROS_to_THREE.clone().multiply( new T.Matrix4().makeRotationFromQuaternion(curr_ee_abs_three.ori));
-                let m3 = new T.Matrix3().setFromMatrix4(m4);
-                controlMapping.updateEEPose(m3);
-            } 
+                // initialize timestamp here to ensure tables can be joined by timestamp
+                const timestamp = Date.now();
+                taskControl.update(eePose, timestamp);
 
-            const timestamp = Date.now();
-            taskControl.update(curr_ee_abs_three, timestamp);
+                // log updated data
 
-            if (renderer.xr.isPresenting) {
                 vrControl.log(timestamp);
-            }
+                taskControl.log(timestamp);
 
-            // add a log() method for taskControl
-
-            const row = [timestamp, window.currentRobot, vrControl.state.state];
-            for (const joint of ["right_j0", "right_j1", "right_j2", "right_j3", "right_j4", "right_j5", "right_j6"]) {
-                const currJoint = window.robot.joints[joint];
-                // row.push(currJoint.position.x + ' ' + currJoint.position.y + ' ' + currJoint.position.z + ', ' + currJoint.quaternion.x + ' ' + currJoint.quaternion.y + ' ' + currJoint.quaternion.z + ' ' + currJoint.quaternion.w);
-                row.push(currJoint.jointValue[0])
+                const row = [timestamp, window.currentRobot, vrControl.state.state];
+                for (const joint of ["right_j0", "right_j1", "right_j2", "right_j3", "right_j4", "right_j5", "right_j6"]) {
+                    const currJoint = window.robot.joints[joint];
+                    row.push(currJoint.jointValue[0])
+                }
+                dataControl.push(row, 'robot')
             }
-            data.push(row);
-
-            // POST request every 500 * 5 = 2500 ms
-            if (data.length === 500) {
-                dataControl.post(data, {
-                    type: 'robot'
-                });
-                data = [];
-            }
+            
             setTimeout(update, 5);
         }, 5);
 

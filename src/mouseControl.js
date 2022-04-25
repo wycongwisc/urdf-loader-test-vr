@@ -14,7 +14,7 @@ export class MouseControl {
         this.relaxedIK= options.relaxedIK;
         this.jointSliders = options.jointSliders;
         this.robotInfo = options.robot_info;
-        this.target_cursor = options.target_cursor;
+        this.targetCursor = options.targetCursor;
         this.controlMapping = options.controlMapping;
 
         this.moveTransScale;
@@ -79,9 +79,9 @@ export class MouseControl {
         this.showCursor = document.getElementById('show-cursor-toggle');
         this.showCursor.onclick = function () {
             if (this.checked) 
-                that.target_cursor.visible  = true;
+                that.targetCursor.visible  = true;
             else
-                that.target_cursor.visible  = false;
+                that.targetCursor.visible  = false;
         }; 
 
         this.reset = this.reset.bind(this)
@@ -358,8 +358,8 @@ export class MouseControl {
         let ee_goal_rel_three = changeReferenceFrame(ee_goal_rel_ros, this.T_THREE_to_ROS);
         let ee_goal_abs_three = this.relToAbs(ee_goal_rel_three, init_ee_abs_three);
 
-        this.target_cursor.position.copy( ee_goal_abs_three.posi );
-        this.target_cursor.matrixWorldNeedsUpdate = true;
+        this.targetCursor.position.copy( ee_goal_abs_three.posi );
+        this.targetCursor.matrixWorldNeedsUpdate = true;
 
         // distance difference
         let d = curr_ee_abs_three.posi.distanceTo( ee_goal_abs_three.posi  );

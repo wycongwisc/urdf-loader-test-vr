@@ -1,24 +1,20 @@
+import { TextureLoader } from 'three';
 import { v4 as id } from 'uuid'
 
 export class DataControl {
-    constructor(params) {
-        this.SCRIPT_PATH = "https://script.google.com/macros/s/AKfycbw49YJzJwjlncG76nb1oXwI4qTWbK9hGEUrShjcXM8cmRgacCmtU2a2QLoMFmbQOkVi/exec";
-        this.SESSION_ID = id();
 
-        this.post([[new Date(), navigator.platform]], { type: 'session' })
+    buffer = new Map();
+    BUFFER_SIZE = 500; // number of data entries stored before a POST request is called
+    SESSION_ID = id();
+    SCRIPT_PATH = "https://script.google.com/macros/s/AKfycbzHU5Nb1flTSAmQCqMb27CzWZDe4qz5ZMzihYl_AJGGMpNjbCoyT-LTO_zLQbsyjwI5/exec";
+
+    constructor(params) {
+        this.post([[new Date(), navigator.platform]], 'session')
     }
 
-    /**
-     * 
-     * @param {*} data 2D array
-     * @param {Object} options 
-     */
-    post(data, options = {}) {
-        // return;
-        // add the SESSION ID to the beginning of each row
-        for (const row of data) {
-            row.unshift(this.SESSION_ID)
-        }
+    post(data, type) {
+        // add session id to beginning of each row
+        for (const row of data) row.unshift(this.SESSION_ID)
         
         fetch(this.SCRIPT_PATH, {
             method: "POST",
@@ -29,12 +25,42 @@ export class DataControl {
             mode: 'no-cors',
             body: JSON.stringify({
                 data,
-                options,
+                type,
             })
         }).then(res => {
             console.log("Request complete! response:", res);
         })
     }
+
+    /**
+     * Pushes a single data entry into the buffer
+     * @param {Array} row 
+     * @param {String} type 
+     */
+    push(row, type) {
+        const data = this.buffer.get(type);
+        if (!data) {
+            this.buffer.set(type, [row]);
+            return
+        } else {
+            data.push(row);
+        }
+
+        if (data.length === this.BUFFER_SIZE) this.flush(type);
+    }
+
+
+    flush(type) {
+        const data = this.buffer.get(type);
+
+        if (!data || data.length === 0) return false;
+
+        this.post(data, type);
+        this.buffer.set(type, []);
+        return true;
+    }
+
+
 
     // async init() {
     //     return new Promise(function (resolve, reject) {

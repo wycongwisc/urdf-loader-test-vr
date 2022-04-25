@@ -11,12 +11,11 @@ export default class PoseMatch extends Task {
             taskControl: params.taskControl,
             disabledControlModes: params.disabledControlModes,
             dataControl: params.dataControl,
-            target_cursor: params.target_cursor
+            targetCursor: params.targetCursor
         });
 
         this.gripper = params.gripper;
-        this.data = [];
-        
+
         const that = this;
         this.state = new StateMachine({
             init: 'IDLE',
@@ -80,44 +79,25 @@ export default class PoseMatch extends Task {
 
     destruct() { 
         this.scene.remove(this.state.goal.obj);
+        this.dataControl.flush(this.name);
     }
 
-    computeGripper(ee_pose) {
+    computeGripper(eePose) {
         const gripper = new T.Object3D();
-        gripper.position.copy(new T.Vector3(ee_pose.posi.x, ee_pose.posi.y, ee_pose.posi.z));
-        gripper.quaternion.copy(new T.Quaternion(ee_pose.ori.x, ee_pose.ori.y, ee_pose.ori.z, ee_pose.ori.w).normalize());
+        gripper.position.copy(new T.Vector3(eePose.posi.x, eePose.posi.y, eePose.posi.z));
+        gripper.quaternion.copy(new T.Quaternion(eePose.ori.x, eePose.ori.y, eePose.ori.z, eePose.ori.w).normalize());
         return gripper;
     }
 
-    update(ee_pose, timestamp) {
+    update(eePose, timestamp) {
+        this.eePose = eePose;
         const goal = this.state.goal;
-        const gripper = this.computeGripper(ee_pose);
-
-        this.data.push([
-            timestamp, 
-            this.id,
-            this.state.state,
-            this.target_cursor.position.x + ' ' + this.target_cursor.position.y + ' ' + this.target_cursor.position.z + ' ',
-            this.target_cursor.quaternion.x + ' ' + this.target_cursor.quaternion.y + ' ' + this.target_cursor.quaternion.z + ' ' + this.target_cursor.quaternion.w,
-            ee_pose.posi.x + ' ' + ee_pose.posi.y + ' ' + ee_pose.posi.z,
-            ee_pose.ori.x + ' ' + ee_pose.ori.y + ' ' + ee_pose.ori.z + ' ' + ee_pose.ori.w,
-            goal.obj.position.x + ' ' + goal.obj.position.y + ' ' + goal.obj.position.z + ' ',
-            goal.obj.quaternion.x + ' ' + goal.obj.quaternion.y + ' ' + goal.obj.quaternion.z + ' ' + goal.obj.quaternion.w
-        ]);
-
-        if (this.data.length === 500) {
-            this.dataControl.post(this.data, { type: this.name });
-            this.data = [];
-        }
+        const gripper = this.computeGripper(eePose);
 
         if (!this.state.is('IDLE')) {
             // https://gamedev.stackexchange.com/questions/75072/how-can-i-compare-two-quaternions-for-logical-equality
             if (gripper.position.distanceTo(goal.obj.position) < 0.02
                 && Math.abs(gripper.quaternion.dot(goal.obj.quaternion)) > 1 - .02) {
-                if (this.data.length !== 0) {
-                    this.dataControl.post(this.data, { type: this.name });
-                    this.data = [];
-                }
                 this.taskControl.finishRound({
                     startTime: this.state.startTime,
                     endTime: timestamp
@@ -126,7 +106,21 @@ export default class PoseMatch extends Task {
         }
     }
 
-    log(timestamp, force) {
-        
+    log(timestamp) {
+        const goal = this.state.goal.obj;
+        const eePose = this.eePose;
+        const targetCursor = this.targetCursor;
+
+        this.dataControl.push([
+            timestamp, 
+            this.id,
+            this.state.state,
+            targetCursor.position.x + ' ' + targetCursor.position.y + ' ' + targetCursor.position.z + ' ',
+            targetCursor.quaternion.x + ' ' + targetCursor.quaternion.y + ' ' + targetCursor.quaternion.z + ' ' + targetCursor.quaternion.w,
+            eePose.posi.x + ' ' + eePose.posi.y + ' ' + eePose.posi.z,
+            eePose.ori.x + ' ' + eePose.ori.y + ' ' + eePose.ori.z + ' ' + eePose.ori.w,
+            goal.position.x + ' ' + goal.position.y + ' ' + goal.position.z + ' ',
+            goal.quaternion.x + ' ' + goal.quaternion.y + ' ' + goal.quaternion.z + ' ' + goal.quaternion.w
+        ], this.name);
     }
 }

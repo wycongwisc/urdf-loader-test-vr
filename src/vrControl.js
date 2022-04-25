@@ -23,7 +23,7 @@ export class VrControl {
         this.teleportVR = params.teleportVR;
         this.intervalID = undefined;
         this.controlMapping = params.controlMapping;
-        this.target_cursor = params.target_cursor;
+        this.targetCursor = params.targetCursor;
         this.robotInfo = params.robot_info;
         this.dataControl = params.dataControl;
 
@@ -52,6 +52,18 @@ export class VrControl {
 
 
         this.EE_OFFSET_INDICATOR = undefined;
+
+        this.recordIndicator = new T.Mesh(
+            new T.SphereGeometry( 0.05, 32, 32 ), 
+            new T.MeshBasicMaterial({ color: 0xFF0000 }) 
+        );
+        this.recordIndicator.position.set(0, 1.65, 0);
+
+        this.playbackIndicator = new T.Mesh( 
+            new T.SphereGeometry( 0.05, 32, 32 ), 
+            new T.MeshBasicMaterial({ color: 0x0000FF })
+        );
+        this.playbackIndicator.position.set(0, 1.65, 0);
 
         // this.workspaceCenter = [
         //     window.robot.position.x - .2, 
@@ -151,20 +163,40 @@ export class VrControl {
                             child.visible = true;
                         }
                     })
-                    that.target_cursor.material.color.setHex(0xFFFFFF);
+                    that.targetCursor.material.color.setHex(0xFFFFFF);
                 },
                 onDeactivateRemoteControl: function() {
                     that.scene.add(that.ray);
-                    that.target_cursor.material.color.setHex(0xFFFFFF);
+                    that.targetCursor.material.color.setHex(0xFFFFFF);
                 },
                 onActivatePlayback: function() {
                     that.playbackData = JSON.parse(localStorage.getItem('recordData'));
-                    that.scene.remove(that.EE_OFFSET_INDICATOR);
-                    that.scene.remove(that.target_cursor);
+                    that.scene.remove(
+                        that.EE_OFFSET_INDICATOR,
+                        that.targetCursor,
+                        // that.ray
+                    );
+
+                    let blink = true;
+                    that.playbackInterval = setInterval(() => {
+                        if (blink) {
+                            that.scene.add(that.playbackIndicator);
+                        } else {
+                            that.scene.remove(that.playbackIndicator);
+                        }
+                        blink = !blink;
+                    }, 500)
+
                 },
                 onDeactivatePlayback: function() {
                     that.scene.add(that.EE_OFFSET_INDICATOR);
-                    that.scene.add(that.target_cursor);
+                    that.scene.add(
+                        that.EE_OFFSET_INDICATOR,
+                        that.targetCursor,
+                        // that.ray
+                    );
+                    that.scene.remove(that.playbackIndicator);
+                    clearInterval(that.playbackInterval);
                 },
                 onTransition: function(state) {
                     if (window.task?.disabledControlModes.includes(state.to)) return false;
@@ -258,6 +290,16 @@ export class VrControl {
                         if (this.state.is('IDLE')) {
                             this.playbackFrameIndex = 0;
                             this.state.isRecording = true;
+
+                            let blink = true;
+                            this.recordInterval = setInterval(() => {
+                                if (blink) {
+                                    this.scene.add(this.recordIndicator);
+                                } else {
+                                    this.scene.remove(this.recordIndicator);
+                                }
+                                blink = !blink;
+                            }, 500)
                         }
                     }
                 },
@@ -265,6 +307,9 @@ export class VrControl {
                     name: 'Stop',
                     onClick: () => {
                         if (this.state.is('IDLE') && this.state.isRecording) {
+                            this.scene.remove(this.recordIndicator);
+                            clearInterval(this.recordInterval);
+
                             this.state.isRecording = false;
                             localStorage.setItem('recordData', JSON.stringify(this.recordData));
                             this.recordData = [];
@@ -277,7 +322,6 @@ export class VrControl {
                         if (this.state.is('IDLE') && !this.state.isRecording && localStorage.getItem('recordData')) {
                             this.state.activatePlayback();
                         } else if (this.state.is('PLAYBACK')) {
-                            console.log('PAUSE')
                             this.state.deactivatePlayback();
                         }
                     }
@@ -354,7 +398,7 @@ export class VrControl {
         }
 
         if (this.state.is('PLAYBACK')) {
-            console.log('playtback')
+            console.log('playback')
             const jointArr = Object.entries(window.robot.joints).filter(joint => joint[1]._jointType != "fixed" && joint[1].type != "URDFMimicJoint");
             jointArr.forEach((joint, index) => {
                 let jointInfo;
@@ -417,15 +461,15 @@ export class VrControl {
         let ee_goal_rel_ros = changeReferenceFrame(ee_goal_rel_three, this.T_ROS_to_THREE);
         let ee_goal_abs_three = relToAbs(ee_goal_rel_three, init_ee_abs_three);
 
-        this.target_cursor.position.copy( ee_goal_abs_three.posi );
-        this.target_cursor.quaternion.copy( ee_goal_abs_three.ori );
+        this.targetCursor.position.copy( ee_goal_abs_three.posi );
+        this.targetCursor.quaternion.copy( ee_goal_abs_three.ori );
 
-        // if (!this.state.is('DRAG_CONTROL')) this.target_cursor.translateZ(.075);
+        // if (!this.state.is('DRAG_CONTROL')) this.targetCursor.translateZ(.075);
 
-        this.target_cursor.matrixWorldNeedsUpdate = true;
+        this.targetCursor.matrixWorldNeedsUpdate = true;
 
         if (!this.state.is('IDLE')) {
-            this.updateEEOffsetIndicator(curr_ee_abs_three.posi, this.target_cursor.position);
+            this.updateEEOffsetIndicator(curr_ee_abs_three.posi, this.targetCursor.position);
         }
 
         // distance difference
@@ -472,7 +516,7 @@ export class VrControl {
         const worldDirection = new T.Vector3();
         camera.getWorldDirection(worldDirection);
 
-        this.data.push([
+        this.dataControl.push([
             timestamp, 
             `${camera.position.x} ${camera.position.y} ${camera.position.z}`,
             `${camera.quaternion.x} ${camera.quaternion.y} ${camera.quaternion.z} ${camera.quaternion.w}`,
@@ -481,12 +525,7 @@ export class VrControl {
             `${control1.quaternion.x} ${control1.quaternion.y} ${control1.quaternion.z} ${control1.quaternion.w}`,
             `${control2.position.x} ${control2.position.y} ${control2.position.z}`,
             `${control2.quaternion.x} ${control2.quaternion.y} ${control2.quaternion.z} ${control2.quaternion.w}`,
-        ]);
-
-        if (this.data.length === 500) {
-            this.dataControl.post(this.data, { type: 'user' });
-            this.data = [];
-        }
+        ], 'user');
     }
 
     /**
@@ -524,7 +563,7 @@ export class VrControl {
             new T.BufferGeometry().setFromPoints([start, end]), 
             new T.LineBasicMaterial({ transparent: true, opacity: 1, color })
         )
-        this.target_cursor.material.color.setHex(color);
+        this.targetCursor.material.color.setHex(color);
 
         this.scene.add(this.EE_OFFSET_INDICATOR);
     }
