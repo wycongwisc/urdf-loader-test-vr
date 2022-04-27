@@ -16,6 +16,8 @@ export class TaskControl {
 
         this.setState = this.setState.bind(this);
 
+        this.roundComplete = new Audio('./assets/round_complete.mp3');
+
         const that = this;
         this.ui = params.uiControl;
         this.state = new StateMachine({
@@ -181,6 +183,7 @@ export class TaskControl {
      * @param {Object} data information about the round that just completed
      */
     finishRound(data) {
+        this.roundComplete.play();
         this.dataControl.post([[
             data.endTime, this.task.id, this.task.name, data.startTime
         ]], 'task')
