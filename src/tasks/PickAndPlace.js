@@ -21,6 +21,8 @@ export default class PickAndPlace extends Task {
             targetCursor: params.targetCursor
         });
 
+        this.tasksID = params.tasksID;
+
         const that = this;
         this.state = new StateMachine({
             init: 'IDLE',
@@ -55,23 +57,45 @@ export default class PickAndPlace extends Task {
     }
 
     setState(state) {
-        switch(state) {
-            case 'IDLE':
-                break;
-            case '1':
-                this.state.block = new Block({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0.2) });
-                this.state.target = new Target({ initPos: new T.Vector3(0.7, TABLE_HEIGHT, 0.75) });
-                break;
-            case '2':
-                this.state.block = new Block({ initPos: new T.Vector3(0.8, TABLE_HEIGHT, 0.5) });
-                this.state.target = new Target({ initPos: new T.Vector3(1, TABLE_HEIGHT, -0.5) });
-                break;
-            case '3':
-                this.state.block = new Block({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0) });
-                this.state.target = new Target({ initPos: new T.Vector3(0.5, TABLE_HEIGHT, 0.5) });
-                break;
-            default:
-                throw new Error(`${state} is not a valid state.`);
+
+        if (this.tasksID === 1) {
+            switch(state) {
+                case 'IDLE':
+                    break;
+                case '1':
+                    this.state.block = new Block({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0.2) });
+                    this.state.target = new Target({ initPos: new T.Vector3(0.7, TABLE_HEIGHT, 0.75) });
+                    break;
+                case '2':
+                    this.state.block = new Block({ initPos: new T.Vector3(0.8, TABLE_HEIGHT, 0.5) });
+                    this.state.target = new Target({ initPos: new T.Vector3(1, TABLE_HEIGHT, -0.5) });
+                    break;
+                case '3':
+                    this.state.block = new Block({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0) });
+                    this.state.target = new Target({ initPos: new T.Vector3(0.5, TABLE_HEIGHT, 0.5) });
+                    break;
+                default:
+                    throw new Error(`${state} is not a valid state.`);
+            }
+        } else {
+            switch(state) {
+                case 'IDLE':
+                    break;
+                case '1':
+                    this.state.block = new Block({ initPos: new T.Vector3(0.8, TABLE_HEIGHT, 0.5) });
+                    this.state.target = new Target({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0) });
+                    break;
+                case '2':
+                    this.state.block = new Block({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0) });
+                    this.state.target = new Target({ initPos: new T.Vector3(1, TABLE_HEIGHT, -0.5) });
+                    break;
+                case '3':
+                    this.state.block = new Block({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0.2) });
+                    this.state.target = new Target({ initPos: new T.Vector3(0.5, TABLE_HEIGHT, 0.5) });
+                    break;
+                default:
+                    throw new Error(`${state} is not a valid state.`);
+            }
         }
     }
 
