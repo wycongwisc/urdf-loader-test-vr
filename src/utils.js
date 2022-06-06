@@ -13,7 +13,8 @@ export function rotQuaternion(q, rot) {
 export function changeReferenceFrame(pose, transform) {
     return {
         "posi": pose.posi.clone().applyMatrix4(transform.clone()),
-        "ori": rotQuaternion(pose.ori.clone(), transform.clone()) };
+        "ori": rotQuaternion(pose.ori.clone(), transform.clone()) 
+    };
 }
 
 export function quaternionToAxisAngle(q) {
@@ -41,13 +42,60 @@ export function degToRad(degrees) {
     return result;
 }
 
-export function getCurrEEpose() {
-    let ee_posi = new T.Vector3();
-    window.robot.links.right_hand.getWorldPosition(ee_posi);
-    let ee_ori = new T.Quaternion();
-    window.robot.links.right_hand.getWorldQuaternion(ee_ori);
-    return {"posi": ee_posi, 
-            "ori": ee_ori}
+export function getCurrEEPose() {
+    return {
+        'posi': window.robot.links.right_hand.getWorldPosition(new T.Vector3()),
+        'ori': window.robot.links.right_hand.getWorldQuaternion(new T.Quaternion())
+    }
+}
+
+export function getCtrlPose() {
+    return { 
+        'posi': window.controllerGrip.getWorldPosition(new T.Vector3()),
+        'ori': window.controllerGrip.getWorldQuaternion(new T.Quaternion())
+    } 
+}
+
+/**
+ * 
+ * @param {*} goalEERelRos 
+ * @returns True if the robot is updated, false otherwise
+ */
+export function updateRobot(goalEERelThree) {
+    const goalEERelRos = changeReferenceFrame(goalEERelThree, T_ROS_to_THREE);
+    const currEEAbsThree = getCurrEEPose();
+
+    const deltaPosi = currEEAbsThree.posi.distanceTo(goalEERelRos.posi); // distance difference
+    const deltaOri = currEEAbsThree.ori.angleTo(goalEERelRos.ori); // angle difference
+
+    if (deltaPosi > 1e-3 || deltaOri > 1e-3) {
+        const result = window.relaxedIK.solve(
+            [goalEERelRos.posi.x, goalEERelRos.posi.y, goalEERelRos.posi.z], 
+            [goalEERelRos.ori.w, goalEERelRos.ori.x, goalEERelRos.ori.y, goalEERelRos.ori.z]
+        );
+        const joints = Object.entries(window.robot.joints).filter(joint => joint[1]._jointType != "fixed" && joint[1].type != "URDFMimicJoint");
+        joints.forEach(joint => {
+            const jointIndex = window.robotInfo.joint_ordering.indexOf(joint[0]);
+            if (jointIndex != -1) window.robot.setJointValue(joint[0], result[jointIndex]);
+        })
+        return true;   
+    }
+    return false;
+}
+
+export function resetRobot() {
+    window.goalEERelThree = { 'posi': new T.Vector3(), 'ori': new T.Quaternion().identity() };
+    window.relaxedIK.recover_vars([]);
+    updateRobot(window.goalEERelThree);
+    updateTargetCursor(window.goalEERelThree);
+    // window.relaxedIK.recover_vars([]);
+}
+
+export function updateTargetCursor(goalEERelThree) {
+    const goalEEAbsThree = relToAbs(goalEERelThree, window.initEEAbsThree);
+    window.targetCursor.position.copy(goalEEAbsThree.posi);
+    window.targetCursor.quaternion.copy(goalEEAbsThree.ori);
+    window.targetCursor.matrixWorldNeedsUpdate = true;
 }
 
 export function mathjsMatToThreejsVector3(a){
@@ -173,3 +221,6 @@ export function getBrowser() {
 export let T_ROS_to_THREE = new T.Matrix4().makeRotationFromEuler(new T.Euler(1.57079632679, 0., 0.));
 // transformation from THREE' reference frame to ROS's reference frame
 export let T_THREE_to_ROS = T_ROS_to_THREE.clone().invert();
+
+export const FONT_FAMILY = (location.hostname === 'localhost') ? './assets/Roboto-msdf.json' : '/urdf-loader-test-vr/assets/Roboto-msdf.json'
+export const FONT_TEXTURE = (location.hostname === 'localhost') ? './assets/Roboto-msdf.png' : '/urdf-loader-test-vr/assets/Roboto-msdf.png'

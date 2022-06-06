@@ -42,29 +42,12 @@ export function initScene() {
     ground.receiveShadow = true;
     scene.add(ground);
 
+    const gridHelper = new T.GridHelper(10, 20, 0x121A21, 0x121A21);
+    scene.add(gridHelper);
+
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.y = 1;
     controls.update();
-
-    let inputs = document.createElement('div');
-    inputs.id = "inputs";
-    document.body.appendChild(inputs);
-
-    let jointDiv = document.createElement('div');
-    jointDiv.id = "joints";
-    document.body.appendChild(jointDiv);
-
-    let topDiv = document.createElement('div');
-    topDiv.id = "topDiv";
-    document.body.appendChild(topDiv); 
-
-    let bottomDiv = document.createElement('div');
-    bottomDiv.id = "bottomDiv";
-    document.body.appendChild(bottomDiv); 
-
-    // let lineDiv = document.createElement('div');
-    // lineDiv.id = "lineDiv";
-    // document.body.appendChild(lineDiv); 
 
     function onResize() {
         renderer.setSize(window.innerWidth, window.innerHeight);
