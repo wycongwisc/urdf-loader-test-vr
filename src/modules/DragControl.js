@@ -6,9 +6,15 @@ export class DragControl extends Module {
     constructor(params, options = {}) {
         super(params);
         Object.assign(this, params);
+        this.name = 'DragControl'
 
         this.activationRadius = options.activationRadius ?? 0.1;
         this.showOffsetIndicator = options.showOffsetIndicator ?? true;
+        this.showInstructions = options.showInstructions ?? false;
+        this.disabled = false;
+
+        this.instructions = this.ui.createContainer('drag-control-activate-instructions', { height: .4, width: .5, backgroundOpacity: 0 });
+        this.instructions.appendChild(this.ui.createText('To activate drag control, move your controller to the robot\'s end effector', { fontSize: 0.025 }));
 
         //
 
@@ -19,9 +25,21 @@ export class DragControl extends Module {
 
         fsmConfig.methods['onActivateDragControl'] = () => {
             window.controllerGrip.traverse((child) => { if (child instanceof T.Mesh) child.visible = false });
+            if (this.showInstructions) {
+                this.instructions.hide();
+                this.instructions = this.ui.createContainer('drag-control-deactivate-instructions', { height: .4, width: .5, backgroundOpacity: 0 });
+                this.instructions.appendChild(this.ui.createText('To deactivate drag control, squeeze the trigger on your controller', { fontSize: 0.025 }));
+                this.instructions.show();
+            }
         }
 
         fsmConfig.methods['onDeactivateDragControl'] = () => {
+            if (this.disabled) return;
+
+            if (this.showInstructions) {
+                this.instructions.hide();
+                this.showInstructions = false;
+            }
             window.controllerGrip.traverse((child) => { if (child instanceof T.Mesh) child.visible = true });
             window.targetCursor.material.color.setHex(0xFFFFFF);
             window.scene.remove(this.offsetIndicator);
@@ -34,48 +52,54 @@ export class DragControl extends Module {
         const eventConfig = this.eventConfig;
 
         eventConfig['select'].push(() => {
+            if (this.disabled) return;
+
             if (this.fsm.is('DRAG_CONTROL')) {
                 this.fsm.deactivateDragControl();
                 return true;
             }
         })
-
-        eventConfig['squeeze'].push(() => {
-            if (this.fsm.is('DRAG_CONTROL')) {
-                this.fsm.deactivateDragControl();
-            }
-            this.prevCtrlPose = null;  
-        })
     }
 
-    update(t) {
-        const currEEAbsThree = getCurrEEPose();
-        const ctrlPose = getCtrlPose();
-        const prevCtrlPose = this.prevCtrlPose;
-        this.prevCtrlPose = ctrlPose;
+    disable() {
+        if (this.fsm.is('DRAG_CONTROL')) {
+            this.fsm.deactivateDragControl();
+        }
+        this.disabled = true;
+    }
+
+    enable() {
+        this.disabled = false;
+    }
+
+    update(t, data) {
+        if (this.disabled) return;
+
+        if (this.showInstructions) {
+            if (!this.instructions.visible) this.instructions.show();
+            this.instructions.getObject().position.copy(data.currEEAbsThree.posi.clone().add(new T.Vector3(0, 0.2, 0)));
+            this.instructions.getObject().lookAt(window.camera.position);
+        }
 
         if (this.fsm.is('IDLE') && !this.dragTimeout) {
-            if (ctrlPose.posi.distanceTo(currEEAbsThree.posi) <= this.activationRadius) {
+            if (data.ctrlPose.posi.distanceTo(data.currEEAbsThree.posi) <= this.activationRadius) {
                 this.fsm.activateDragControl();
-                // return true;
             }
         }
 
         if (this.fsm.is('DRAG_CONTROL')) {
-            const initEEAbsThree = window.initEEAbsThree;
-            const goalEERelThree = window.goalEERelThree;
 
             const deltaPosi = new T.Vector3();
-            deltaPosi.subVectors(ctrlPose.posi, initEEAbsThree.posi)
-            goalEERelThree.posi.copy(deltaPosi);
+            deltaPosi.subVectors(data.ctrlPose.posi, window.initEEAbsThree.posi)
+            window.goalEERelThree.posi.copy(deltaPosi);
 
             const deltaOri = new T.Quaternion();
-            deltaOri.multiplyQuaternions(ctrlPose.ori.clone(), prevCtrlPose.ori.clone().invert())
-            goalEERelThree.ori.premultiply(deltaOri);
+            deltaOri.multiplyQuaternions(data.ctrlPose.ori, data.prevCtrlPose.ori.invert())
+            window.goalEERelThree.ori.premultiply(deltaOri);
 
-            this.showOffsetIndicator && this.updateOffsetIndicator(currEEAbsThree.posi, window.targetCursor.position);
-            updateTargetCursor(goalEERelThree);
-            updateRobot(goalEERelThree);
+            this.showOffsetIndicator && this.updateOffsetIndicator(data.currEEAbsThree.posi, window.targetCursor.position);
+            updateTargetCursor(window.goalEERelThree);
+            updateRobot(window.goalEERelThree);
         }
     }
 

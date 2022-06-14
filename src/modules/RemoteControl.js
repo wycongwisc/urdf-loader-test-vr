@@ -7,8 +7,18 @@ export class RemoteControl extends Module {
     constructor(params, options = {}) {
         super(params);
         Object.assign(this, params);
+        this.name = 'RemoteControl'
 
         this.showOffsetIndicator = options.showOffsetIndicator ?? true;
+        this.showInstructions = options.showInstructions ?? false;
+        this.disabled = false;
+
+        this.instructions = this.ui.createContainer('remote-control-instructions', {
+            height: .4,
+            width: .5,
+            backgroundOpacity: 0,
+        });
+        this.instructions.appendChild(this.ui.createText('To activate remote control, click the trigger on your controller', { fontSize: 0.025 }));
 
         //
 
@@ -17,9 +27,24 @@ export class RemoteControl extends Module {
         fsmConfig.transitions.push({ name: 'activateRemoteControl', from: 'IDLE', to: 'REMOTE_CONTROL' });
         fsmConfig.transitions.push({ name: 'deactivateRemoteControl', from: 'REMOTE_CONTROL', to: 'IDLE' });
 
-        fsmConfig.methods['onActivateRemoteControl'] = () => {};
+        fsmConfig.methods['onActivateRemoteControl'] = () => {
+            if (this.disabled) return;
+
+            if (this.showInstructions) {
+                this.instructions.hide();
+                this.instructions = this.ui.createContainer('drag-control-deactivate-instructions', { height: .4, width: .5, backgroundOpacity: 0 });
+                this.instructions.appendChild(this.ui.createText('To deactivate remote control, squeeze the trigger on your controller', { fontSize: 0.025 }));
+                this.instructions.show();
+            }
+        };
 
         fsmConfig.methods['onDeactivateRemoteControl'] = () => {
+            if (this.disabled) return;
+            if (this.showInstructions) {
+                this.instructions.hide();
+                this.showInstructions = false;
+            }
+
             window.scene.remove(this.offsetIndicator);
             window.targetCursor.material.color.setHex(0xFFFFFF);
         };
@@ -29,6 +54,8 @@ export class RemoteControl extends Module {
         const eventConfig = this.eventConfig;
 
         eventConfig['select'].push(() =>{
+            if (this.disabled) return;
+
             if (this.fsm.is('IDLE')) {
                 this.fsm.activateRemoteControl();
                 return true;
@@ -39,35 +66,42 @@ export class RemoteControl extends Module {
                 return true;
             }
         })
-
-        eventConfig['squeeze'].push(() => {
-            if (this.fsm.is('REMOTE_CONTROL')) {
-                this.fsm.deactivateRemoteControl();
-            }
-            this.prevCtrlPose = null;
-        })
     }
 
-    update(t) {
-        const ctrlPose = getCtrlPose();
-        const prevCtrlPose = this.prevCtrlPose;
-        this.prevCtrlPose = ctrlPose;
+    disable() {
+        console.log('disable remote control')
+        if (this.fsm.is('REMOTE_CONTROL')) {
+            this.fsm.deactivateRemoteControl();
+        }
+        this.disabled = true;
+    }
+
+    enable() {
+        this.disabled = false;
+    }
+
+    update(t, data) {
+        if (this.disabled) return;
+
+        if (this.showInstructions) {
+            if (!this.instructions.visible) this.instructions.show();
+            this.instructions.getObject().position.copy(data.ctrlPose.posi.clone().add(new T.Vector3(0, 0.2, 0)));
+            this.instructions.getObject().lookAt(window.camera.position);
+        }
 
         if (this.fsm.is('REMOTE_CONTROL')) {
-            const currEEAbsThree = getCurrEEPose();
-            const goalEERelThree = window.goalEERelThree;
             
             const deltaPosi = new T.Vector3(); 
-            deltaPosi.subVectors(ctrlPose.posi, prevCtrlPose.posi)
-            goalEERelThree.posi.add(deltaPosi);
+            deltaPosi.subVectors(data.ctrlPose.posi, data.prevCtrlPose.posi)
+            window.goalEERelThree.posi.add(deltaPosi);
 
             const deltaOri = new T.Quaternion();
-            deltaOri.multiplyQuaternions(ctrlPose.ori.clone(), prevCtrlPose.ori.clone().invert())
-            goalEERelThree.ori.premultiply(deltaOri);
+            deltaOri.multiplyQuaternions(data.ctrlPose.ori.clone(), data.prevCtrlPose.ori.clone().invert())
+            window.goalEERelThree.ori.premultiply(deltaOri);
 
-            this.showOffsetIndicator && this.updateOffsetIndicator(currEEAbsThree.posi, window.targetCursor.position);
-            updateTargetCursor(goalEERelThree);
-            updateRobot(goalEERelThree);
+            this.showOffsetIndicator && this.updateOffsetIndicator(data.currEEAbsThree.posi, window.targetCursor.position);
+            updateTargetCursor(window.goalEERelThree);
+            updateRobot(window.goalEERelThree);
         }
     }
 

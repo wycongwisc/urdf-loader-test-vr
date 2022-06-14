@@ -16,12 +16,13 @@
     "webpack-cli": "^4.7.2"
   },
   "dependencies": {
+    "@dimforge/rapier3d": "^0.8.1",
     "js-yaml": "^4.1.0",
     "mathjs": "^9.5.0",
     "teleportvr": "^3.0.1",
     "three": "^0.137.5",
     "three-mesh-ui": "^6.3.1",
-    "urdf-loader": "^0.10.2",
+    "urdf-loader": "file:urdf-loader",
     "uuid": "^8.3.2",
     "xmlhttprequest": "^1.8.0"
   }

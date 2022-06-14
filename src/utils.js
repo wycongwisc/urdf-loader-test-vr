@@ -56,13 +56,20 @@ export function getCtrlPose() {
     } 
 }
 
+export function getGripperPose(tip = false) {
+    const gripper = new T.Object3D();
+        gripper.position.copy(new T.Vector3(eePose.posi.x, eePose.posi.y, eePose.posi.z));
+        gripper.quaternion.copy(new T.Quaternion(eePose.ori.x, eePose.ori.y, eePose.ori.z, eePose.ori.w).normalize());
+        return gripper;
+}
+
 /**
  * 
  * @param {*} goalEERelRos 
  * @returns True if the robot is updated, false otherwise
  */
-export function updateRobot(goalEERelThree) {
-    const goalEERelRos = changeReferenceFrame(goalEERelThree, T_ROS_to_THREE);
+export function updateRobot() {
+    const goalEERelRos = changeReferenceFrame(window.goalEERelThree, T_ROS_to_THREE);
     const currEEAbsThree = getCurrEEPose();
 
     const deltaPosi = currEEAbsThree.posi.distanceTo(goalEERelRos.posi); // distance difference
@@ -91,8 +98,8 @@ export function resetRobot() {
     // window.relaxedIK.recover_vars([]);
 }
 
-export function updateTargetCursor(goalEERelThree) {
-    const goalEEAbsThree = relToAbs(goalEERelThree, window.initEEAbsThree);
+export function updateTargetCursor() {
+    const goalEEAbsThree = relToAbs(window.goalEERelThree, window.initEEAbsThree);
     window.targetCursor.position.copy(goalEEAbsThree.posi);
     window.targetCursor.quaternion.copy(goalEEAbsThree.ori);
     window.targetCursor.matrixWorldNeedsUpdate = true;
@@ -221,6 +228,5 @@ export function getBrowser() {
 export let T_ROS_to_THREE = new T.Matrix4().makeRotationFromEuler(new T.Euler(1.57079632679, 0., 0.));
 // transformation from THREE' reference frame to ROS's reference frame
 export let T_THREE_to_ROS = T_ROS_to_THREE.clone().invert();
-
 export const FONT_FAMILY = (location.hostname === 'localhost') ? './assets/Roboto-msdf.json' : '/urdf-loader-test-vr/assets/Roboto-msdf.json'
 export const FONT_TEXTURE = (location.hostname === 'localhost') ? './assets/Roboto-msdf.png' : '/urdf-loader-test-vr/assets/Roboto-msdf.png'

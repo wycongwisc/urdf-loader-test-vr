@@ -10,6 +10,7 @@ export class Tasks extends Module {
     constructor(params, tasks, options = {}) {
         super(params);
         Object.assign(this, params);
+        this.name = 'Tasks'
 
         this.navigation = options.navigation ?? true;
 
@@ -46,7 +47,9 @@ export class Tasks extends Module {
                 }
             }
         })
+    }
 
+    start() {
         this.fsm.start();
     }
 
@@ -54,7 +57,7 @@ export class Tasks extends Module {
         this.clearTask();
 
         this.task = this.tasks[taskIndex];
-        this.task.fsm.start();
+        this.task.start();
     }
 
     clearTask() {
@@ -136,8 +139,10 @@ export class Tasks extends Module {
     //     }
     // }
 
-    update(t) {
-        if (this.task?.update(t)) {
+    update(t, data) {
+        this.task?.update(t, data);
+        if (this.task?.fsm.is('COMPLETE')) {
+            // this.data.post([[t, this.task.id, this.task.name, this.task.startTime], 'task'])
             this.fsm.next();
         }
     }

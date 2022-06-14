@@ -19,116 +19,61 @@ const NUM_ROUNDS = 1;
 export default class PickAndPlace extends Task {
     constructor(params, options = {}) {
         super({
-            name: 'pick-and-place',
+            name: 'PickAndPlace',
             ui: params.ui,
             data: params.data,
-        });
-
-        this.numRounds = options.numRounds ?? NUM_ROUNDS;
-
-        this.roundComplete = new Audio('./assets/round_complete.mp3');
-
-        //
-
-        const ui = this.ui;
-        const instructions = ui.createContainer('pick-and-place-instructions', {
-            position: new T.Vector3(2, 1.6, 0),
-            orientation: new T.Euler(0, -Math.PI/2, 0, 'XYZ')
-        });
-        instructions.appendChild(ui.createText('Pick and Place'));
-        instructions.appendChild(ui.createText('Complete the task by picking up the block with the robot and placing it inside the red circle'));
-
-        //
-
-        const that = this;
-        const roundIndices = Array.from({ length: this.numRounds }, (v, k) => `${k + 1}`);
-        this.fsm = new StateMachine({
-            init: 'IDLE',
-            transitions: [
-                { name: 'start', from: 'IDLE', to: roundIndices[0] },
-                { name: 'next', from: roundIndices, to: function() {
-                        return (Number(this.state) === roundIndices.length) ? 'IDLE' : `${Number(this.state) + 1}`;
-                }},
-                { name: 'previous', from: roundIndices, to: function() {
-                    return (Number(this.state) === roundIndices[0]) ? 'IDLE' : `${Number(this.state) - 1}`;
-                }},
-                { name: 'stop', from: roundIndices, to: 'IDLE'}
+        }, {
+            numRounds: options.numRounds,
+            rounds: [
+                {
+                    block: new Block({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0.2) }),
+                    target: new Target({ initPos: new T.Vector3(0.7, TABLE_HEIGHT, 0.75) })
+                },
+                {
+                    block: new Block({ initPos: new T.Vector3(0.8, TABLE_HEIGHT, 0.5) }),
+                    target: new Target({ initPos: new T.Vector3(1, TABLE_HEIGHT, -0.5) })
+                },
+                {
+                    block: new Block({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0) }),
+                    target: new Target({ initPos: new T.Vector3(0.5, TABLE_HEIGHT, 0.5) })
+                }
             ],
-            methods: {
-                onTransition: (state) => {
-                    if (state.to === 'IDLE') {
-                        that.clearRound();
-                    } else {
-                        that.setRound(Number(state.to) - 1);
-                    }
-                },
-                onStart: () => {
-                    const loader = new GLTFLoader();
-                    loader.load('./models/table/scene.gltf', (gltf) => {
-                        that.table = gltf.scene;
-                        window.scene.add(that.table);
-                        that.table.rotation.y = -Math.PI / 2;
-                        that.table.position.x = .8;
-                        that.table.scale.set(.011, .011, .011);
-                        that.table.traverse(child => {
-                            child.castShadow = true;
-                            child.receiveShadow = true;
-                        });
-                    });
-                    instructions.show();
-                },
-            }
-        })
+            disableModules: options.disableModules 
+        });
 
-        this.rounds = [
-            {
-                block: new Block({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0.2) }),
-                target: new Target({ initPos: new T.Vector3(0.7, TABLE_HEIGHT, 0.75) })
-            },
-            {
-                block: new Block({ initPos: new T.Vector3(0.8, TABLE_HEIGHT, 0.5) }),
-                target: new Target({ initPos: new T.Vector3(1, TABLE_HEIGHT, -0.5) })
-            },
-            {
-                block: new Block({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0) }),
-                target: new Target({ initPos: new T.Vector3(0.5, TABLE_HEIGHT, 0.5) })
-            }
-        ]
+        //
+
+        this.instructions = this.ui.createContainer('pick-and-place-instructions', {
+            height: .4,
+            position: new T.Vector3(2, 1.5, 0),
+            rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
+            backgroundOpacity: 0,
+        });
+        this.instructions.appendChild(this.ui.createText('Pick and Place\n', { fontSize: 0.08 }));
+        this.instructions.appendChild(this.ui.createText('Complete the task by picking up the block with the robot and placing it inside the red circle'));
     }
 
-    setRound(roundIndex) {
-        this.clearRound();
-        this.round = this.rounds[roundIndex] ?? this.rounds[0]; // FIX
-
-        for (const object in this.round) {
-            window.scene.add(this.round[object].mesh);
-        }
-        this.startTime = Date.now();
+    start() {
+        this.fsm.start();
+        const loader = new GLTFLoader();
+        loader.load('./models/table/scene.gltf', (gltf) => {
+            this.table = gltf.scene;
+            window.scene.add(this.table);
+            this.table.rotation.y = -Math.PI / 2;
+            this.table.position.x = .8;
+            this.table.scale.set(.011, .011, .011);
+            this.table.traverse(child => {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            });
+        });
+        this.instructions.show();
     }
 
-    /**
-     * Clears the current round
-     */
-    clearRound() {
-        for (const object in this.round) {
-            window.scene.remove(this.round[object].mesh);
-        }
-        this.round = null;
-    }
-
-    completeRound(t) {
-        this.roundComplete.play();
-        this.fsm.next()
-        if (this.fsm.is('IDLE')) {
-            this.data.post([[t, this.id, this.name, this.startTime]], 'task');
-            return true;
-        } 
-    }
-
-    clear() {
-        this.clearRound();
+    destruct() {
+        this.instructions.hide();
         window.scene.remove(this.table);
-        this.data.flush(this.name);
+        // this.data.flush(this.name);
     }
 
     /**
@@ -145,14 +90,15 @@ export default class PickAndPlace extends Task {
         return gripper;
     }
 
-    update(t) {
+    update(t, data) {
         const round = this.round;
         if (!round) return;
 
-        const currEEPose = getCurrEEPose();
         const block = round.block;
         const target = round.target;
-        const gripper = this.computeGripper(currEEPose);
+        const gripper = this.computeGripper(data.currEEAbsThree);
+        
+        this.instructions.getObject().lookAt(window.camera.position);
 
         if (!block.grasped && gripper.position.distanceTo(block.mesh.position) < 0.02) {
             block.grasped = true;

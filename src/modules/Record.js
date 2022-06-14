@@ -4,8 +4,9 @@ import * as T from 'three';
 export class Record extends Module {
     constructor(params) {
         super(params);
-
         Object.assign(this, params);
+        this.name = 'Record'
+
         const fsmConfig = this.fsmConfig;
 
         const recordIndicator = new T.Mesh(new T.SphereGeometry( 0.05, 32, 32 ), new T.MeshBasicMaterial({ color: 0xFF0000 }));
@@ -85,7 +86,7 @@ export class Record extends Module {
         localStorage.clear();
     }
 
-    update() {
+    update(t, data) {
         if (this.fsm.is('PLAYBACK')) {
             const joints = Object.entries(window.robot.joints).filter(joint => joint[1]._jointType != "fixed" && joint[1].type != "URDFMimicJoint");
             joints.forEach((joint, index) => {

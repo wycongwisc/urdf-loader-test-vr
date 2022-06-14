@@ -13,6 +13,8 @@ import { RemoteControl } from './modules/RemoteControl';
 import { Tasks } from './modules/Tasks';
 import PickAndPlace from './modules/tasks/PickAndPlace';
 import PoseMatch from './modules/tasks/PoseMatch';
+import CustomTask from './modules/tasks/CustomTask';
+import { ResetRobot } from './modules/ResetRobot';
 
 export class VrControl {
     constructor(params) {
@@ -39,8 +41,7 @@ export class VrControl {
         targetCursor.material.depthWrite = false;
         window.scene.add(targetCursor);
         window.targetCursor = targetCursor;
-        updateTargetCursor(window.goalEERelThree);
-
+        updateTargetCursor();
 
         // controllers
 
@@ -77,15 +78,11 @@ export class VrControl {
 
         this.raycaster = new T.Raycaster();
         this.ray = new T.ArrowHelper(new T.Vector3(0, 0, 1), new T.Vector3(0, 0, 0), 300, 0xFFFFFF, 1, 1);
-
+        
         // modules
 
         const eventConfig = {
-            squeeze: [
-                () => {
-                    resetRobot();
-                }
-            ],
+            squeeze: [],
             select: [
                 () => {
                     if (this.fsm.is('IDLE')) {
@@ -106,20 +103,34 @@ export class VrControl {
             methods: {
                 onTransition: function(state) {
                     if (state.to !== 'IDLE') window.scene.remove(that.ray);
-                    if (window.task?.disabledControlModes.includes(state.to)) return false;
                 }
-
             }
         };
 
-        this.modules = [];
+        window.modules = [];
+        const resetRobot = new ResetRobot({ eventConfig, ui: this.ui }, { showInstructions: true });
+        window.modules.push(resetRobot)
 
-        this.modules.push(new Record({ fsmConfig, eventConfig, ui: this.ui }));
-        this.modules.push(new DragControl({ fsmConfig, eventConfig }));
-        this.modules.push(new RemoteControl({ fsmConfig, eventConfig }));
-        this.modules.push(new Tasks(
+        const dragControl = new DragControl({ fsmConfig, eventConfig, ui: this.ui }, { showInstructions: true })
+        window.modules.push(dragControl);
+
+        const remoteControl = new RemoteControl({ fsmConfig, eventConfig, ui: this.ui }, { showInstructions: true })
+        window.modules.push(remoteControl);
+
+        const record = new Record({ fsmConfig, eventConfig, ui: this.ui });
+        window.modules.push(record);
+
+        const tasks = new Tasks(
             { ui: this.ui }, 
-            [
+            [   
+                new CustomTask(
+                    { ui: this.ui, data: this.data }, 
+                    { disableModules: ['RemoteControl'], completeCondition: () => { return (dragControl.showInstructions === false) } }
+                ),
+                new CustomTask(
+                    { ui: this.ui, data: this.data }, 
+                    { disableModules: ['DragControl'], completeCondition: () => { return (remoteControl.showInstructions === false) } }
+                ),
                 new PickAndPlace(
                     { ui: this.ui, data: this.data }, 
                     { numRounds: 1 }
@@ -130,15 +141,19 @@ export class VrControl {
                 ),
             ],
             { navigation: true }
-        ))
+        )
+        window.modules.push(tasks);
+        // disable by reconstructing everything
 
         this.fsm = new StateMachine(fsmConfig);
-        this.modules.forEach((module) => {
+        window.modules.forEach((module) => {
             if (module instanceof Record 
                 || module instanceof DragControl 
                 || module instanceof RemoteControl)
             module.setFSM(this.fsm)
         });
+
+        tasks.start();
 
         //
 
@@ -152,7 +167,7 @@ export class VrControl {
                 if (handler()) return;
             }
         });
-        
+
         // ui
 
         function setHand(hand) {
@@ -181,15 +196,16 @@ export class VrControl {
         // )
     }
 
+
     // this method needs to be cleaned up a bit
     update(t) {
-        const ctrlPose = getCtrlPose();
-        this.prevCtrlPose = ctrlPose;
+        this.ctrlPose = getCtrlPose();
+        this.currEEAbsThree = getCurrEEPose();
 
         // FIX: have control modes hide the ray 
 
         if (this.fsm.is('PLAYBACK') || this.fsm.is('IDLE')) {
-            this.raycaster.set(ctrlPose.posi, this.controller.getWorldDirection(new T.Vector3()).negate());
+            this.raycaster.set(this.ctrlPose.posi, this.controller.getWorldDirection(new T.Vector3()).negate());
             this.ray.position.copy(this.raycaster.ray.origin);
             this.ray.setDirection(this.raycaster.ray.direction);
             if (this.fsm.is('IDLE') && this.ray.parent !== window.scene) {
@@ -198,12 +214,18 @@ export class VrControl {
             this.ui.update(this.raycaster);
         }
 
-        for (const module of this.modules) {
-            if (module.update(t)) return;
+        for (const module of window.modules) {
+            if (module.update(t, { 
+                ctrlPose: this.ctrlPose, 
+                prevCtrlPose: this.prevCtrlPose, 
+                currEEAbsThree: this.currEEAbsThree, 
+            })) return;
         }
 
-        updateTargetCursor(window.goalEERelThree);
-        updateRobot(window.goalEERelThree);
+        updateTargetCursor();
+        updateRobot();
+
+        this.prevCtrlPose = {...this.ctrlPose};
     }
 
     log(timestamp) {

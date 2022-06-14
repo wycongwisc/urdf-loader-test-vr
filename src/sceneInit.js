@@ -38,7 +38,7 @@ export function initScene() {
 
     const ground = new T.Mesh(new T.PlaneBufferGeometry(), new T.ShadowMaterial({ opacity: 0.25 }));
     ground.rotation.x = -Math.PI / 2;
-    ground.scale.setScalar(30);
+    // ground.scale.setScalar(30);
     ground.receiveShadow = true;
     scene.add(ground);
 
