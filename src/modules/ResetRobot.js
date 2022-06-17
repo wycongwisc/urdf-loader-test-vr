@@ -10,6 +10,13 @@ export class ResetRobot extends Module {
 
         this.disabled = false;
 
+        this.instructions = this.ui.createContainer('reset-robot-instructions', {
+            height: .4,
+            width: .5,
+            backgroundOpacity: 0,
+        });
+        this.instructions.appendChild(this.ui.createText('Press the grip button to reset the robot', { fontSize: 0.025 }));
+
         const eventConfig = this.eventConfig;
         eventConfig['squeeze'].push(() => {
             if (this.disabled) return;
