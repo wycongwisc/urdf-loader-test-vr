@@ -8,9 +8,10 @@ import Task from "./tasks/Task"
 
 export class Tasks extends Module {
     constructor(params, tasks, options = {}) {
-        super(params);
+        super({
+            name: 'tasks'
+        });
         Object.assign(this, params);
-        this.name = 'Tasks'
 
         this.navigation = options.navigation ?? true;
 
@@ -64,90 +65,15 @@ export class Tasks extends Module {
         this.task?.clear();
     }
 
-    // setState(state) {
-    //     switch(state) {
-    //         case 'IDLE':
-    //             this.task = undefined;
-    //             this.ui.addText(this.ui.INSTRUCTION_PANEL, [
-    //                 new UI.Text({ fontSize: 0.1, content: 'No task' }),
-    //             ]),
-    //             this.ui.addButtons(
-    //                 this.ui.NAVIGATION_PANEL,
-    //                 [
-    //                     { name: 'Restart', onClick: () => this.state.start() }
-    //                 ]
-    //             )
-    //             break;
-    //         case '1': 
-    //             this.task = new PickAndPlace({ 
-    //                 scene: this.scene, 
-    //                 disabledControlModes: ['REMOTE_CONTROL'], 
-    //                 Tasks: this, 
-    //                 data: this.data,
-    //                 tasksID: 1, 
-    //             });
-    //             this.ui.addText(
-    //                 this.ui.INSTRUCTION_PANEL,
-    //                 [
-    //                     new UI.Text({ fontSize: 0.075, content: `Introduction to Drag Control:` }),
-    //                     new UI.Text({ fontSize: 0.1, content: `\nPick and Place\n` }),
-    //                     new UI.Text({ fontSize: 0.05, content: `\nMove your controller to the robot\'s end effector to activate drag control. Squeeze the trigger while drag control is active to exit drag control.
-    //                         \nPressing the grip button will make the robot return to its original position.
-    //                         \nComplete the task by picking up the block with the robot and placing it inside the red circle.\n\n`,
-    //                     })
-    //                 ]
-    //             )
-    //             this.counter = this.ui.addTaskCounter(this.ui.INSTRUCTION_PANEL, this.task);
-    //             this.ui.addButtons(
-    //                 this.ui.NAVIGATION_PANEL,
-    //                 [
-    //                     { name: 'Next', onClick: () => this.state.next() },
-    //                     { name: 'Previous', onClick: () => this.state.previous() }
-    //                 ]
-    //             )
-    //             break;
-    //         case '2':
-    //             this.task = new PickAndPlace({
-    //                 scene: this.scene, 
-    //                 disabledControlModes: ['DRAG_CONTROL'], 
-    //                 Tasks: this, 
-    //                 data: this.data,
-    //                 tasksID: 2,
-    //             });
-    //             this.ui.addText(
-    //                 this.ui.INSTRUCTION_PANEL,
-    //                 [
-    //                     new UI.Text({ fontSize: 0.075, content: `Introduction to Remote Control:` }),
-    //                     new UI.Text({ fontSize: 0.1, content: `\nPick and Place\n` }),
-    //                     new UI.Text({ fontSize: 0.05, content: `\nSqueeze the trigger to activate and deactivate remote control.             
-    //                         \nPressing the grip button will make the robot return to its original position.
-    //                         \nComplete the task by picking up the block with the robot and placing it inside the red circle.\n\n`,
-    //                     })
-    //                 ]
-    //             )
-    //             this.counter = this.ui.addTaskCounter(this.ui.INSTRUCTION_PANEL, this.task);
-    //             this.ui.addButtons(
-    //                 this.ui.NAVIGATION_PANEL,
-    //                 [
-    //                     { name: 'Next', onClick: () => this.state.next() },
-    //                     { name: 'Previous', onClick: () => this.state.previous() }
-    //                 ]
-    //             )
-    //             break;
-    //         default:
-    //             throw new Error(`${state} is not a valid state.`);
-    //     }
-    // }
-
     update(t, data) {
         this.task?.update(t, data);
         if (this.task?.fsm.is('COMPLETE')) {
-            // this.data.post([[t, this.task.id, this.task.name, this.task.startTime], 'task'])
+            this.data.logTask(t, this.task)
             this.fsm.next();
         }
     }
 
-    // log(timestamp) {
-    //     this.task?.log(timestamp);
-    // }
+    log(t) {
+        this.task.log(t);
+    }
 }

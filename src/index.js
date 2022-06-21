@@ -31,11 +31,11 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
         loadingScreen.addEventListener('transitionend', (e) => e.target.remove());
     }) : null);
 
-    loader.parseCollision = true;
-    loader.parseVisual = true;
+    // loader.parseCollision = true;
+    // loader.parseVisual = true;
     loader.load(file, robot => {
         robot.rotation.x = -Math.PI / 2;
-        robot.position.y = .06;
+        robot.position.y = .1;
         // robot.position.x = .25;
         robot.updateMatrix();
         robot.traverse(c => {
@@ -55,7 +55,7 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
             }
         });
 
-        // scene.add(robot);
+        scene.add(robot);
         window.robot = robot;
         window.robotName = name;
         console.log(robot);
@@ -73,7 +73,7 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
             window.relaxedIK = new RelaxedIK(window.robotInfo, window.robotNN);
             console.log('%cSuccessfully loaded robot config.', 'color: green');
 
-            function createRobotCollider(currJoint, parentRigidBody, parentColliders) {
+            function createRobotCollider(currJoint, parentRigidBody, parentColliders, parentName = '') {
                 if (![
                     'base_fixed', 
                     'controller_box_fixed', 
@@ -81,9 +81,11 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
                     'pedestal_fixed', 
                     'right_arm_mount', 
                     'right_j0',
-                    // 'head_pan',
-                    // 'right_torso_itb',
-                    // 'right_j1'
+                    'head_pan',
+                    'right_torso_itb',
+                    'right_j1',
+                    'right_j2',
+                    'right_j1_2',
                 ].includes(currJoint.name)) return;
 
                 if (currJoint.type === 'URDFJoint' || currJoint.type === 'URDFMimicJoint') {
@@ -200,7 +202,13 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
                                     for (const collider of colliders) {
                                         collider.setCollisionGroups(robotCollisionGroups)
                                     }
+
+                                    for (const collider of parentColliders) {
+                                        collider.setCollisionGroups(robotCollisionGroups)
+                                    }
                                 }
+
+                                console.log('Creating a revolute joint between ' + parentName + ' and ' +  childLink.name + ' with axis ', currJoint.axis);
     
                                 const position = currJoint.position;
                                 
@@ -214,7 +222,7 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
 
                                 // console.log(rapier_joint)
                                 // console.log(rapier_joint.rawSet.jointConfigureMotorVelocity())
-                                console.log(currJoint.name, joint.rawAxis())
+                                // console.log(currJoint.name, joint.rawAxis())
                                 joint.configureMotorVelocity(10.0, 0.5);
     
                                 // joint.rawSet.jointConfigureMotorVelocity(joint.handle, joint.rawAxis(), 1.0, 0.5)
@@ -223,52 +231,53 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
                                 console.log(currJoint._jointType);
                             }
                             childLink.children.forEach((joint) => {
-                                createRobotCollider(joint, rigidBody, colliders);
+                                createRobotCollider(joint, rigidBody, colliders, childLink.name);
                             });
                         }
                     })
                 } 
             }
     
-            // console.log('Robot: ', robot);
+            // // console.log('Robot: ', robot);
     
-            const jointNames = new Map();
+            // const jointNames = new Map();
 
 
-            const position = robot.getWorldPosition(new T.Vector3());
-            const quaternion = robot.getWorldQuaternion(new T.Quaternion());
-            console.log(robot.name);
-            const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic().setAdditionalMass(1)
-                .setTranslation(position.x, position.y, position.z)
-                .setRotation(quaternion);
-            const rigidBody = world.createRigidBody(rigidBodyDesc);
+            // const position = robot.getWorldPosition(new T.Vector3());
+            // const quaternion = robot.getWorldQuaternion(new T.Quaternion());
+            // console.log(robot.name);
+            // const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+            //     .setAdditionalMass(1)
+            //     .setTranslation(position.x, position.y, position.z)
+            //     .setRotation(quaternion);
+            // const rigidBody = world.createRigidBody(rigidBodyDesc);
             // rigidBody.addForce({ x: 0, y: 0, z: 2})
 
-            robot.children.forEach((joint) => {
-                createRobotCollider(joint, rigidBody, []);
-            });
+            // robot.children.forEach((joint) => {
+            //     createRobotCollider(joint, rigidBody, []);
+            // });
     
-            // function changeRobotVisibility(parent, hideURDFVisual, hideURDFCollider) {
-            //     parent.children.forEach( (child) => {
-            //         if (child.type === 'URDFCollider') {
-            //             if (hideURDFCollider === true) {
-            //                 child.visible = false; 
-            //             } else {
-            //                 child.visible = true; 
-            //             }
-            //         } else  if (child.type === 'URDFVisual') {
-            //             if (hideURDFVisual === true) {
-            //                 child.visible = false; 
-            //             } else {
-            //                 child.visible = true; 
-            //             }
-            //         } else {
-            //             changeRobotVisibility(child, hideURDFVisual, hideURDFCollider);
-            //         }
-            //     })
-            // }
+            // // function changeRobotVisibility(parent, hideURDFVisual, hideURDFCollider) {
+            // //     parent.children.forEach( (child) => {
+            // //         if (child.type === 'URDFCollider') {
+            // //             if (hideURDFCollider === true) {
+            // //                 child.visible = false; 
+            // //             } else {
+            // //                 child.visible = true; 
+            // //             }
+            // //         } else  if (child.type === 'URDFVisual') {
+            // //             if (hideURDFVisual === true) {
+            // //                 child.visible = false; 
+            // //             } else {
+            // //                 child.visible = true; 
+            // //             }
+            // //         } else {
+            // //             changeRobotVisibility(child, hideURDFVisual, hideURDFCollider);
+            // //         }
+            // //     })
+            // // }
     
-            // changeRobotVisibility(window.robot, true, false);
+            // // changeRobotVisibility(window.robot, true, false);
 
             init();
         });
@@ -284,7 +293,7 @@ const [scene, camera, renderer, camControls] = initScene();
 window.scene = scene;
 window.camera = camera;
 
-const gravity = { x: 0.0, y: -9.81, z: 0.0 };
+const gravity = { x: 0.0, y: -1.0, z: 0.0 };
 const world = new RAPIER.World(gravity);
 
 const groundDesc = RAPIER.RigidBodyDesc.fixed()
@@ -302,53 +311,53 @@ const coll2mesh = new Map();
 const three_to_ros = new T.Group();
 scene.add(three_to_ros);
 
-let lines;
-const gameLoop = () => {
-    world.step();
+// let lines;
+// const gameLoop = () => {
+//     world.step();
 
-    // Get and print the rigid-body's position.
-    // world.forEachRigidBody((rigidBody) => {
-    //     const position = rigidBody.translation();
-    //     const quaternion = rigidBody.rotation();
-    //     console.log(position, quaternion);
-    // })
-    // const position = rigidBody.translation();
-    // console.log("Rigid-body position: ", position.x, position.y, position.z);
+//     // Get and print the rigid-body's position.
+//     // world.forEachRigidBody((rigidBody) => {
+//     //     const position = rigidBody.translation();
+//     //     const quaternion = rigidBody.rotation();
+//     //     console.log(position, quaternion);
+//     // })
+//     // const position = rigidBody.translation();
+//     // console.log("Rigid-body position: ", position.x, position.y, position.z);
 
-    coll2mesh.forEach((mesh, rigidBody) => {
-        const position = rigidBody.translation();
-
-
-        mesh.position.set(position.x, position.y, position.z);
-        const quaternion = rigidBody.rotation();
-        mesh.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
-        console.log(position, quaternion);
-        mesh.updateMatrix();
-    })
+//     coll2mesh.forEach((mesh, rigidBody) => {
+//         const position = rigidBody.translation();
 
 
-    if (!lines) {
-        let material = new T.LineBasicMaterial({
-            color: 0xffffff,
-            vertexColors: T.VertexColors
-        });
-        let geometry = new T.BufferGeometry();
-        lines = new T.LineSegments(geometry, material);
-        lines.renderOrder = Infinity;
-        lines.material.depthTest = false;
-        lines.material.depthWrite = false;
-        scene.add(lines);
-    }
+//         mesh.position.set(position.x, position.y, position.z);
+//         const quaternion = rigidBody.rotation();
+//         mesh.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+//         // console.log(position, quaternion);
+//         mesh.updateMatrix();
+//     })
+
+
+//     if (!lines) {
+//         let material = new T.LineBasicMaterial({
+//             color: 0xffffff,
+//             vertexColors: T.VertexColors
+//         });
+//         let geometry = new T.BufferGeometry();
+//         lines = new T.LineSegments(geometry, material);
+//         lines.renderOrder = Infinity;
+//         lines.material.depthTest = false;
+//         lines.material.depthWrite = false;
+//         scene.add(lines);
+//     }
     
-    let buffers = world.debugRender();
-    lines.geometry.setAttribute('position', new T.BufferAttribute(buffers.vertices, 3));
-    lines.geometry.setAttribute('color', new T.BufferAttribute(buffers.colors, 4));
+//     let buffers = world.debugRender();
+//     lines.geometry.setAttribute('position', new T.BufferAttribute(buffers.vertices, 3));
+//     lines.geometry.setAttribute('color', new T.BufferAttribute(buffers.colors, 4));
 
 
-    setTimeout(gameLoop, 16);
-};
+//     setTimeout(gameLoop, 16);
+// };
 
-gameLoop();
+// gameLoop();
 
 // load robots
 
@@ -425,11 +434,10 @@ function init() {
 
     setTimeout(function update() { 
         if (renderer.xr.isPresenting) {
-            // initialize timestamp here to ensure tables can be joined by timestamp
+            // pass timestamp to ensure tables can be joined by timestamp
+            // only update and log data if user is in VR
             const t = Date.now();
             vrControl.update(t);
-
-            // log updated data
             vrControl.log(t);
         }
         setTimeout(update, 5);

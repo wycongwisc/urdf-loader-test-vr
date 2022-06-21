@@ -2,10 +2,11 @@ import Module from "./Module";
 import * as T from 'three';
 
 export class Record extends Module {
-    constructor(params) {
-        super(params);
+    constructor(params, options = {}) {
+        super({
+            name: 'record'
+        });
         Object.assign(this, params);
-        this.name = 'Record'
 
         const fsmConfig = this.fsmConfig;
 

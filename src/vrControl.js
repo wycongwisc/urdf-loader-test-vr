@@ -15,6 +15,7 @@ import PickAndPlace from './modules/tasks/PickAndPlace';
 import PoseMatch from './modules/tasks/PoseMatch';
 import CustomTask from './modules/tasks/CustomTask';
 import { ResetRobot } from './modules/ResetRobot';
+import { Teleport } from './modules/Teleport';
 
 export class VrControl {
     constructor(params) {
@@ -59,20 +60,14 @@ export class VrControl {
         this.controller = this.controller1;
         window.controllerGrip = this.controllerGrip1;
 
+        this.controllerGrip1.addEventListener('connected', e => this.controller1.handedness = e.data.handedness);
+        this.controllerGrip2.addEventListener('connected', e => this.controller2.handedness = e.data.handedness);
+        this.hand = INIT_HAND;
+
         // teleportvr
 
         this.teleportvr = new TeleportVR(window.scene, this.camera);
-        this.teleportvr.setControlState(this.fsm);
         this.renderer.xr.addEventListener('sessionstart', () => this.teleportvr.set(INIT_POSITION));
-        this.controllerGrip1.addEventListener('connected', e => {
-            this.teleportvr.add(0, this.controllerGrip1, this.controller1, e.data.gamepad);
-            this.controller1.handedness = e.data.handedness;
-        });
-        this.controllerGrip2.addEventListener('connected', e => {
-            this.teleportvr.add(1, this.controllerGrip2, this.controller2, e.data.gamepad);
-            this.controller2.handedness = e.data.handedness;
-        });
-        this.hand = INIT_HAND;
 
         // raycasters
 
@@ -108,6 +103,16 @@ export class VrControl {
         };
 
         window.modules = [];
+
+        const teleport = new Teleport({ 
+            teleportvr: this.teleportvr,
+            controllerGrip1: this.controllerGrip1,
+            controllerGrip2: this.controllerGrip2,
+            controller1: this.controller1,
+            controller2: this.controller2, 
+        })
+        window.modules.push(teleport);
+
         const resetRobot = new ResetRobot({ eventConfig, ui: this.ui }, { showInstructions: true });
         window.modules.push(resetRobot)
 
@@ -123,14 +128,14 @@ export class VrControl {
         const tasks = new Tasks(
             { ui: this.ui }, 
             [   
-                new CustomTask(
-                    { ui: this.ui, data: this.data }, 
-                    { disableModules: ['RemoteControl'], completeCondition: () => { return (dragControl.showInstructions === false) } }
-                ),
-                new CustomTask(
-                    { ui: this.ui, data: this.data }, 
-                    { disableModules: ['DragControl'], completeCondition: () => { return (remoteControl.showInstructions === false) } }
-                ),
+                // new CustomTask(
+                //     { ui: this.ui, data: this.data }, 
+                //     { disableModules: ['RemoteControl'], completeCondition: () => { return (dragControl.showInstructions === false) } }
+                // ),
+                // new CustomTask(
+                //     { ui: this.ui, data: this.data }, 
+                //     { disableModules: ['DragControl'], completeCondition: () => { return (remoteControl.showInstructions === false) } }
+                // ),
                 new PickAndPlace(
                     { ui: this.ui, data: this.data }, 
                     { numRounds: 1 }
@@ -149,7 +154,9 @@ export class VrControl {
         window.modules.forEach((module) => {
             if (module instanceof Record 
                 || module instanceof DragControl 
-                || module instanceof RemoteControl)
+                || module instanceof RemoteControl
+                || module instanceof Teleport
+                || module instanceof ResetRobot)
             module.setFSM(this.fsm)
         });
 
@@ -170,16 +177,16 @@ export class VrControl {
 
         // ui
 
-        function setHand(hand) {
-            this.controller.removeEventListener('select', select);
-            this.controller.removeEventListener('squeeze', squeeze);
-            this.controller = (hand === this.controller1.handedness) ? this.controller1 : this.controller2;
-            window.controllerGrip = (hand === this.controller1.handedness) ? this.controllerGrip1 : this.controllerGrip2;
-            this.controller.addEventListener('select', select);
-            this.controller.addEventListener('squeeze', squeeze);
+        // function setHand(hand) {
+        //     this.controller.removeEventListener('select', select);
+        //     this.controller.removeEventListener('squeeze', squeeze);
+        //     this.controller = (hand === this.controller1.handedness) ? this.controller1 : this.controller2;
+        //     window.controllerGrip = (hand === this.controller1.handedness) ? this.controllerGrip1 : this.controllerGrip2;
+        //     this.controller.addEventListener('select', select);
+        //     this.controller.addEventListener('squeeze', squeeze);
             
-            this.hand = hand;
-        }
+        //     this.hand = hand;
+        // }
 
         // this.ui.addButtons(
         //     this.ui.CONTROLLER_SWITCH_PANEL,
@@ -194,16 +201,15 @@ export class VrControl {
         //         { name: 'Refresh', onClick: () => window.location.reload() }
         //     ]
         // )
+
+        this.data.logSession(window.modules);
     }
 
-
-    // this method needs to be cleaned up a bit
     update(t) {
         this.ctrlPose = getCtrlPose();
         this.currEEAbsThree = getCurrEEPose();
 
-        // FIX: have control modes hide the ray 
-
+        // TODO: have control modes hide the ray 
         if (this.fsm.is('PLAYBACK') || this.fsm.is('IDLE')) {
             this.raycaster.set(this.ctrlPose.posi, this.controller.getWorldDirection(new T.Vector3()).negate());
             this.ray.position.copy(this.raycaster.ray.origin);
@@ -228,35 +234,13 @@ export class VrControl {
         this.prevCtrlPose = {...this.ctrlPose};
     }
 
-    log(timestamp) {
-        // const camera = this.camera;
-        // const control1 = this.controllerGrip1;
-        // const control2 = this.controllerGrip2;
-        // const targetCursor = this.targetCursor;
+    log(t) {
+        this.data.logRobot(t, this.fsm, window.robot, window.targetCursor);
+        this.data.logUser(t, this.camera, this.controllerGrip1, this.controllerGrip2, this.hand);
 
-        // const worldDirection = new T.Vector3();
-        // camera.getWorldDirection(worldDirection);
-
-        // this.data.push([
-        //     timestamp, 
-        //     `${camera.position.x} ${camera.position.y} ${camera.position.z}`,
-        //     `${camera.quaternion.x} ${camera.quaternion.y} ${camera.quaternion.z} ${camera.quaternion.w}`,
-        //     `${worldDirection.x} ${worldDirection.y} ${worldDirection.z}`,
-        //     `${control1.position.x} ${control1.position.y} ${control1.position.z}`,
-        //     `${control1.quaternion.x} ${control1.quaternion.y} ${control1.quaternion.z} ${control1.quaternion.w}`,
-        //     `${control2.position.x} ${control2.position.y} ${control2.position.z}`,
-        //     `${control2.quaternion.x} ${control2.quaternion.y} ${control2.quaternion.z} ${control2.quaternion.w}`,
-        // ], 'user');
-
-        // const row = [timestamp, window.currentRobot, this.fsm.state];
-        // for (const joint of ["right_j0", "right_j1", "right_j2", "right_j3", "right_j4", "right_j5", "right_j6"]) {
-        //     const currJoint = window.robot.joints[joint];
-        //     row.push(currJoint.jointValue[0]);
-        // }
-        // row.push(`${targetCursor.position.x} ${targetCursor.position.y} ${targetCursor.position.z}`)
-        // row.push(`${targetCursor.quaternion.x} ${targetCursor.quaternion.y} ${targetCursor.quaternion.z} ${targetCursor.quaternion.w}`)
-
-        // this.data.push(row, 'robot');
+        for (const module of window.modules) {
+            module.log(t);
+        }
     }
 }
 

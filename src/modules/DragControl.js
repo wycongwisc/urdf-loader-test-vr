@@ -4,9 +4,10 @@ import { getCtrlPose, getCurrEEPose, updateTargetCursor, updateRobot, resetRobot
 
 export class DragControl extends Module {
     constructor(params, options = {}) {
-        super(params);
+        super({
+            name: 'drag-control'
+        });
         Object.assign(this, params);
-        this.name = 'DragControl'
 
         this.activationRadius = options.activationRadius ?? 0.1;
         this.showOffsetIndicator = options.showOffsetIndicator ?? true;
@@ -77,7 +78,7 @@ export class DragControl extends Module {
 
         if (this.showInstructions) {
             if (!this.instructions.visible) this.instructions.show();
-            this.instructions.getObject().position.copy(data.currEEAbsThree.posi.clone().add(new T.Vector3(0, 0.2, 0)));
+            this.instructions.getObject().position.copy(data.currEEAbsThree.posi.clone().add(new T.Vector3(0, 0.4, 0)));
             this.instructions.getObject().lookAt(window.camera.position);
         }
 

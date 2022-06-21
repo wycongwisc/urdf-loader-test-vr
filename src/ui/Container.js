@@ -24,7 +24,6 @@ export default class Container extends Element {
     }
 
     appendChild(element) {
-        console.log(element);
         this.object.add(element.object);
     }
     

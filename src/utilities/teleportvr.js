@@ -60,8 +60,8 @@ export default class TeleportVR {
         this._enabled[id] = true;
         //console.log("gamepads length = " + Object.keys(this._gamePads).length)
     }
-    setControlState(controlState) {
-        this.controlState = controlState;
+    setFSM(fsm) {
+        this.fsm = fsm;
     }
     get enabled() {
         return this._enabled;
@@ -109,7 +109,7 @@ export default class TeleportVR {
 
     update(elevationsMeshList) {
 
-        if (this.controlState && !this.controlState.is('IDLE')) {
+        if (this.fsm && !this.fsm.is('IDLE')) {
             return;
         }
 

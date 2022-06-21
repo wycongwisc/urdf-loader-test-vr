@@ -4,9 +4,10 @@ import { resetRobot } from "../utils";
 
 export class ResetRobot extends Module {
     constructor(params, options = {}) {
-        super(params);
+        super({
+            name: 'reset-robot'
+        });
         Object.assign(this, params);
-        this.name = 'ResetRobot';
 
         this.disabled = false;
 

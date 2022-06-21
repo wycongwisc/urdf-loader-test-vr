@@ -1,6 +1,6 @@
 import * as T from 'three';
 import Task from './Task'
-import GripperGoal from './GripperGoal';
+import GripperGoal from './objects/GripperGoal';
 import { recursiveSearch } from '../../utils';
 import { Vector3 } from 'three';
 import { Euler } from 'three';
@@ -11,7 +11,6 @@ export default class PoseMatch extends Task {
             name: 'pose-match',
             ui: params.ui,
             data: params.data,
-            
         }, {
             numRounds: options.numRounds,
             rounds: [
@@ -50,30 +49,27 @@ export default class PoseMatch extends Task {
     }
 
     update(t, data) {
+        if (this.fsm.is('COMPLETE')) return;
+        
         const round = this.round;
-        if (!round) return;
-
         const goal = round.goal;
 
         // https://gamedev.stackexchange.com/questions/75072/how-can-i-compare-two-quaternions-for-logical-equality
         if (data.currEEAbsThree.posi.distanceTo(goal.mesh.position) < 0.02
             && Math.abs(data.currEEAbsThree.ori.dot(goal.mesh.quaternion)) > 1 - .02) {
-            return this.completeRound(t);
+            this.completeRound(t);
         }
     }
 
-    // log(timestamp) {
-    //     const goal = this.state.goal.obj;
-    //     const eePose = this.eePose;
+    log(t) {
+        const round = this.round;
+        const goal = round.goal.obj;
 
-    //     this.dataControl.push([
-    //         timestamp, 
-    //         this.id,
-    //         this.state.state,
-    //         eePose.posi.x + ' ' + eePose.posi.y + ' ' + eePose.posi.z,
-    //         eePose.ori.x + ' ' + eePose.ori.y + ' ' + eePose.ori.z + ' ' + eePose.ori.w,
-    //         goal.position.x + ' ' + goal.position.y + ' ' + goal.position.z + ' ',
-    //         goal.quaternion.x + ' ' + goal.quaternion.y + ' ' + goal.quaternion.z + ' ' + goal.quaternion.w
-    //     ], this.name);
-    // }
+        this.data.log(t, [
+            this.id,
+            this.fsm.state,
+            goal.position.x + ' ' + goal.position.y + ' ' + goal.position.z + ' ',
+            goal.quaternion.x + ' ' + goal.quaternion.y + ' ' + goal.quaternion.z + ' ' + goal.quaternion.w
+        ], this.name);
+    }
 }

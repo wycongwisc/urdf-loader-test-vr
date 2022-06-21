@@ -10,8 +10,9 @@ const NUM_ROUNDS = 1;
  */
 export default class Task extends Module {
     constructor(params = {}, options = {}) {
-        super(params);
-        this.name = params.name;
+        super({
+            name: params.name
+        });
         this.data = params.data;
         this.ui = params.ui;
 
@@ -55,7 +56,6 @@ export default class Task extends Module {
                 onStart: () => {
                     for (const module of window.modules) {
                         if (that.disableModules.includes(module.name)) {
-                            console.log(module.name)
                             module.disable();
                         }
                     }

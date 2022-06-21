@@ -5,8 +5,8 @@
 import * as T from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import Task from './Task'
-import Block from './Block'
-import Target from './Target';
+import Block from './objects/Block'
+import Target from './objects/Target';
 import StateMachine from "javascript-state-machine"
 import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET, TABLE_HEIGHT } from "../../globals"
 import { getCurrEEPose } from '../../utils';
@@ -19,7 +19,7 @@ const NUM_ROUNDS = 1;
 export default class PickAndPlace extends Task {
     constructor(params, options = {}) {
         super({
-            name: 'PickAndPlace',
+            name: 'pick-and-place',
             ui: params.ui,
             data: params.data,
         }, {
@@ -91,9 +91,9 @@ export default class PickAndPlace extends Task {
     }
 
     update(t, data) {
-        const round = this.round;
-        if (!round) return;
+        if (this.fsm.is('COMPLETE')) return;
 
+        const round = this.round;
         const block = round.block;
         const target = round.target;
         const gripper = this.computeGripper(data.currEEAbsThree);
@@ -110,26 +110,25 @@ export default class PickAndPlace extends Task {
         }
 
         if (block.mesh.position.distanceTo(target.mesh.position) < 0.04) {
-            return this.completeRound(t);
+            this.completeRound(t);
         }
+
+
     }
 
-    // log(timestamp) {
-    //     const eePose = this.eePose;
-    //     const block = this.state.block;
-    //     const target = this.state.target;
+    log(t) {
+        const round = this.round;
+        const block = round.block;
+        const target = round.target;
 
-    //     this.data.push([
-    //         timestamp, 
-    //         this.id,
-    //         this.state.state,
-    //         eePose.posi.x + ' ' + eePose.posi.y + ' ' + eePose.posi.z,
-    //         eePose.ori.x + ' ' + eePose.ori.y + ' ' + eePose.ori.z + ' ' + eePose.ori.w,
-    //         block.mesh.position.x + ' ' + block.mesh.position.y + ' ' + block.mesh.position.z,
-    //         block.mesh.quaternion.x + ' ' + block.mesh.quaternion.y + ' ' + block.mesh.quaternion.z + ' ' + block.mesh.quaternion.w,
-    //         target.mesh.position.x + ' ' + target.mesh.position.y + ' ' + target.mesh.position.z,
-    //         target.mesh.quaternion.x + ' ' + target.mesh.quaternion.y + ' ' + target.mesh.quaternion.z + ' ' + block.mesh.quaternion.w,
-    //         block.grasped,
-    //     ], this.name);
-    // }
+        this.data.log(t, [
+            this.id,
+            this.fsm.state,
+            block.mesh.position.x + ' ' + block.mesh.position.y + ' ' + block.mesh.position.z,
+            block.mesh.quaternion.x + ' ' + block.mesh.quaternion.y + ' ' + block.mesh.quaternion.z + ' ' + block.mesh.quaternion.w,
+            target.mesh.position.x + ' ' + target.mesh.position.y + ' ' + target.mesh.position.z,
+            target.mesh.quaternion.x + ' ' + target.mesh.quaternion.y + ' ' + target.mesh.quaternion.z + ' ' + block.mesh.quaternion.w,
+            block.grasped,
+        ], this.name)
+    }
 }
