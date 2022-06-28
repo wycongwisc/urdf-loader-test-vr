@@ -128,14 +128,14 @@ export class VrControl {
         const tasks = new Tasks(
             { ui: this.ui }, 
             [   
-                // new CustomTask(
-                //     { ui: this.ui, data: this.data }, 
-                //     { disableModules: ['RemoteControl'], completeCondition: () => { return (dragControl.showInstructions === false) } }
-                // ),
-                // new CustomTask(
-                //     { ui: this.ui, data: this.data }, 
-                //     { disableModules: ['DragControl'], completeCondition: () => { return (remoteControl.showInstructions === false) } }
-                // ),
+                new CustomTask(
+                    { ui: this.ui, data: this.data }, 
+                    { disableModules: ['RemoteControl'], completeCondition: () => { return (dragControl.showInstructions === false) } }
+                ),
+                new CustomTask(
+                    { ui: this.ui, data: this.data }, 
+                    { disableModules: ['DragControl'], completeCondition: () => { return (remoteControl.showInstructions === false) } }
+                ),
                 new PickAndPlace(
                     { ui: this.ui, data: this.data }, 
                     { numRounds: 1 }

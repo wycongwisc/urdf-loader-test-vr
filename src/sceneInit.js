@@ -6,7 +6,8 @@ export function initScene() {
 
     // scene
     const scene = new T.Scene();
-    scene.background = new T.Color(0x2c3e50);
+    // scene.background = new T.Color(0x2c3e50);
+    scene.background = new T.Color(0xffffff);
 
     // camera
     const camera = new T.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.001, 1000);
@@ -43,7 +44,7 @@ export function initScene() {
     scene.add(ground);
 
     const gridHelper = new T.GridHelper(10, 20, 0x121A21, 0x121A21);
-    scene.add(gridHelper);
+    // scene.add(gridHelper);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.y = 1;
