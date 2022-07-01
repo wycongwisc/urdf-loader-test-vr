@@ -303,20 +303,20 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
 
             // console.log('Robot: ', robot);
     
-            const jointNames = new Map();
+            // const jointNames = new Map();
 
 
-            const position = robot.getWorldPosition(new T.Vector3());
-            const quaternion = robot.getWorldQuaternion(new T.Quaternion());
-            console.log(robot.name);
-            const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-                .setTranslation(position.x, position.y, position.z)
-                .setRotation(quaternion);
-            const rigidBody = world.createRigidBody(rigidBodyDesc);
+            // const position = robot.getWorldPosition(new T.Vector3());
+            // const quaternion = robot.getWorldQuaternion(new T.Quaternion());
+            // console.log(robot.name);
+            // const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+            //     .setTranslation(position.x, position.y, position.z)
+            //     .setRotation(quaternion);
+            // const rigidBody = world.createRigidBody(rigidBodyDesc);
 
-            robot.children.forEach((joint) => {
-                createRobotCollider(joint, rigidBody, [], new T.Quaternion());
-            });
+            // robot.children.forEach((joint) => {
+            //     createRobotCollider(joint, rigidBody, [], new T.Quaternion());
+            // });
     
             // function changeRobotVisibility(parent, hideURDFVisual, hideURDFCollider) {
             //     parent.children.forEach( (child) => {
@@ -354,50 +354,56 @@ const [scene, camera, renderer, camControls] = initScene();
 window.scene = scene;
 window.camera = camera;
 
-const gravity = { x: 0.0, y: -9.81, z: 0.0 };
-const world = new RAPIER.World(gravity);
+// const gravity = { x: 0.0, y: -9.81, z: 0.0 };
+// const world = new RAPIER.World(gravity);
 
-const groundDesc = RAPIER.RigidBodyDesc.fixed()
-const groundRigidBody = world.createRigidBody(groundDesc);
-let currCollisionGroup_membership = 0x0001;
-const groundColliderDesc = RAPIER.ColliderDesc.cuboid(10.0, 0.1, 10.0).setDensity(2.0);
-const groundCollider = world.createCollider(groundColliderDesc, groundRigidBody);
-const robotCollisionGroups = 0x00010002;
-const groundCollisionGroups = 0x00020001;
+// const groundDesc = RAPIER.RigidBodyDesc.fixed()
+// const groundRigidBody = world.createRigidBody(groundDesc);
+// let currCollisionGroup_membership = 0x0001;
+// const groundColliderDesc = RAPIER.ColliderDesc.cuboid(10.0, 0.1, 10.0).setDensity(2.0);
+// const groundCollider = world.createCollider(groundColliderDesc, groundRigidBody);
+// const robotCollisionGroups = 0x00010002;
+// const groundCollisionGroups = 0x00020001;
 
-// groundCollider.setCollisionGroups( currCollisionGroup_membership << 16 | (0xffff & (0xffff ^ currCollisionGroup_membership)));
-groundCollider.setCollisionGroups(groundCollisionGroups);
+// // groundCollider.setCollisionGroups( currCollisionGroup_membership << 16 | (0xffff & (0xffff ^ currCollisionGroup_membership)));
+// groundCollider.setCollisionGroups(groundCollisionGroups);
 
-// const baseRigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-// const baseRigidBody = world.createRigidBody(baseRigidBodyDesc);
-// const baseColliderDesc = RAPIER.ColliderDesc.cuboid(0.1, 0.1, 0.1);
-// const baseCollider = world.createCollider(baseColliderDesc, baseRigidBody);
-// baseCollider.setCollisionGroups(robotCollisionGroups);
-// // rigidBody.addForce({ x: 0, y: 0, z: 2})
+const gravity = { x: 0.0, y: -9.8, z: 0.0 };
+  const world = new RAPIER.World(gravity);
 
-// const baseJointParams = RAPIER.JointData.fixed( 
-//     new RAPIER.Vector3(0,  1, 0.0), 
-//     new RAPIER.Quaternion(-0.7071068, 0, 0, 0.7071068),
-//     new RAPIER.Vector3(0.0, 0.0, 0.0), 
-//     new RAPIER.Quaternion(0.0,0.0, 0.0, 1.0)
-// );
-// world.createImpulseJoint(baseJointParams, groundRigidBody, baseRigidBody);
+  const groundDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0.0, -0.1, 0.0);
+  const groundRigidBody = world.createRigidBody(groundDesc);
+  const groundColliderDesc = RAPIER.ColliderDesc.cuboid(10.0, 0.1, 10.0).setDensity(2.0);
+  const groundCollider = world.createCollider(groundColliderDesc, groundRigidBody);
+  
+  const object1RigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+  const object1RigidBody = world.createRigidBody(object1RigidBodyDesc);
+  const object1ColliderDesc = RAPIER.ColliderDesc.cuboid(0.1, 0.1, 0.1).setDensity(1.3).setFriction(0.8);
+  const object1Collider = world.createCollider(object1ColliderDesc, object1RigidBody);
 
-// const mountRigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-//     .setTranslation(0, .5, 0)
-// const mountRigidBody = world.createRigidBody(mountRigidBodyDesc);
-// const mountColliderDesc = RAPIER.ColliderDesc.cuboid(0.1, 0.2, 0.1)
-//     .setRotation(new RAPIER.Quaternion(-0.7071068, 0, 0, 0.7071068));
-// const mountCollider = world.createCollider(mountColliderDesc, mountRigidBody);
-// mountCollider.setCollisionGroups(robotCollisionGroups);
+  const object1JointParams = RAPIER.JointData.fixed(
+    new RAPIER.Vector3(0.0, 1.0, 0.0), 
+    new RAPIER.Quaternion(-0.7071068, 0, 0, 0.7071068),
+    new RAPIER.Vector3(0.0, 0.0, 0.0), 
+    new RAPIER.Quaternion(0.0,0.0, 0.0, 1.0)
+  );
+  const j0 = world.createImpulseJoint(object1JointParams, groundRigidBody, object1RigidBody);
 
-// const mountJointParams = RAPIER.JointData.revolute(
-//     new RAPIER.Vector3(0.5, 0.0, 0), 
-//     new RAPIER.Vector3(0., 0, 0.0),
-//     new RAPIER.Vector3(0, 0, 1),
-// );
-// const joint = world.createImpulseJoint(mountJointParams, baseRigidBody, mountRigidBody);
-// joint.configureMotorVelocity(10, 0.5)
+  const object2RigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+  const object2RigidBody = world.createRigidBody(object2RigidBodyDesc);
+  const object2ColliderDesc = RAPIER.ColliderDesc.cuboid(0.1, 0.1, 0.1).setDensity(1.3).setFriction(0.8);
+  const object2Collider = world.createCollider(object2ColliderDesc, object2RigidBody);
+
+  const object2JointParams = RAPIER.JointData.revolute(
+    new RAPIER.Vector3(0.0, 0.0, 0.5), 
+    new RAPIER.Vector3(0.0, 0.0, 0.0),  
+    new RAPIER.Vector3(0.0, 0.0, 1.0),  
+  );
+  const j1 = world.createImpulseJoint(object2JointParams, object1RigidBody, object2RigidBody);
+	// j1.configureMotorVelocity(-10, 0.5)
+  
+  // the revolute joint shouldn't be rotating
+	j1.configureMotorPosition(1, 1, 0.02)
 
 const coll2mesh = new Map();
 const three_to_ros = new T.Group();
