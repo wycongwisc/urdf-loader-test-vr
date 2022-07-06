@@ -10,11 +10,10 @@ const NUM_ROUNDS = 1;
  */
 export default class Task extends Module {
     constructor(params = {}, options = {}) {
-        super({
-            name: params.name
-        });
+        super({ name: params.name });
         this.data = params.data;
         this.ui = params.ui;
+        this.world = params.world;
 
         this.disableModules = options.disableModules ?? [];
         this.id = id();
@@ -77,7 +76,7 @@ export default class Task extends Module {
         this.round = this.rounds[roundIndex]
 
         for (const object in this.round) {
-            window.scene.add(this.round[object].mesh);
+            this.round[object].show();
         }
     }
 
@@ -86,7 +85,7 @@ export default class Task extends Module {
      */
     clearRound() {
         for (const object in this.round) {
-            window.scene.remove(this.round[object].mesh);
+            this.round[object].hide();
         }
         this.round = null;
     }

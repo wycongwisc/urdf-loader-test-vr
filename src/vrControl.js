@@ -29,6 +29,7 @@ export class VrControl {
         this.renderer = params.renderer;
         this.data = params.data;
         this.ui = params.ui;
+        this.world = params.world;
 
         // initial end effector pose
 
@@ -128,22 +129,22 @@ export class VrControl {
         const tasks = new Tasks(
             { ui: this.ui }, 
             [   
-                new CustomTask(
-                    { ui: this.ui, data: this.data }, 
-                    { disableModules: ['RemoteControl'], completeCondition: () => { return (dragControl.showInstructions === false) } }
-                ),
-                new CustomTask(
-                    { ui: this.ui, data: this.data }, 
-                    { disableModules: ['DragControl'], completeCondition: () => { return (remoteControl.showInstructions === false) } }
-                ),
+                // new CustomTask(
+                //     { ui: this.ui, data: this.data }, 
+                //     { disableModules: ['RemoteControl'], completeCondition: () => { return (dragControl.showInstructions === false) } }
+                // ),
+                // new CustomTask(
+                //     { ui: this.ui, data: this.data }, 
+                //     { disableModules: ['DragControl'], completeCondition: () => { return (remoteControl.showInstructions === false) } }
+                // ),
                 new PickAndPlace(
-                    { ui: this.ui, data: this.data }, 
+                    { ui: this.ui, data: this.data, world: this.world }, 
                     { numRounds: 1 }
                 ),
-                new PoseMatch(
-                    { ui: this.ui, data: this.data },
-                    { numRounds: 1 }
-                ),
+                // new PoseMatch(
+                //     { ui: this.ui, data: this.data },
+                //     { numRounds: 1 }
+                // ),
             ],
             { navigation: true }
         )

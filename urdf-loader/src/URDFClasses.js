@@ -47,6 +47,18 @@ class URDFVisual extends URDFBase {
 
 }
 
+class URDFInertial extends URDFBase {
+
+    constructor(...args) {
+
+        super(...args);
+        this.isURDFInertial = true;
+        this.type = 'URDFInertial';
+
+    }
+
+}
+
 class URDFLink extends URDFBase {
 
     constructor(...args) {
@@ -399,4 +411,4 @@ class URDFRobot extends URDFLink {
 
 }
 
-export { URDFRobot, URDFLink, URDFJoint, URDFMimicJoint, URDFVisual, URDFCollider };
+export { URDFRobot, URDFLink, URDFJoint, URDFMimicJoint, URDFVisual, URDFCollider, URDFInertial};

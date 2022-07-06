@@ -33,10 +33,12 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
 
     loader.parseCollision = true;
     loader.parseVisual = true;
+    loader.parseInertial = true;
     loader.load(file, robot => {
         robot.rotation.x = -Math.PI / 2;
         robot.position.y = .1;
-        robot.position.x = .25;
+        robot.position.x = -2;
+        robot.position.z = 2;
         robot.updateMatrix();
         robot.traverse(c => {
             c.castShadow = true;
@@ -86,18 +88,18 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
                     'right_arm_mount', 
                     'right_j0',
                     'right_j1',
-                    // 'right_j1_2',
-                    // 'right_j2',
-                    // 'right_j2_2',
-                    // 'right_j3',
-                    // 'right_j4',
-                    // 'right_j4_2',
-                    // 'right_j5',
-                    // 'right_j6',
-                    // 'right_hand',
-                    // 'right_torso_itb',
+                    'right_j1_2',
+                    'right_j2',
+                    'right_j2_2',
+                    'right_j3',
+                    'right_j4',
+                    'right_j4_2',
+                    'right_j5',
+                    'right_j6',
+                    'right_hand',
+                    'right_torso_itb',
                     // 'right_wirst',
-                    // 'torso_t0',
+                    'torso_t0',
                     // 'right_gripper_base_joint',
                 ].includes(currJoint.name)) return;
 
@@ -133,8 +135,8 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
                             const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
                                 .setTranslation(position.x, position.y, position.z)
                                 .setRotation(quaternion)
-                                .setLinearDamping(0.5)
-                                .setAngularDamping(1.0)
+                                .setLinearDamping(100)
+                                .setAngularDamping(100)
                             const rigidBody = world.createRigidBody(rigidBodyDesc);
 
                             const currentJointRotation = new T.Quaternion();
@@ -149,9 +151,8 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
                                     visual.quaternion.copy(currentJointRotation.clone())
                                 }
 
-
-                                three_to_ros.add(visualGroup);
-                                coll2mesh.set(rigidBody, visualGroup);
+                                scene.add(visualGroup);
+                                simObjs.set(rigidBody, visualGroup);
                             }
     
                             const colliders = [];
@@ -289,6 +290,8 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
                                 const joint = world.createImpulseJoint(params, parentRigidBody, rigidBody);
                                 jointNames.set(currJoint.name, joint);
                                 // joint.configureMotorVelocity(0, 0.5);
+                                joint.configureMotorPosition(0, 100, 100)
+
 
                             } else {
                                 console.log(currJoint._jointType);
@@ -303,20 +306,20 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
 
             // console.log('Robot: ', robot);
     
-            // const jointNames = new Map();
+            const jointNames = new Map();
 
 
-            // const position = robot.getWorldPosition(new T.Vector3());
-            // const quaternion = robot.getWorldQuaternion(new T.Quaternion());
-            // console.log(robot.name);
-            // const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-            //     .setTranslation(position.x, position.y, position.z)
-            //     .setRotation(quaternion);
-            // const rigidBody = world.createRigidBody(rigidBodyDesc);
+            const position = robot.getWorldPosition(new T.Vector3());
+            const quaternion = robot.getWorldQuaternion(new T.Quaternion());
+            console.log(robot.name);
+            const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+                .setTranslation(position.x, position.y, position.z)
+                .setRotation(quaternion);
+            const rigidBody = world.createRigidBody(rigidBodyDesc);
 
-            // robot.children.forEach((joint) => {
-            //     createRobotCollider(joint, rigidBody, [], new T.Quaternion());
-            // });
+            robot.children.forEach((joint) => {
+                createRobotCollider(joint, rigidBody, [], new T.Quaternion());
+            });
     
             // function changeRobotVisibility(parent, hideURDFVisual, hideURDFCollider) {
             //     parent.children.forEach( (child) => {
@@ -354,66 +357,66 @@ const [scene, camera, renderer, camControls] = initScene();
 window.scene = scene;
 window.camera = camera;
 
-// const gravity = { x: 0.0, y: -9.81, z: 0.0 };
+const gravity = { x: 0.0, y: -9.81, z: 0.0 };
+const world = new RAPIER.World(gravity);
+
+const groundDesc = RAPIER.RigidBodyDesc.fixed()
+const groundRigidBody = world.createRigidBody(groundDesc);
+let currCollisionGroup_membership = 0x0001;
+const groundColliderDesc = RAPIER.ColliderDesc.cuboid(10.0, 0.1, 10.0).setDensity(2.0);
+const groundCollider = world.createCollider(groundColliderDesc, groundRigidBody);
+const robotCollisionGroups = 0x00010002;
+const groundCollisionGroups = 0x00020001;
+
+// groundCollider.setCollisionGroups( currCollisionGroup_membership << 16 | (0xffff & (0xffff ^ currCollisionGroup_membership)));
+groundCollider.setCollisionGroups(groundCollisionGroups);
+
+// const gravity = { x: 0.0, y: -9.8, z: 0.0 };
 // const world = new RAPIER.World(gravity);
 
-// const groundDesc = RAPIER.RigidBodyDesc.fixed()
+// const groundDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0.0, -0.1, 0.0);
 // const groundRigidBody = world.createRigidBody(groundDesc);
-// let currCollisionGroup_membership = 0x0001;
 // const groundColliderDesc = RAPIER.ColliderDesc.cuboid(10.0, 0.1, 10.0).setDensity(2.0);
 // const groundCollider = world.createCollider(groundColliderDesc, groundRigidBody);
-// const robotCollisionGroups = 0x00010002;
-// const groundCollisionGroups = 0x00020001;
 
-// // groundCollider.setCollisionGroups( currCollisionGroup_membership << 16 | (0xffff & (0xffff ^ currCollisionGroup_membership)));
-// groundCollider.setCollisionGroups(groundCollisionGroups);
+// const object1RigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+// const object1RigidBody = world.createRigidBody(object1RigidBodyDesc);
+// const object1ColliderDesc = RAPIER.ColliderDesc.cuboid(0.1, 0.1, 0.1).setDensity(1.3).setFriction(0.8);
+// const object1Collider = world.createCollider(object1ColliderDesc, object1RigidBody);
 
-const gravity = { x: 0.0, y: -9.8, z: 0.0 };
-  const world = new RAPIER.World(gravity);
+// const object1JointParams = RAPIER.JointData.fixed(
+//     new RAPIER.Vector3(0.0, 1.0, 0.0), 
+//     new RAPIER.Quaternion(0.0,0.0, 0.0, 1.0),
+//     new RAPIER.Vector3(0.0, 0.0, 0.0), 
+//     new RAPIER.Quaternion(0.0,0.0, 0.0, 1.0)
+// );
+// const j0 = world.createImpulseJoint(object1JointParams, groundRigidBody, object1RigidBody);
 
-  const groundDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0.0, -0.1, 0.0);
-  const groundRigidBody = world.createRigidBody(groundDesc);
-  const groundColliderDesc = RAPIER.ColliderDesc.cuboid(10.0, 0.1, 10.0).setDensity(2.0);
-  const groundCollider = world.createCollider(groundColliderDesc, groundRigidBody);
-  
-  const object1RigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-  const object1RigidBody = world.createRigidBody(object1RigidBodyDesc);
-  const object1ColliderDesc = RAPIER.ColliderDesc.cuboid(0.1, 0.1, 0.1).setDensity(1.3).setFriction(0.8);
-  const object1Collider = world.createCollider(object1ColliderDesc, object1RigidBody);
+// const object2RigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+// const object2RigidBody = world.createRigidBody(object2RigidBodyDesc);
+// const object2ColliderDesc = RAPIER.ColliderDesc.cuboid(0.1, 0.1, 0.1).setDensity(1.3).setFriction(0.8);
+// const object2Collider = world.createCollider(object2ColliderDesc, object2RigidBody);
 
-  const object1JointParams = RAPIER.JointData.fixed(
-    new RAPIER.Vector3(0.0, 1.0, 0.0), 
-    new RAPIER.Quaternion(-0.7071068, 0, 0, 0.7071068),
-    new RAPIER.Vector3(0.0, 0.0, 0.0), 
-    new RAPIER.Quaternion(0.0,0.0, 0.0, 1.0)
-  );
-  const j0 = world.createImpulseJoint(object1JointParams, groundRigidBody, object1RigidBody);
+// const object2JointParams = RAPIER.JointData.revolute(
+// new RAPIER.Vector3(0.0, 0.5, 0.0), 
+// new RAPIER.Vector3(0.0, 0.0, 0.0),  
+// new RAPIER.Vector3(0.0, 1.0, 0.0),  
+// );
+// const j1 = world.createImpulseJoint(object2JointParams, object1RigidBody, object2RigidBody);
 
-  const object2RigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-  const object2RigidBody = world.createRigidBody(object2RigidBodyDesc);
-  const object2ColliderDesc = RAPIER.ColliderDesc.cuboid(0.1, 0.1, 0.1).setDensity(1.3).setFriction(0.8);
-  const object2Collider = world.createCollider(object2ColliderDesc, object2RigidBody);
+// j1.configureMotorPosition(2*Math.PI, 10, 10);
 
-  const object2JointParams = RAPIER.JointData.revolute(
-    new RAPIER.Vector3(0.0, 0.0, 0.5), 
-    new RAPIER.Vector3(0.0, 0.0, 0.0),  
-    new RAPIER.Vector3(0.0, 0.0, 1.0),  
-  );
-  const j1 = world.createImpulseJoint(object2JointParams, object1RigidBody, object2RigidBody);
-	// j1.configureMotorVelocity(-10, 0.5)
-  
-  // the revolute joint shouldn't be rotating
-	j1.configureMotorPosition(1, 1, 0.02)
 
-const coll2mesh = new Map();
-const three_to_ros = new T.Group();
-scene.add(three_to_ros);
+
+
+
+window.simObjs = new Map();
 
 let lines;
 const gameLoop = () => {
     world.step();
 
-    coll2mesh.forEach((mesh, rigidBody) => {
+    window.simObjs.forEach((mesh, rigidBody) => {
         const position = rigidBody.translation();
         mesh.position.set(position.x, position.y, position.z);
         const quaternion = rigidBody.rotation();
@@ -487,6 +490,7 @@ function init() {
         renderer,
         data,
         ui,
+        world,
     })
 
 

@@ -3,12 +3,12 @@
  */
 
 import * as T from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import Task from './Task'
 import Block from './objects/Block'
 import Target from './objects/Target';
+import Table from './objects/Table'
 import StateMachine from "javascript-state-machine"
-import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET, TABLE_HEIGHT } from "../../globals"
+import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET } from "../../globals"
 import { getCurrEEPose } from '../../utils';
 import Container from '../../ui/Container';
 
@@ -22,24 +22,44 @@ export default class PickAndPlace extends Task {
             name: 'pick-and-place',
             ui: params.ui,
             data: params.data,
+            world: params.world
         }, {
             numRounds: options.numRounds,
-            rounds: [
-                {
-                    block: new Block({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0.2) }),
-                    target: new Target({ initPos: new T.Vector3(0.7, TABLE_HEIGHT, 0.75) })
-                },
-                {
-                    block: new Block({ initPos: new T.Vector3(0.8, TABLE_HEIGHT, 0.5) }),
-                    target: new Target({ initPos: new T.Vector3(1, TABLE_HEIGHT, -0.5) })
-                },
-                {
-                    block: new Block({ initPos: new T.Vector3(1, TABLE_HEIGHT, 0) }),
-                    target: new Target({ initPos: new T.Vector3(0.5, TABLE_HEIGHT, 0.5) })
-                }
-            ],
             disableModules: options.disableModules 
         });
+
+        this.rounds = [
+            {
+                block: new Block({ 
+                    world: this.world,
+                    position: new T.Vector3(1, 1.5, 0.2) 
+                }),
+                target: new Target({ 
+                    world: this.world,
+                    position: new T.Vector3(0.7, 1.5, 0.75) 
+                })
+            },
+            {
+                block: new Block({ 
+                    world: this.world,
+                    position: new T.Vector3(0.8, 1.5, 0.5) 
+                }),
+                target: new Target({ 
+                    world: this.world,
+                    position: new T.Vector3(1, 1.5, -0.5) 
+                })
+            },
+            {
+                block: new Block({ 
+                    world: this.world,
+                    position: new T.Vector3(1, 1.5, 0) 
+                }),
+                target: new Target({ 
+                    world: this.world,
+                    position: new T.Vector3(0.5, 1.5, 0.5) 
+                })
+            }
+        ]
 
         //
 
@@ -55,24 +75,18 @@ export default class PickAndPlace extends Task {
 
     start() {
         this.fsm.start();
-        const loader = new GLTFLoader();
-        loader.load('./models/table/scene.gltf', (gltf) => {
-            this.table = gltf.scene;
-            window.scene.add(this.table);
-            this.table.rotation.y = -Math.PI / 2;
-            this.table.position.x = .8;
-            this.table.scale.set(.011, .011, .011);
-            this.table.traverse(child => {
-                child.castShadow = true;
-                child.receiveShadow = true;
-            });
+        this.table = new Table({ 
+            world: this.world, 
+            position: new T.Vector3(0.8, 0, 0),
+            rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
         });
+        this.table.show();
         this.instructions.show();
     }
 
     destruct() {
+        this.table.hide();
         this.instructions.hide();
-        window.scene.remove(this.table);
         // this.data.flush(this.name);
     }
 
@@ -112,8 +126,6 @@ export default class PickAndPlace extends Task {
         if (block.mesh.position.distanceTo(target.mesh.position) < 0.04) {
             this.completeRound(t);
         }
-
-
     }
 
     log(t) {

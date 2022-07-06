@@ -13,39 +13,30 @@ export default class PoseMatch extends Task {
             data: params.data,
         }, {
             numRounds: options.numRounds,
-            rounds: [
-                {
-                    goal: new GripperGoal({ 
-                        position: new Vector3(1, 1, 0),
-                        rotation: new Euler(0, Math.PI/2, Math.PI/2, 'XYZ')
-                    })
-                },
-                {
-                    goal: new GripperGoal({
-                        position: new Vector3(.5, 1, .5),
-                        rotation: new Euler(0, 0, Math.PI/4, 'XYZ')
-                    })
-                },
-                {
-                    goal: new GripperGoal({
-                        position: new Vector3(.5, 1, -.5),
-                        rotation: new Euler(Math.PI/3, Math.PI/2, 0, 'XYZ')
-                    })
-                }
-            ],
             disableModules: options.disableModules 
         });
 
-        // TODO: use traverse() instead
-        // const gripper = recursiveSearch(window.robot, 'children', 'right_gripper_base')[0].clone();
-        // gripper.traverse((child) => {
-        //     if (child.isMesh) {
-        //         child.material = child.material instanceof Array ? 
-        //             child.material.map((material) => material.clone()) : 
-        //             child.material.clone();
-        //     }
-        // });
-        // this.gripper = gripper;
+        this.rounds = [
+            {
+                goal: new GripperGoal({ 
+                    position: new Vector3(1, 1, 0),
+                    rotation: new Euler(0, Math.PI/2, Math.PI/2, 'XYZ')
+                })
+            },
+            {
+                goal: new GripperGoal({
+                    position: new Vector3(.5, 1, .5),
+                    rotation: new Euler(0, 0, Math.PI/4, 'XYZ')
+                })
+            },
+            {
+                goal: new GripperGoal({
+                    position: new Vector3(.5, 1, -.5),
+                    rotation: new Euler(Math.PI/3, Math.PI/2, 0, 'XYZ')
+                })
+            }
+        ];
+
     }
 
     update(t, data) {
