@@ -11,8 +11,13 @@ export class Data {
     constructor(params) {
     }
 
+    /**
+     * Sends the data to Google Sheets. Call this method directly to bypass the buffer.
+     * @param {} data 
+     * @param {*} type 
+     */
     post(data, type) {
-        console.log(type, data)
+        console.log(`Posting to ${type}`, data);
 
         // add session id to beginning of each row
         // for (const row of data) row.unshift(this.SESSION_ID)
@@ -34,7 +39,7 @@ export class Data {
     }
 
     /**
-     * Pushes a single data entry into the buffer
+     * Pushes a single data entry into the buffer. Call this method for high frequency logs so that POST requests can be batched.
      * @param {Array} row 
      * @param {String} type 
      */
@@ -50,12 +55,17 @@ export class Data {
         if (data.length >= this.BUFFER_SIZE) this.flush(type);
     }
 
-
+    /**
+     * Makes a POST request for all data in the specified buffer.
+     * @param {String} type Buffer name
+     * @returns True if buffer has been flushed, false otherwise
+     */
     flush(type) {
         const data = this.buffer.get(type);
 
         if (!data || data.length === 0) return false;
 
+        console.log(`Flushing ${type} buffer (${data.length} entries)`);
         this.post(data, type);
         this.buffer.set(type, []);
         return true;
@@ -95,6 +105,10 @@ export class Data {
     }
 
     logRobot(t, fsm, robot, target) {
+        const pos1 = window.robot.links['right_gripper_l_finger_tip'].getWorldPosition(new T.Vector3());
+        const pos2 = window.robot.links['right_gripper_r_finger_tip'].getWorldPosition(new T.Vector3());
+        const gripperDistance = pos1.distanceTo(pos2);
+
         const row = [
             t, 
             this.SESSION_ID, 
@@ -105,6 +119,7 @@ export class Data {
             const currJoint = robot.joints[joint];
             row.push(currJoint.jointValue[0]);
         }
+        row.push(gripperDistance);
         row.push(`${target.position.x} ${target.position.y} ${target.position.z}`)
         row.push(`${target.quaternion.x} ${target.quaternion.y} ${target.quaternion.z} ${target.quaternion.w}`)
         this.push(row, 'robot');

@@ -85,6 +85,20 @@ export function updateRobot() {
             const jointIndex = window.robotInfo.joint_ordering.indexOf(joint[0]);
             if (jointIndex != -1) window.robot.setJointValue(joint[0], result[jointIndex]);
         })
+
+        window.linkToRigidBody.forEach((rigidBody, link) => {
+            rigidBody.setNextKinematicTranslation(link.getWorldPosition(new T.Vector3()));
+            rigidBody.setNextKinematicRotation(link.getWorldQuaternion(new T.Quaternion()));
+        })
+
+
+        // set next transofmrations of rigid bodies to world position/quaternion of corresponding links
+
+        // world.step();
+
+
+        // set urdfVisuals
+
         return true;   
     }
     return false;

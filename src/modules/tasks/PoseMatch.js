@@ -46,15 +46,16 @@ export default class PoseMatch extends Task {
         const goal = round.goal;
 
         // https://gamedev.stackexchange.com/questions/75072/how-can-i-compare-two-quaternions-for-logical-equality
-        if (data.currEEAbsThree.posi.distanceTo(goal.mesh.position) < 0.02
-            && Math.abs(data.currEEAbsThree.ori.dot(goal.mesh.quaternion)) > 1 - .02) {
-            this.completeRound(t);
+        if (
+            data.currEEAbsThree.posi.distanceTo(goal.mesh.position) < 0.02
+            && Math.abs(data.currEEAbsThree.ori.dot(goal.mesh.quaternion)) > 1 - .02
+        ) {
+            this.fsm.next();
         }
     }
 
     log(t) {
-        const round = this.round;
-        const goal = round.goal.obj;
+        const goal = this.round.goal.mesh;
 
         this.data.log(t, [
             this.id,

@@ -18,11 +18,7 @@ export default class Block {
 
         // create the brick
         // this.initPos.y += this.size[1] / 2;
-    }
 
-    show() {
-        if (this.visible) return;
-        else this.visible = true;
 
         const mesh = new T.Mesh( 
             new T.BoxGeometry( 
@@ -40,27 +36,66 @@ export default class Block {
         mesh.receiveShadow = true;
         this.grasped = false;
 
+        this.mesh = mesh;
+    }
+
+    show() {
+        if (this.visible) return;
+        else this.visible = true;
+
         const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(mesh.position.x, mesh.position.y, mesh.position.z)
-            .setRotation(mesh.quaternion)
+            .setTranslation(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z)
+            .setRotation(this.mesh.quaternion)
         this.rigidBody = this.world.createRigidBody(rigidBodyDesc);
 
         const colliderDesc = RAPIER.ColliderDesc.cuboid(this.size.x/2, this.size.y/2, this.size.z/2)
-            .setRestitution(0.7);
-        const collider = this.world.createCollider(colliderDesc, this.rigidBody);
+            .setRestitution(0.5)
+        this.collider = this.world.createCollider(colliderDesc, this.rigidBody);
+        window.simObjs.set(this.rigidBody, this.mesh);
+        
+        window.scene.add(this.mesh);
+    }
 
-        window.simObjs.set(this.rigidBody, mesh);
-        window.scene.add(mesh);
-        this.mesh = mesh;
+    grasp(position, quaternion) {
+        this.grasped = true;
+        this.destruct();
 
+        const rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased()
+            .setTranslation(position.x, position.y, position.z)
+            .setRotation(quaternion)
+        this.rigidBody = this.world.createRigidBody(rigidBodyDesc);
+
+        const colliderDesc = RAPIER.ColliderDesc.cuboid(this.size.x/2, this.size.y/2, this.size.z/2)
+            .setRestitution(0.5)
+        this.collider = this.world.createCollider(colliderDesc, this.rigidBody);
+        window.simObjs.set(this.rigidBody, this.mesh);
+    }
+
+    ungrasp(position, quaternion) {
+        this.grasped = false;
+        this.destruct();
+
+        const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+            .setTranslation(position.x, position.y, position.z)
+            .setRotation(quaternion)
+        this.rigidBody = this.world.createRigidBody(rigidBodyDesc);
+
+        const colliderDesc = RAPIER.ColliderDesc.cuboid(this.size.x/2, this.size.y/2, this.size.z/2)
+            .setRestitution(0.5)
+        this.collider = this.world.createCollider(colliderDesc, this.rigidBody);
+        window.simObjs.set(this.rigidBody, this.mesh);
+    }
+
+    destruct() {
+        window.simObjs.delete(this.rigidBody);
+        this.world.removeRigidBody(this.rigidBody);
     }
 
     hide() {
         this.visible = false;
 
         window.scene.remove(this.mesh);
-        window.simObjs.delete(this.rigidBody);
-        this.world.removeRigidBody(this.rigidBody);
+        this.destruct();
     }
 
     // reset() {

@@ -6,8 +6,8 @@ export function initScene() {
 
     // scene
     const scene = new T.Scene();
-    // scene.background = new T.Color(0x2c3e50);
-    scene.background = new T.Color(0xffffff);
+    scene.background = new T.Color(0x2c3e50);
+    // scene.background = new T.Color(0xffffff);
 
     // camera
     const camera = new T.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.001, 1000);
@@ -30,8 +30,8 @@ export function initScene() {
     
     const directionalLight = new T.DirectionalLight(0xffffff, 1.0);
     directionalLight.castShadow = true;
-    directionalLight.shadow.mapSize.setScalar(1024);
-    directionalLight.position.set(5, 30, 5);
+    directionalLight.shadow.mapSize.setScalar(4096);
+    directionalLight.position.set(3, 7, 3);
     scene.add(directionalLight);
 
     const ambientLight = new T.AmbientLight(0xffffff, 0.2);
@@ -39,12 +39,14 @@ export function initScene() {
 
     const ground = new T.Mesh(new T.PlaneBufferGeometry(), new T.ShadowMaterial({ opacity: 0.25 }));
     ground.rotation.x = -Math.PI / 2;
-    // ground.scale.setScalar(30);
     ground.receiveShadow = true;
     scene.add(ground);
 
     const gridHelper = new T.GridHelper(10, 20, 0x121A21, 0x121A21);
-    // scene.add(gridHelper);
+    scene.add(gridHelper);
+
+    const cameraHelper = new T.CameraHelper(directionalLight.shadow.camera)
+    scene.add(cameraHelper)
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.y = 1;

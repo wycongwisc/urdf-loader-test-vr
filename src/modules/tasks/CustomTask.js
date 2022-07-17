@@ -16,7 +16,7 @@ export default class CustomTask extends Task {
 
     update(t, data) {
         if (this.completeCondition()) {
-            this.completeRound();
+            this.fsm.next();
         }
     }
 }

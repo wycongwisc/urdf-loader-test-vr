@@ -14,6 +14,7 @@ import { Tasks } from './modules/Tasks';
 import PickAndPlace from './modules/tasks/PickAndPlace';
 import PoseMatch from './modules/tasks/PoseMatch';
 import CustomTask from './modules/tasks/CustomTask';
+import PickAndDrop from './modules/tasks/PickAndDrop';
 import { ResetRobot } from './modules/ResetRobot';
 import { Teleport } from './modules/Teleport';
 
@@ -61,8 +62,14 @@ export class VrControl {
         this.controller = this.controller1;
         window.controllerGrip = this.controllerGrip1;
 
-        this.controllerGrip1.addEventListener('connected', e => this.controller1.handedness = e.data.handedness);
-        this.controllerGrip2.addEventListener('connected', e => this.controller2.handedness = e.data.handedness);
+        this.controllerGrip1.addEventListener('connected', e => {
+            this.controller1.handedness = e.data.handedness;
+            this.controller1.gamepad = e.data.gamepad;
+        });
+        this.controllerGrip2.addEventListener('connected', e => {
+            this.controller2.handedness = e.data.handedness;
+            this.controller2.gamepad = e.data.gamepad;
+        });
         this.hand = INIT_HAND;
 
         // teleportvr
@@ -114,20 +121,20 @@ export class VrControl {
         })
         window.modules.push(teleport);
 
-        const resetRobot = new ResetRobot({ eventConfig, ui: this.ui }, { showInstructions: true });
-        window.modules.push(resetRobot)
+        // const resetRobot = new ResetRobot({ eventConfig, ui: this.ui }, { showInstructions: true });
+        // window.modules.push(resetRobot)
 
-        const dragControl = new DragControl({ fsmConfig, eventConfig, ui: this.ui }, { showInstructions: true })
+        const dragControl = new DragControl({ fsmConfig, eventConfig, ui: this.ui }, { showInstructions: false })
         window.modules.push(dragControl);
 
-        const remoteControl = new RemoteControl({ fsmConfig, eventConfig, ui: this.ui }, { showInstructions: true })
+        const remoteControl = new RemoteControl({ fsmConfig, eventConfig, ui: this.ui, controller: this.controller }, { showInstructions: true })
         window.modules.push(remoteControl);
 
         const record = new Record({ fsmConfig, eventConfig, ui: this.ui });
         window.modules.push(record);
 
         const tasks = new Tasks(
-            { ui: this.ui }, 
+            { ui: this.ui, data: this.data }, 
             [   
                 // new CustomTask(
                 //     { ui: this.ui, data: this.data }, 
@@ -137,10 +144,14 @@ export class VrControl {
                 //     { ui: this.ui, data: this.data }, 
                 //     { disableModules: ['DragControl'], completeCondition: () => { return (remoteControl.showInstructions === false) } }
                 // ),
-                new PickAndPlace(
+                new PickAndDrop(
                     { ui: this.ui, data: this.data, world: this.world }, 
-                    { numRounds: 1 }
+                    { numRounds: 2 }
                 ),
+                // new PickAndPlace(
+                //     { ui: this.ui, data: this.data, world: this.world }, 
+                //     { numRounds: 1 }
+                // ),
                 // new PoseMatch(
                 //     { ui: this.ui, data: this.data },
                 //     { numRounds: 1 }

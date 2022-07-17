@@ -30,7 +30,9 @@ export default class Table {
 
             const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
                 .setTranslation(mesh.position.x, mesh.position.y, mesh.position.z)
-                .setRotation(mesh.quaternion);
+                .setRotation(mesh.quaternion)
+                .lockTranslations()
+                .lockRotations()
             this.rigidBody = this.world.createRigidBody(rigidBodyDesc);
             window.simObjs.set(this.rigidBody, mesh);
 
@@ -57,8 +59,11 @@ export default class Table {
                     .setTranslation(-67 * this.scale.x, 72 * this.scale.y, 0),
             ]
 
+            this.colliders = []
             colliders.forEach(desc => { 
                 const collider = this.world.createCollider(desc, this.rigidBody);
+                collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
+                this.colliders.push(collider);
             });
 
             window.scene.add(mesh);

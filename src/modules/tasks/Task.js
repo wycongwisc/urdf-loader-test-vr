@@ -28,13 +28,19 @@ export default class Task extends Module {
         this.fsm = new StateMachine({
             init: 'IDLE',
             transitions: [
-                { name: 'start', from: 'IDLE', to: roundIndices[0] },
-                { name: 'next', from: roundIndices, to: function() {
+                { 
+                    name: 'start', from: 'IDLE', to: roundIndices[0] 
+                },
+                { 
+                    name: 'next', from: roundIndices, to: function() {
                         return (Number(this.state) === roundIndices.length) ? 'COMPLETE' : `${Number(this.state) + 1}`;
-                }},
-                { name: 'previous', from: roundIndices, to: function() {
-                    return (Number(this.state) === roundIndices[0]) ? 'COMPLETE' : `${Number(this.state) - 1}`;
-                }},
+                    }
+                },
+                { 
+                    name: 'previous', from: roundIndices, to: function() {
+                        return (Number(this.state) === roundIndices[0]) ? 'COMPLETE' : `${Number(this.state) - 1}`;
+                    }
+                },
             ],
             methods: {
                 onTransition: (state) => {
@@ -42,10 +48,13 @@ export default class Task extends Module {
                         case 'IDLE':
                             break;
                         case 'COMPLETE':
+                            that.roundComplete.play();
+                            that.data.flush(this.name);
                             for (const module of window.modules) {
                                 if (that.disableModules.includes(module.name)) module.enable();
                             }
                             that.clearRound();
+                            that.destruct();
                             break;
                         default:
                             that.clearRound();
@@ -75,8 +84,15 @@ export default class Task extends Module {
         }
         this.round = this.rounds[roundIndex]
 
-        for (const object in this.round) {
-            this.round[object].show();
+        for (const objectName in this.round) {
+            const object = this.round[objectName];
+            if (Array.isArray(object)) {
+                for (const childObject of object) {
+                    childObject.show();
+                }
+            } else {
+                object.show();
+            }
         }
     }
 
@@ -84,18 +100,15 @@ export default class Task extends Module {
      * Clears the current round (this.round)
      */
     clearRound() {
-        for (const object in this.round) {
-            this.round[object].hide();
+        for (const name in this.round) {
+            const obj = this.round[name];
+            if (Array.isArray(obj)) {
+                for (const child of obj) child.hide();
+            } else {
+                obj.hide();
+            }
         }
         this.round = null;
-    }
-
-    /**
-     * Advances the finite state machine to the next round. This method should be called after a round is completed.
-     */
-    completeRound() {
-        this.roundComplete.play();
-        this.fsm.next();
     }
 
     clear() {

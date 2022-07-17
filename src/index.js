@@ -33,12 +33,12 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
 
     loader.parseCollision = true;
     loader.parseVisual = true;
-    loader.parseInertial = true;
+    // loader.parseInertial = true;
     loader.load(file, robot => {
         robot.rotation.x = -Math.PI / 2;
-        robot.position.y = .1;
-        robot.position.x = -2;
-        robot.position.z = 2;
+        robot.position.y = .05;
+        robot.position.x = .2 ;
+        // robot.position.z = .3;
         robot.updateMatrix();
         robot.traverse(c => {
             c.castShadow = true;
@@ -62,6 +62,9 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
         window.robotName = name;
         console.log(robot);
 
+        window.robotColliders = {};
+        window.gripperColliders = [];
+
         initRelaxedIK().then(async () => {
             window.robotInfo = yaml.load(await fetch(info).then(response => response.text()));
             window.robotNN = yaml.load(await fetch(nn).then(response => response.text()));
@@ -74,6 +77,117 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
 
             window.relaxedIK = new RelaxedIK(window.robotInfo, window.robotNN);
             console.log('%cSuccessfully loaded robot config.', 'color: green');
+
+
+            window.linkToRigidBody = new Map();
+
+            function initRobotPhysics(currJoint) {
+                if (currJoint.type === 'URDFJoint' || currJoint.type === 'URDFMimicJoint') {
+                    console.log(`%c ${currJoint.name}`, 'background: #222; color: white; padding: .5rem');
+                    console.log(currJoint)
+                    currJoint.children.forEach((childLink) => {
+                        if (childLink.type == 'URDFLink') {
+
+                            const urdfColliders = [];
+                            let urdfVisual;
+                            childLink.children.forEach((grandChild) => {
+                                if (grandChild.type === 'URDFCollider') {
+                                    urdfColliders.push(grandChild);
+                                } else if (grandChild.type === 'URDFVisual') {
+                                    if (!urdfVisual) urdfVisual = grandChild;
+                                    else console.warn("Multiple URDF Visual found!");
+                                }
+                            });
+    
+                            const position = childLink.getWorldPosition(new T.Vector3());
+                            const quaternion = childLink.getWorldQuaternion(new T.Quaternion());
+
+                            const rigidBodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased()
+                                .setTranslation(position.x, position.y, position.z)
+                                .setRotation(quaternion)
+                            const rigidBody = world.createRigidBody(rigidBodyDesc);
+
+                            if (urdfVisual) {
+                                urdfVisual.traverse(child => {
+                                    child.castShadow = true;
+                                    child.recieveShadow = true;
+                                })
+                                const visualGroup = new T.Group();
+                                visualGroup.add(urdfVisual);
+                                scene.add(visualGroup);
+                                simObjs.set(rigidBody, visualGroup);
+                            }
+    
+                            if (urdfColliders.length != 0 && childLink.name !== 'finger_tip') {
+                                const colliders = [];
+                                for (const urdfCollider of urdfColliders) {
+                                    const colliderMeshes = [];
+                                    urdfCollider.traverse((child) => {
+                                        if (child.type === 'Mesh') colliderMeshes.push(child)
+                                    })
+                                    // let colliderMeshes = recursivelyFindMesh(urdfCollider);
+                                    if (colliderMeshes.length != 1) {
+                                        console.warn("No collider mesh or multiple collider meshes were found under: ");
+                                        console.log(urdfCollider);
+                                        return;
+                                    } 
+        
+                                    const colliderMesh = colliderMeshes[0];
+                                    const vertices = colliderMesh.geometry.getAttribute('position').array.slice();
+                                    console.log(colliderMesh)
+
+                                    for (let i = 0; i < vertices.length; i += 3) {
+                                        vertices[i] *= colliderMesh.scale.x;
+                                        vertices[i + 1] *= colliderMesh.scale.y;
+                                        vertices[i + 2] *= colliderMesh.scale.z;
+                                    }
+
+                                    let indices = colliderMesh.geometry.index;
+                                    if (!indices) {
+                                        // unindexed bufferedgeometry
+                                        indices = [...Array(vertices.count).keys()]
+                                    }
+                                    let position = new T.Vector3();
+                                    position.addVectors(urdfCollider.position, colliderMesh.position);
+                                    let quaternion = new T.Quaternion();
+                                    quaternion.multiplyQuaternions(urdfCollider.quaternion, colliderMesh.quaternion);
+
+
+                                    const colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices.array)
+                                        .setTranslation(position.x, position.y, position.z)
+                                        .setRotation(quaternion)
+                                    const collider = world.createCollider(colliderDesc, rigidBody);
+                                    collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+                                    colliders.push(collider);
+                                }
+                                window.robotColliders[childLink.name] = colliders;
+                            }
+
+                            if (childLink.name === 'right_gripper_l_finger') {
+                                window.leftFinger =  {
+                                    rigidBody,
+                                    link: childLink
+                                    
+                                }
+                            }
+                            if (childLink.name === 'right_gripper_r_finger') {
+                                window.rightFinger =  {
+                                    rigidBody,
+                                    link: childLink
+                                }
+                            }
+
+                            window.linkToRigidBody.set(childLink, rigidBody);
+
+                            
+    
+                            childLink.children.forEach((joint) => {
+                                initRobotPhysics(joint);
+                            });
+                        }
+                    })
+                } 
+            }
 
             function createRobotCollider(currJoint, parentRigidBody, parentColliders, parentJointRotation, parentName = '') {
                 if (![
@@ -305,20 +419,18 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
             }
 
             // console.log('Robot: ', robot);
-    
-            const jointNames = new Map();
-
+            // const jointNames = new Map();
 
             const position = robot.getWorldPosition(new T.Vector3());
             const quaternion = robot.getWorldQuaternion(new T.Quaternion());
-            console.log(robot.name);
             const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
                 .setTranslation(position.x, position.y, position.z)
                 .setRotation(quaternion);
             const rigidBody = world.createRigidBody(rigidBodyDesc);
 
             robot.children.forEach((joint) => {
-                createRobotCollider(joint, rigidBody, [], new T.Quaternion());
+                initRobotPhysics(joint)
+                // createRobotCollider(joint, rigidBody, [], new T.Quaternion());
             });
     
             // function changeRobotVisibility(parent, hideURDFVisual, hideURDFCollider) {
@@ -412,43 +524,6 @@ groundCollider.setCollisionGroups(groundCollisionGroups);
 
 window.simObjs = new Map();
 
-let lines;
-const gameLoop = () => {
-    world.step();
-
-    window.simObjs.forEach((mesh, rigidBody) => {
-        const position = rigidBody.translation();
-        mesh.position.set(position.x, position.y, position.z);
-        const quaternion = rigidBody.rotation();
-        mesh.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
-        // console.log(position, quaternion);
-        mesh.updateMatrix();
-    })
-
-
-    if (!lines) {
-        let material = new T.LineBasicMaterial({
-            color: 0xffffff,
-            vertexColors: T.VertexColors
-        });
-        let geometry = new T.BufferGeometry();
-        lines = new T.LineSegments(geometry, material);
-        lines.renderOrder = Infinity;
-        lines.material.depthTest = false;
-        lines.material.depthWrite = false;
-        scene.add(lines);
-    }
-    
-    let buffers = world.debugRender();
-    lines.geometry.setAttribute('position', new T.BufferAttribute(buffers.vertices, 3));
-    lines.geometry.setAttribute('color', new T.BufferAttribute(buffers.colors, 4));
-
-
-    setTimeout(gameLoop, 16);
-};
-
-gameLoop();
-
 // load robots
 
 const robots = {
@@ -521,8 +596,7 @@ function init() {
 
 
 
-    // update loop
-
+    // update logic loop
     setTimeout(function update() { 
         if (renderer.xr.isPresenting) {
             // pass timestamp to ensure tables can be joined by timestamp
@@ -534,8 +608,45 @@ function init() {
         setTimeout(update, 5);
     }, 5);
 
-    // render loop
 
+    // update physics loop
+    let lines;
+    setTimeout(function update() {
+        const events = new RAPIER.EventQueue(true);
+        world.step(events);
+
+        // vrControl.updatePhysics(events);
+        window.simObjs.forEach((mesh, rigidBody) => {
+            const position = rigidBody.translation();
+            mesh.position.set(position.x, position.y, position.z);
+            const quaternion = rigidBody.rotation();
+            mesh.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+            // console.log(position, quaternion);
+            mesh.updateMatrix();
+        })
+
+
+        if (!lines) {
+            let material = new T.LineBasicMaterial({
+                color: 0xffffff,
+                vertexColors: T.VertexColors
+            });
+            let geometry = new T.BufferGeometry();
+            lines = new T.LineSegments(geometry, material);
+            lines.renderOrder = Infinity;
+            lines.material.depthTest = false;
+            lines.material.depthWrite = false;
+            scene.add(lines);
+        }
+        
+        let buffers = world.debugRender();
+        lines.geometry.setAttribute('position', new T.BufferAttribute(buffers.vertices, 3));
+        lines.geometry.setAttribute('color', new T.BufferAttribute(buffers.colors, 4));
+
+        setTimeout(update, 16);
+    })
+
+    // render loop
     renderer.setAnimationLoop( function () {
         ThreeMeshUI.update();
         vrControl.teleportvr?.update();

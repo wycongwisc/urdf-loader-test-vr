@@ -11,6 +11,7 @@ import StateMachine from "javascript-state-machine"
 import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET } from "../../globals"
 import { getCurrEEPose } from '../../utils';
 import Container from '../../ui/Container';
+import Box from './objects/Box';
 
 // default settings
 
@@ -32,11 +33,11 @@ export default class PickAndPlace extends Task {
             {
                 block: new Block({ 
                     world: this.world,
-                    position: new T.Vector3(1, 1.5, 0.2) 
+                    position: new T.Vector3(1, 3, 0.2) 
                 }),
                 target: new Target({ 
                     world: this.world,
-                    position: new T.Vector3(0.7, 1.5, 0.75) 
+                    position: new T.Vector3(0.7, 3, 0.75) 
                 })
             },
             {
@@ -124,14 +125,13 @@ export default class PickAndPlace extends Task {
         }
 
         if (block.mesh.position.distanceTo(target.mesh.position) < 0.04) {
-            this.completeRound(t);
+            this.fsm.next();
         }
     }
 
     log(t) {
-        const round = this.round;
-        const block = round.block;
-        const target = round.target;
+        const block = this.round.block;
+        const target = this.round.target;
 
         this.data.log(t, [
             this.id,
