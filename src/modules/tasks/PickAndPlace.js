@@ -37,27 +37,27 @@ export default class PickAndPlace extends Task {
                 }),
                 target: new Target({ 
                     world: this.world,
-                    position: new T.Vector3(0.7, 3, 0.75) 
+                    position: new T.Vector3(0.7, .9, 0.75) 
                 })
             },
             {
                 block: new Block({ 
                     world: this.world,
-                    position: new T.Vector3(0.8, 1.5, 0.5) 
+                    position: new T.Vector3(0.8, 3, 0.5) 
                 }),
                 target: new Target({ 
                     world: this.world,
-                    position: new T.Vector3(1, 1.5, -0.5) 
+                    position: new T.Vector3(1, .9, -0.5) 
                 })
             },
             {
                 block: new Block({ 
                     world: this.world,
-                    position: new T.Vector3(1, 1.5, 0) 
+                    position: new T.Vector3(1, 3, 0) 
                 }),
                 target: new Target({ 
                     world: this.world,
-                    position: new T.Vector3(0.5, 1.5, 0.5) 
+                    position: new T.Vector3(0.5, .9, 0.5) 
                 })
             }
         ]
@@ -71,7 +71,7 @@ export default class PickAndPlace extends Task {
             backgroundOpacity: 0,
         });
         this.instructions.appendChild(this.ui.createText('Pick and Place\n', { fontSize: 0.08 }));
-        this.instructions.appendChild(this.ui.createText('Complete the task by picking up the block with the robot and placing it inside the red circle'));
+        this.instructions.appendChild(this.ui.createText('Complete the task by picking up the block with the robot and placing it inside the circle'));
     }
 
     start() {
@@ -115,18 +115,45 @@ export default class PickAndPlace extends Task {
         
         this.instructions.getObject().lookAt(window.camera.position);
 
-        if (!block.grasped && gripper.position.distanceTo(block.mesh.position) < 0.02) {
-            block.grasped = true;
+        // hacked grasping mechanics
+        const pos1 = window.robot.links['right_gripper_l_finger_tip'].getWorldPosition(new T.Vector3());
+        const pos2 = window.robot.links['right_gripper_r_finger_tip'].getWorldPosition(new T.Vector3());
+        const gripperDistance = pos1.distanceTo(pos2);
+
+        for (const block of blocks) {
+            if (!block.grasped) {
+                const gripperContact = {};
+
+                this.world.contactsWith(window.robotColliders['right_gripper_l_finger_tip'][0], (collider) => {
+                    if (collider === block.collider) gripperContact.left = block;
+                });
+
+                this.world.contactsWith(window.robotColliders['right_gripper_r_finger_tip'][0], (collider) => {
+                    if (collider === block.collider) gripperContact.right = block;
+                });
+
+                if (
+                    gripperContact.left 
+                    && gripperContact.right
+                    && gripperContact.left === gripperContact.right 
+                    && gripperDistance < block.size.x + .01 
+                    && gripperDistance > block.size.x
+                ) {
+                    block.grasp(gripper.position, gripper.quaternion);
+                }
+            } else {
+                block.rigidBody.setNextKinematicTranslation(gripper.position);
+                block.rigidBody.setNextKinematicRotation(gripper.quaternion); // TODO
+
+                if (gripperDistance > block.size.x + .01) {
+                    block.ungrasp(gripper.position, gripper.quaternion)
+                }
+            }
         }
 
-        if (block.grasped) {
-            block.mesh.position.copy(gripper.position);
-            block.mesh.quaternion.copy(gripper.quaternion);
-        }
-
-        if (block.mesh.position.distanceTo(target.mesh.position) < 0.04) {
-            this.fsm.next();
-        }
+        this.world.contactsWith(block.collider, (collider) => {
+            if (collider === target.collider) this.fsm.nxet();
+        })
     }
 
     log(t) {
@@ -136,10 +163,10 @@ export default class PickAndPlace extends Task {
         this.data.log(t, [
             this.id,
             this.fsm.state,
-            block.mesh.position.x + ' ' + block.mesh.position.y + ' ' + block.mesh.position.z,
-            block.mesh.quaternion.x + ' ' + block.mesh.quaternion.y + ' ' + block.mesh.quaternion.z + ' ' + block.mesh.quaternion.w,
             target.mesh.position.x + ' ' + target.mesh.position.y + ' ' + target.mesh.position.z,
             target.mesh.quaternion.x + ' ' + target.mesh.quaternion.y + ' ' + target.mesh.quaternion.z + ' ' + block.mesh.quaternion.w,
+            block.mesh.position.x + ' ' + block.mesh.position.y + ' ' + block.mesh.position.z,
+            block.mesh.quaternion.x + ' ' + block.mesh.quaternion.y + ' ' + block.mesh.quaternion.z + ' ' + block.mesh.quaternion.w,
             block.grasped,
         ], this.name)
     }

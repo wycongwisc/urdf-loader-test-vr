@@ -9,4 +9,8 @@ export default class Text extends Element {
             fontSize: options.fontSize ?? 0.05,
         }))
     }
+
+    set(text) {
+        this.object.set({ content: text });
+    }
 }

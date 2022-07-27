@@ -23,14 +23,12 @@ export default class PickAndDrop extends Task {
             name: 'pick-and-drop',
             ui: params.ui,
             data: params.data,
-            world: params.world
+            world: params.world,
+            controller: params.controller
         }, {
             numRounds: options.numRounds,
             disableModules: options.disableModules 
         });
-
-        this.tableCollision = new Audio('./assets/table_collision.wav');
-        this.soundInterval = 0;
         this.rounds = [
             {
                 blocks: [
@@ -74,28 +72,33 @@ export default class PickAndDrop extends Task {
             },
         ]
 
-        //
+        // 
 
         this.instructions = this.ui.createContainer('pick-and-drop-instructions', {
             height: .4,
-            position: new T.Vector3(2, 1.5, 0),
+            position: new T.Vector3(2, 1.52, 0),
             rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
             backgroundOpacity: 0,
         });
         this.instructions.appendChild(this.ui.createText('Pick and Drop\n', { fontSize: 0.08 }));
         this.instructions.appendChild(this.ui.createText('Complete the task by picking up the blocks with the robot and placing them in the box. Close the box after you are done.'));
+        this.blockCounter = this.ui.createContainer('block-counter', {
+            height: .1,
+            width: .2,
+            backgroundOpacity: 0,
+        });
+        this.blockCounterText = this.ui.createText('- / -', { fontSize: 0.025 });
+        this.blockCounter.appendChild(this.blockCounterText);
+
+        this.buttons = this.ui.createContainer('pick-and-drop-buttons', {
+            height: .4,
+            position: new T.Vector3(2, 1.2, 0),
+            rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
+            backgroundOpacity: 0,
+        })
+        this.buttons.appendChild(this.ui.createButton('Reset', { onClick: () => this.fsm.reset() }))
+
         
-        this.sphere = new T.Mesh(
-            new T.SphereGeometry(0.025), 
-            new T.MeshBasicMaterial({ color: 0xffffff })
-        )
-        this.sphere2 = new T.Mesh(
-            new T.SphereGeometry(0.025), 
-            new T.MeshBasicMaterial({ color: 0xffffff })
-        )
-        window.scene.add(this.sphere);
-        window.scene.add(this.sphere2);
-    
     }
 
     start() {
@@ -107,12 +110,15 @@ export default class PickAndDrop extends Task {
         });
         this.table.show();
         this.instructions.show();
+        this.buttons.show();
+        this.blockCounter.show();
     }
 
     destruct() {
         this.table.hide();
         this.instructions.hide();
-        // this.data.flush(this.name);
+        this.buttons.hide();
+        this.blockCounter.hide();
     }
 
     /**
@@ -135,9 +141,17 @@ export default class PickAndDrop extends Task {
         const gripper = this.computeGripper(data.currEEAbsThree);
         
         this.instructions.getObject().lookAt(window.camera.position);
+        this.buttons.getObject().lookAt(window.camera.position);
+        this.blockCounter.getObject().lookAt(window.camera.position);
+
+        const temp = box.meshes[0].clone();
+        temp.translateX(box.size.x / 2);
+        temp.translateY(box.size.z / 2);
+        temp.translateZ(-.05);
+
+        this.blockCounter.getObject().position.copy(temp.position);
 
         // hacked grasping mechanics
-        
         const pos1 = window.robot.links['right_gripper_l_finger_tip'].getWorldPosition(new T.Vector3());
         const pos2 = window.robot.links['right_gripper_r_finger_tip'].getWorldPosition(new T.Vector3());
         const gripperDistance = pos1.distanceTo(pos2);
@@ -174,35 +188,26 @@ export default class PickAndDrop extends Task {
         }
 
         // detect collision with table
-
         let tableContact = false;
         for (const colliderName in window.robotColliders) {
             const colliders = window.robotColliders[colliderName];
             for (const collider of colliders) {
                 this.world.contactsWith(collider, (collider2) => {
-                    if (this.table?.colliders.includes(collider2) && !tableContact && Date.now() - this.soundInterval > 500) {
-                        this.soundInterval = Date.now();
-                        this.tableCollision.play()
-                        // this.controller.gamepad?.hapticActuators[0].pulse(1, 18);
+                    if (this.table?.colliders.includes(collider2) && !tableContact) {
+                        this.controller.gamepad?.hapticActuators[0].pulse(1, 18);
                         tableContact = true;
                     }
                 })
             }
         }
 
-        // completion condition
-        // for (const block of blocks) {
-        //     this.world.contactsWith()
-        // }
-
-
         // check if blocks are in the box;
         // https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
 
-        const p1 = box.mesh.position;
-        const p2 = box.mesh.localToWorld(new T.Vector3(box.size.x, 0, 0));
-        const p3 = box.mesh.localToWorld(new T.Vector3(0, box.size.z, 0));
-        const p4 = box.mesh.localToWorld(new T.Vector3(0, 0, box.size.y));
+        const p1 = box.meshes[0].position;
+        const p2 = box.meshes[0].localToWorld(new T.Vector3(box.size.x, 0, 0));
+        const p3 = box.meshes[0].localToWorld(new T.Vector3(0, box.size.z, 0));
+        const p4 = box.meshes[0].localToWorld(new T.Vector3(0, 0, box.size.y));
 
         const [i, j, k] = [new T.Vector3(), new T.Vector3(), new T.Vector3()]
         i.subVectors(p2, p1);
@@ -223,6 +228,8 @@ export default class PickAndDrop extends Task {
             }
         }
 
+        this.blockCounterText.set(`${numInside} / ${blocks.length}`);
+
         if (numInside === blocks.length) {
             let numContacts = 0;
             const lid = box.colliders[5];
@@ -232,14 +239,11 @@ export default class PickAndDrop extends Task {
                 })
             }
 
+            // lid must contact all four sides of the box
             if (numContacts === 4) {
                 this.fsm.next();
             }
         }
-
-        // this.sphere.position.copy(p0);
-        // this.sphere2.position.copy(p3)
-
     }
 
     log(t) {
@@ -249,9 +253,10 @@ export default class PickAndDrop extends Task {
         const data = [
             this.id,
             this.fsm.state,
-
-            box.mesh.position.x + ' ' + box.mesh.position.y + ' ' + box.mesh.position.z,
-            box.mesh.quaternion.x + ' ' + box.mesh.quaternion.y + ' ' + box.mesh.quaternion.z + ' ' + box.mesh.quaternion.w,
+            box.meshes[0].position.x + ' ' + box.meshes[0].position.y + ' ' + box.meshes[0].position.z,
+            box.meshes[0].quaternion.x + ' ' + box.meshes[0].quaternion.y + ' ' + box.meshes[0].quaternion.z + ' ' + box.meshes[0].quaternion.w,
+            box.meshes[1].position.x + ' ' + box.meshes[1].position.y + ' ' + box.meshes[1].position.z,
+            box.meshes[1].quaternion.x + ' ' + box.meshes[1].quaternion.y + ' ' + box.meshes[1].quaternion.z + ' ' + box.meshes[1].quaternion.w,
         ]
 
         for (const block of blocks) {

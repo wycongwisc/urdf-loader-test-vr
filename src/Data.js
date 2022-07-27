@@ -6,7 +6,7 @@ export class Data {
     buffer = new Map();
     BUFFER_SIZE = 500; // number of data entries stored before a POST request is called
     SESSION_ID = id();
-    SCRIPT_PATH = "https://script.google.com/macros/s/AKfycbzHU5Nb1flTSAmQCqMb27CzWZDe4qz5ZMzihYl_AJGGMpNjbCoyT-LTO_zLQbsyjwI5/exec";
+    SCRIPT_PATH = "https://script.google.com/macros/s/AKfycbywMorCojPbcZT3vhueV1nbH-0YjHv-zFtrxHUpyaBt4gRoJx_FOYC1ewo09uviNek8/exec";
 
     constructor(params) {
     }
@@ -14,28 +14,28 @@ export class Data {
     /**
      * Sends the data to Google Sheets. Call this method directly to bypass the buffer.
      * @param {} data 
-     * @param {*} type 
+     * @param {*} table 
      */
-    post(data, type) {
-        console.log(`Posting to ${type}`, data);
+    post(data, table) {
+        console.log(`Posting to ${table}`, data);
 
         // add session id to beginning of each row
         // for (const row of data) row.unshift(this.SESSION_ID)
         
-        // fetch(this.SCRIPT_PATH, {
-        //     method: "POST",
-        //     headers: {
-        //         'Accept': 'application/json',
-        //         'Content-Type': 'application/json'
-        //     }, 
-        //     mode: 'no-cors',
-        //     body: JSON.stringify({
-        //         data,
-        //         type,
-        //     })
-        // }).then(res => {
-        //     console.log("Request complete! response:", res);
-        // })
+        fetch(this.SCRIPT_PATH, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }, 
+            mode: 'no-cors',
+            body: JSON.stringify({
+                data,
+                table,
+            })
+        }).then(res => {
+            console.log("Request complete! response:", res);
+        })
     }
 
     /**
@@ -43,16 +43,16 @@ export class Data {
      * @param {Array} row 
      * @param {String} type 
      */
-    push(row, type) {
-        const data = this.buffer.get(type);
+    push(row, table) {
+        const data = this.buffer.get(table);
         if (!data) {
-            this.buffer.set(type, [row]);
+            this.buffer.set(table, [row]);
             return
         } else {
             data.push(row);
         }
 
-        if (data.length >= this.BUFFER_SIZE) this.flush(type);
+        if (data.length >= this.BUFFER_SIZE) this.flush(table);
     }
 
     /**
@@ -60,14 +60,14 @@ export class Data {
      * @param {String} type Buffer name
      * @returns True if buffer has been flushed, false otherwise
      */
-    flush(type) {
-        const data = this.buffer.get(type);
+    flush(table) {
+        const data = this.buffer.get(table);
 
         if (!data || data.length === 0) return false;
 
-        console.log(`Flushing ${type} buffer (${data.length} entries)`);
-        this.post(data, type);
-        this.buffer.set(type, []);
+        console.log(`Flushing ${table} buffer (${data.length} entries)`);
+        this.post(data, table);
+        this.buffer.set(table, []);
         return true;
     }
 
@@ -79,6 +79,7 @@ export class Data {
             new Date(), 
             this.SESSION_ID,
             navigator.platform,
+            ip,
             locationData.city,
             locationData.regionName,
             locationData.country
@@ -104,7 +105,7 @@ export class Data {
         this.post([row], 'session');
     }
 
-    logRobot(t, fsm, robot, target) {
+    logRobot(t, fsm, robot, eePose, target) {
         const pos1 = window.robot.links['right_gripper_l_finger_tip'].getWorldPosition(new T.Vector3());
         const pos2 = window.robot.links['right_gripper_r_finger_tip'].getWorldPosition(new T.Vector3());
         const gripperDistance = pos1.distanceTo(pos2);
@@ -120,6 +121,8 @@ export class Data {
             row.push(currJoint.jointValue[0]);
         }
         row.push(gripperDistance);
+        row.push(`${eePose.posi.x} ${eePose.posi.y} ${eePose.posi.z}`);
+        row.push(`${eePose.ori.x} ${eePose.ori.y} ${eePose.ori.z} ${eePose.ori.w}`);
         row.push(`${target.position.x} ${target.position.y} ${target.position.z}`)
         row.push(`${target.quaternion.x} ${target.quaternion.y} ${target.quaternion.z} ${target.quaternion.w}`)
         this.push(row, 'robot');
@@ -153,12 +156,12 @@ export class Data {
         ], 'task');
     }
 
-    log(t, data, type) {
+    log(t, data, table) {
         this.push([
             t,
             this.SESSION_ID,
             ...data,
-        ], type);
+        ], table);
     }
 
     

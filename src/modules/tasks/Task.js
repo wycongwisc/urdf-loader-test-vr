@@ -14,6 +14,7 @@ export default class Task extends Module {
         this.data = params.data;
         this.ui = params.ui;
         this.world = params.world;
+        this.controller = params.controller;
 
         this.disableModules = options.disableModules ?? [];
         this.id = id();
@@ -41,6 +42,11 @@ export default class Task extends Module {
                         return (Number(this.state) === roundIndices[0]) ? 'COMPLETE' : `${Number(this.state) - 1}`;
                     }
                 },
+                {
+                    name: 'reset', from: roundIndices, to: function() {
+                        return this.state;
+                    }
+                }
             ],
             methods: {
                 onTransition: (state) => {
@@ -49,7 +55,7 @@ export default class Task extends Module {
                             break;
                         case 'COMPLETE':
                             that.roundComplete.play();
-                            that.data.flush(this.name);
+                            that.data?.flush(this.name);
                             for (const module of window.modules) {
                                 if (that.disableModules.includes(module.name)) module.enable();
                             }
@@ -120,16 +126,13 @@ export default class Task extends Module {
      */
     start() {
         this.fsm.start();
+        window.fsm?.goto('IDLE');
     }
 
     /**
      * Clean up the task. This method is automatically called after all rounds are completed.
      */
     destruct() {
-        return;
-    }
-
-    setFSM(fsm) { 
         return;
     }
 }

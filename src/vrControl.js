@@ -17,6 +17,10 @@ import CustomTask from './modules/tasks/CustomTask';
 import PickAndDrop from './modules/tasks/PickAndDrop';
 import { ResetRobot } from './modules/ResetRobot';
 import { Teleport } from './modules/Teleport';
+import { Grasping } from './modules/Grasping';
+import DragControlTutorial from './modules/tasks/DragControlTutorial';
+import RemoteControlTutorial from './modules/tasks/RemoteControlTutorial';
+import GraspingTutorial from './modules/tasks/GraspingTutorial';
 
 export class VrControl {
     constructor(params) {
@@ -88,7 +92,7 @@ export class VrControl {
             squeeze: [],
             select: [
                 () => {
-                    if (this.fsm.is('IDLE')) {
+                    if (window.fsm.is('IDLE')) {
                         if (this.ui.update(this.raycaster, false)) {
                             this.ui.update(this.raycaster, true);
                             return true;
@@ -124,11 +128,14 @@ export class VrControl {
         // const resetRobot = new ResetRobot({ eventConfig, ui: this.ui }, { showInstructions: true });
         // window.modules.push(resetRobot)
 
-        const dragControl = new DragControl({ fsmConfig, eventConfig, ui: this.ui }, { showInstructions: false })
+        const dragControl = new DragControl({ fsmConfig, eventConfig, ui: this.ui })
         window.modules.push(dragControl);
 
-        const remoteControl = new RemoteControl({ fsmConfig, eventConfig, ui: this.ui, controller: this.controller }, { showInstructions: true })
+        const remoteControl = new RemoteControl({ fsmConfig, eventConfig, ui: this.ui, controller: this.controller })
         window.modules.push(remoteControl);
+
+        const grasping = new Grasping({ controller: this.controller });
+        window.modules.push(grasping);
 
         const record = new Record({ fsmConfig, eventConfig, ui: this.ui });
         window.modules.push(record);
@@ -136,22 +143,25 @@ export class VrControl {
         const tasks = new Tasks(
             { ui: this.ui, data: this.data }, 
             [   
-                // new CustomTask(
-                //     { ui: this.ui, data: this.data }, 
-                //     { disableModules: ['RemoteControl'], completeCondition: () => { return (dragControl.showInstructions === false) } }
-                // ),
-                // new CustomTask(
-                //     { ui: this.ui, data: this.data }, 
-                //     { disableModules: ['DragControl'], completeCondition: () => { return (remoteControl.showInstructions === false) } }
-                // ),
+                new RemoteControlTutorial(
+                    { ui: this.ui },
+                    { disableModules: ['drag-control'] }
+                ),
+                new DragControlTutorial(
+                    { ui: this.ui },
+                    { disableModules: ['remote-control'] }
+                ),
+                new GraspingTutorial(
+                    { ui: this.ui, hand: this.hand, controller: this.controller },
+                ),
                 new PickAndDrop(
-                    { ui: this.ui, data: this.data, world: this.world }, 
+                    { ui: this.ui, data: this.data, world: this.world, controller: this.controller }, 
                     { numRounds: 2 }
                 ),
-                // new PickAndPlace(
-                //     { ui: this.ui, data: this.data, world: this.world }, 
-                //     { numRounds: 1 }
-                // ),
+                new PickAndPlace(
+                    { ui: this.ui, data: this.data, world: this.world }, 
+                    { numRounds: 1 }
+                ),
                 // new PoseMatch(
                 //     { ui: this.ui, data: this.data },
                 //     { numRounds: 1 }
@@ -160,16 +170,17 @@ export class VrControl {
             { navigation: true }
         )
         window.modules.push(tasks);
-        // disable by reconstructing everything
 
-        this.fsm = new StateMachine(fsmConfig);
+        window.fsm = new StateMachine(fsmConfig);
         window.modules.forEach((module) => {
-            if (module instanceof Record 
+            if (
+                module instanceof Record 
                 || module instanceof DragControl 
                 || module instanceof RemoteControl
                 || module instanceof Teleport
-                || module instanceof ResetRobot)
-            module.setFSM(this.fsm)
+                || module instanceof ResetRobot
+            )
+            module.setFSM(window.fsm)
         });
 
         tasks.start();
@@ -222,11 +233,11 @@ export class VrControl {
         this.currEEAbsThree = getCurrEEPose();
 
         // TODO: have control modes hide the ray 
-        if (this.fsm.is('PLAYBACK') || this.fsm.is('IDLE')) {
+        if (window.fsm.is('PLAYBACK') || window.fsm.is('IDLE')) {
             this.raycaster.set(this.ctrlPose.posi, this.controller.getWorldDirection(new T.Vector3()).negate());
             this.ray.position.copy(this.raycaster.ray.origin);
             this.ray.setDirection(this.raycaster.ray.direction);
-            if (this.fsm.is('IDLE') && this.ray.parent !== window.scene) {
+            if (window.fsm.is('IDLE') && this.ray.parent !== window.scene) {
                 window.scene.add(this.ray);
             }
             this.ui.update(this.raycaster);
@@ -247,7 +258,7 @@ export class VrControl {
     }
 
     log(t) {
-        this.data.logRobot(t, this.fsm, window.robot, window.targetCursor);
+        this.data.logRobot(t, window.fsm, window.robot, getCurrEEPose(), window.targetCursor);
         this.data.logUser(t, this.camera, this.controllerGrip1, this.controllerGrip2, this.hand);
 
         for (const module of window.modules) {

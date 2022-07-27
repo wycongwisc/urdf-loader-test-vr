@@ -518,10 +518,6 @@ groundCollider.setCollisionGroups(groundCollisionGroups);
 
 // j1.configureMotorPosition(2*Math.PI, 10, 10);
 
-
-
-
-
 window.simObjs = new Map();
 
 // load robots

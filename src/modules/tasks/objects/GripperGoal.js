@@ -2,8 +2,9 @@ import * as T from 'three';
 
 export default class GripperGoal {
     constructor(params) {
-        this.position = params.position;
-        this.rotation = params.rotation;
+        this.position = params.position ?? new T.Vector3();
+        this.rotation = params.rotation ?? new T.Euler();
+        this.opacity = params.opacity ?? 0.4;
 
         window.robot.traverse((child) => {
             if (child.name === 'right_gripper_base') {
@@ -20,22 +21,34 @@ export default class GripperGoal {
 
         this.mesh.position.copy(this.position);
         this.mesh.rotation.copy(this.rotation);
-        this.mesh.quaternion.normalize();
 
         this.mesh.traverse((child) => {
             if (child.isMesh) {
                 if (child.material instanceof Array) {
                     child.material.forEach((item) => {
                         item.transparent = true;
-                        item.opacity = 0.4;
+                        item.opacity = this.opacity;
                     })
                 } else {
                     child.material.transparent = true;
-                    child.material.opacity = 0.4;
+                    child.material.opacity = this.opacity;
                 }
             }
         })
 
         this.mesh.add(new T.AxesHelper(0.2));
+    }
+
+    show() {
+        if (this.visible) return;
+        else this.visible = true;
+
+        window.scene.add(this.mesh);
+    }
+
+    hide() {
+        this.visible = false;
+
+        window.scene.remove(this.mesh);
     }
 }

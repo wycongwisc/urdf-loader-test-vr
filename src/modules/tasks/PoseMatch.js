@@ -55,13 +55,13 @@ export default class PoseMatch extends Task {
     }
 
     log(t) {
-        const goal = this.round.goal.mesh;
+        const goal = this.round.goal;
 
         this.data.log(t, [
             this.id,
             this.fsm.state,
-            goal.position.x + ' ' + goal.position.y + ' ' + goal.position.z + ' ',
-            goal.quaternion.x + ' ' + goal.quaternion.y + ' ' + goal.quaternion.z + ' ' + goal.quaternion.w
+            goal.mesh.position.x + ' ' + goal.mesh.position.y + ' ' + goal.mesh.position.z + ' ',
+            goal.mesh.quaternion.x + ' ' + goal.mesh.quaternion.y + ' ' + goal.mesh.quaternion.z + ' ' + goal.mesh.quaternion.w
         ], this.name);
     }
 }

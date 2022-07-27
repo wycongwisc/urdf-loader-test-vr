@@ -44,44 +44,44 @@ export class Record extends Module {
 
         // ui additions
 
-        this.ui.addButtons(
-            this.ui.RECORDING_PANEL,
-            [
-                {
-                    name: 'Record',
-                    onClick: () => {
-                        if (this.fsm.is('IDLE')) {
-                            this.frameIndex = 0;
-                            this.isRecording = true;
-                            window.scene.add(recordIndicator);
-                            recordInterval = setInterval(() => recordIndicator.visible = !recordIndicator.visible, 500)
-                        }
-                    }
-                },
-                {
-                    name: 'Stop',
-                    onClick: () => {
-                        if (this.fsm.is('IDLE') && this.isRecording) {
-                            this.isRecording = false;
-                            window.scene.remove(recordIndicator);
-                            clearInterval(recordInterval);
-                            localStorage.setItem('data', JSON.stringify(this.data));
-                            this.data = [];
-                        }
-                    }
-                },
-                {
-                    name: 'Play',
-                    onClick: () => {
-                        if (this.fsm.is('IDLE') && !this.isRecording && localStorage.getItem('data')) {
-                            this.fsm.activatePlayback();
-                        } else if (this.fsm.is('PLAYBACK')) {
-                            this.fsm.deactivatePlayback();
-                        }
-                    }
-                }
-            ]
-        )
+        // this.ui.addButtons(
+        //     this.ui.RECORDING_PANEL,
+        //     [
+        //         {
+        //             name: 'Record',
+        //             onClick: () => {
+        //                 if (this.fsm.is('IDLE')) {
+        //                     this.frameIndex = 0;
+        //                     this.isRecording = true;
+        //                     window.scene.add(recordIndicator);
+        //                     recordInterval = setInterval(() => recordIndicator.visible = !recordIndicator.visible, 500)
+        //                 }
+        //             }
+        //         },
+        //         {
+        //             name: 'Stop',
+        //             onClick: () => {
+        //                 if (this.fsm.is('IDLE') && this.isRecording) {
+        //                     this.isRecording = false;
+        //                     window.scene.remove(recordIndicator);
+        //                     clearInterval(recordInterval);
+        //                     localStorage.setItem('data', JSON.stringify(this.data));
+        //                     this.data = [];
+        //                 }
+        //             }
+        //         },
+        //         {
+        //             name: 'Play',
+        //             onClick: () => {
+        //                 if (this.fsm.is('IDLE') && !this.isRecording && localStorage.getItem('data')) {
+        //                     this.fsm.activatePlayback();
+        //                 } else if (this.fsm.is('PLAYBACK')) {
+        //                     this.fsm.deactivatePlayback();
+        //                 }
+        //             }
+        //         }
+        //     ]
+        // )
 
         // REMOVE THIS 
         localStorage.clear();

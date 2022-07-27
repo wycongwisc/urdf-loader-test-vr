@@ -1,307 +1,60 @@
 import ThreeMeshUI from 'three-mesh-ui'
 import * as T from 'three'
-import { ZeroSlopeEnding } from 'three';
-import { sackurTetrodeDependencies } from 'mathjs';
 import Container from './ui/Container'
 import Element from './ui/Element'
 import Text from './ui/Text'
+import Button from './ui/Button'
 
 export class UI {
     constructor() {
-        if (location.hostname === 'localhost') {
-            this.FONT_FAMILY = './assets/Roboto-msdf.json';
-            this.FONT_TEXTURE = './assets/Roboto-msdf.png';
-        } else {
-            this.FONT_FAMILY = '/urdf-loader-test-vr/assets/Roboto-msdf.json';
-            this.FONT_TEXTURE = '/urdf-loader-test-vr/assets/Roboto-msdf.png';
-        }
+        this.FONT_FAMILY = (location.hostname === 'localhost') ? 
+            './assets/Roboto-msdf.json' : '/urdf-loader-test-vr/assets/Roboto-msdf.json';
+        this.FONT_TEXTURE = (location.hostname === 'localhost') ? 
+            './assets/Roboto-msdf.png' : '/urdf-loader-test-vr/assets/Roboto-msdf.png';
 
-        this.buttons = new Map();
-        
-        this.BUTTON_OPTIONS = {
-            width: 0.4,
-            height: 0.15,
-            justifyContent: 'center',
-            alignContent: 'center',
-            offset: 0.05,
-            margin: 0.02,
-            borderRadius: 0.075
-        }
-
-        this.BUTTON_HOVER_STATE = {
-            state: 'hovered',
-            attributes: {
-                offset: 0.035,
-                backgroundColor: new T.Color( 0xFF0000 ),
-                backgroundOpacity: 1,
-                fontColor: new T.Color( 0xffffff )
-            },
-        };
-
-        this.BUTTON_IDLE_STATE = {
-            state: 'idle',
-            attributes: {
-                offset: 0.035,
-                backgroundColor: new T.Color( 0xFF0000 ),
-                backgroundOpacity: 0.5,
-                fontColor: new T.Color( 0xffffff )
-            },
-        };
-
-        this.BUTTON_SELECTED_ATTRIBUTES = {
-            offset: 0.02,
-            backgroundColor: new T.Color( 0x777777 ),
-            fontColor: new T.Color( 0x222222 )
-        };
-
-        this.INSTRUCTION_PANEL = new ThreeMeshUI.Block({
-            width: 1.2,
-            height: 1.1,
-            padding: 0.05,
-            justifyContent: 'center',
-            alignContent: 'left',
-            fontFamily: this.FONT_FAMILY,
-            fontTexture: this.FONT_TEXTURE
-        }),
-
-        this.INSTRUCTION_PANEL.position.set( 2, 1.6, 0 );
-        this.INSTRUCTION_PANEL.rotation.y = -Math.PI/2;
-
-        this.NAVIGATION_PANEL = new ThreeMeshUI.Block({
-            justifyContent: 'center',
-            alignContent: 'center',
-            // backgroundColor: new T.Color( 0xFF0000 ),
-            contentDirection: 'row-reverse',
-            fontFamily: this.FONT_FAMILY,
-            fontTexture: this.FONT_TEXTURE,
-            fontSize: 0.07,
-            padding: 0.02,
-            borderRadius: 0.11
-        }),
-
-        this.NAVIGATION_PANEL.position.set( 1.9, .92, 0 );
-        this.NAVIGATION_PANEL.rotateY(-Math.PI/2)
-        this.NAVIGATION_PANEL.rotateX(-Math.PI/6);
-
-        this.RECORDING_PANEL = new ThreeMeshUI.Block({
-            justifyContent: 'center',
-            alignContent: 'center',
-            // backgroundColor: new T.Color( 0xFF0000 ),
-            fontFamily: this.FONT_FAMILY,
-            fontTexture: this.FONT_TEXTURE,
-            fontSize: 0.07,
-            padding: 0.02,
-            borderRadius: 0.11
-        }),
-
-        this.RECORDING_PANEL.position.set( 2, 1.75, -.9 );
-        this.RECORDING_PANEL.rotation.y = -Math.PI/2;
-
-        this.ROBOT_SWITCH_PANEL = new ThreeMeshUI.Block({
-            justifyContent: 'center',
-            alignContent: 'center',
-            // backgroundColor: new T.Color( 0xFF0000 ),
-            fontFamily: this.FONT_FAMILY,
-            fontTexture: this.FONT_TEXTURE,
-            fontSize: 0.07,
-            padding: 0.02,
-            borderRadius: 0.11
-        }),
-
-        this.ROBOT_SWITCH_PANEL.position.set( 2, 1.85, .9 );
-        this.ROBOT_SWITCH_PANEL.rotation.y = -Math.PI/2;
-
-        this.CONTROLLER_SWITCH_PANEL = new ThreeMeshUI.Block({
-            justifyContent: 'center',
-            alignContent: 'center',
-            // backgroundColor: new T.Color( 0xFF0000 ),
-            fontFamily: this.FONT_FAMILY,
-            fontTexture: this.FONT_TEXTURE,
-            fontSize: 0.07,
-            padding: 0.02,
-            borderRadius: 0.11
-        }),
-
-        this.CONTROLLER_SWITCH_PANEL.position.set( 2, 1.35, .9 );
-        this.CONTROLLER_SWITCH_PANEL.rotation.y = -Math.PI/2;
-
-        this.REFRESH_PANEL = new ThreeMeshUI.Block({
-            justifyContent: 'center',
-            alignContent: 'center',
-            // backgroundColor: new T.Color( 0xFF0000 ),
-            fontFamily: this.FONT_FAMILY,
-            fontTexture: this.FONT_TEXTURE,
-            fontSize: 0.07,
-            padding: 0.02,
-            borderRadius: 0.11
-        }),
-
-        this.REFRESH_PANEL.position.set( 2, 1.25, -.9 );
-        this.REFRESH_PANEL.rotation.y = -Math.PI/2;
-
-        this.CONTROLS_PANEL = new ThreeMeshUI.Block({
-            width: 1.2,
-            height: .4,
-            padding: 0.05,
-            justifyContent: 'center',
-            alignContent: 'left',
-            fontFamily: this.FONT_FAMILY,
-            fontTexture: this.FONT_TEXTURE
-        }),
-
-        this.CONTROLS_PANEL.position.set( 1.9, 2.4, 0 );
-        this.CONTROLS_PANEL.rotateY(-Math.PI/2)
-        this.CONTROLS_PANEL.rotateX(Math.PI/8);
-
-        this.addText(this.CONTROLS_PANEL,
-            [
-                new ThreeMeshUI.Text({ fontSize: 0.065, content: `How to Teleport:` }),
-                new ThreeMeshUI.Text({ fontSize: 0.05, content: `\nMove the joystick to select a location and orientation. Push down on the joystick to teleport.`
-                })
-            ]
-        )
-
-        this.dom = {}
+        this.elements = [];
     }
 
     createContainer(name, options = {}) {
         const container = new Container(name, options);
+        this.elements.push(container)
         return container;
     }
 
     createText(content, options = {}) {
         const text = new Text(content, options);
+        this.elements.push(text)
         return text;
     }
 
-
-    display() {
-        window.scene.add(
-            this.INSTRUCTION_PANEL,
-            this.NAVIGATION_PANEL,
-            this.RECORDING_PANEL,
-            this.ROBOT_SWITCH_PANEL,
-            this.CONTROLLER_SWITCH_PANEL,
-            this.REFRESH_PANEL,
-            this.CONTROLS_PANEL
-        )
-    }
-
-    /**
-     * 
-     * @param {*} text array of ThreeMeshUI.Text objects
-     */
-    addText(container, text) {
-        container.add(...text)
-    }
-
-    /**
-     * 
-     * @param {*} options array of objects with name and onClick property
-     */
-    addButtons(container, options) {  
-
-        for (const option of options) {
-            const button = new ThreeMeshUI.Block(this.BUTTON_OPTIONS);
-            button.add(new ThreeMeshUI.Text({ content: option.name }));
-
-            button.setupState({
-                state: 'selected',
-                attributes: this.BUTTON_SELECTED_ATTRIBUTES,
-                onSet: option.onClick
-            })
-
-            button.setupState(this.BUTTON_HOVER_STATE);
-            button.setupState(this.BUTTON_IDLE_STATE);
-
-            this.buttons.set(option.name, button);
-
-            container.add(button);
-        }
-    }
-
-    addTaskCounter(container, task) {
-        const counter = new ThreeMeshUI.Text({
-            content: `Task: ${task.state.state} / ${task.state.NUM_ROUNDS}`,
-            fontSize: 0.05
-        });
-        container.add(counter);
-        return counter;
-    }
-
-    hide() {
-        window.scene.remove(
-            this.INSTRUCTION_PANEL,
-            this.NAVIGATION_PANEL,
-            this.RECORDING_PANEL,
-            this.ROBOT_SWITCH_PANEL,
-            this.CONTROLLER_SWITCH_PANEL,
-            this.REFRESH_PANEL,
-            this.CONTROLS_PANEL
-        )
-    }
-
-    reset() {
-        this.hide();
-        
-        this.buttons.delete('Restart');
-        this.buttons.delete('Next');
-        this.buttons.delete('Previous');
-
-        // only need to reset panels that change
-        this.INSTRUCTION_PANEL = new ThreeMeshUI.Block({
-            width: 1.2,
-            height: 1.1,
-            padding: 0.05,
-            justifyContent: 'center',
-            alignContent: 'left',
-            fontFamily: this.FONT_FAMILY,
-            fontTexture: this.FONT_TEXTURE
-        }),
-
-        this.INSTRUCTION_PANEL.position.set( 2, 1.6, 0 );
-        this.INSTRUCTION_PANEL.rotation.y = -Math.PI/2;
-
-        this.NAVIGATION_PANEL = new ThreeMeshUI.Block({
-            justifyContent: 'center',
-            alignContent: 'center',
-            // backgroundColor: new T.Color( 0xFF0000 ),
-            contentDirection: 'row-reverse',
-            fontFamily: this.FONT_FAMILY,
-            fontTexture: this.FONT_TEXTURE,
-            fontSize: 0.07,
-            padding: 0.02,
-            borderRadius: 0.11
-        }),
-
-        this.NAVIGATION_PANEL.position.set( 1.9, .92, 0 );
-        this.NAVIGATION_PANEL.rotateY(-Math.PI/2)
-        this.NAVIGATION_PANEL.rotateX(-Math.PI/6);
-
-        this.display();
+    createButton(content, options = {}) {
+        const button = new Button(content, options);
+        this.elements.push(button)
+        return button;
     }
 
     update(raycaster, isSelect) {
         const intersect = this.raycast(raycaster);
         if (intersect && intersect.object.isUI) {
-            if (isSelect) {
-                intersect.object.setState('selected');
-            } else {
-                intersect.object.setState('hovered');
-            }
+            intersect.object.setState(isSelect ? 'selected' : 'hovered');
             return true;
         }
 
-        this.buttons.forEach((button) => {
-            if ((!intersect || button !== intersect.object) && button.isUI) {
-                button.setState('idle');
+        this.elements.forEach((element) => {
+            if (
+                element instanceof Button
+                && (!intersect || element.object !== intersect.object)
+                && element.object.isUI
+            ) {
+                element.object.setState('idle');
             }
-        });
+        })
         return false;
     }
 
     raycast(raycaster) {
-        return Array.from(this.buttons.values()).reduce((closestIntersection, obj) => {
+        const buttons = this.elements.filter((element) => element instanceof Button).map((element) => element.object)
+        return buttons.reduce((closestIntersection, obj) => {
             const intersection = raycaster.intersectObject(obj, true);
             if (!intersection[0]) return closestIntersection;
             if (!closestIntersection || intersection[0].distance < closestIntersection.distance) {

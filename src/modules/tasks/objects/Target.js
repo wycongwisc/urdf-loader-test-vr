@@ -30,12 +30,13 @@ export default class Target {
         const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
             .setTranslation(mesh.position.x, mesh.position.y, mesh.position.z)
             .setRotation(mesh.quaternion)
+            .lockTranslations()
+            .lockRotations()
         this.rigidBody = this.world.createRigidBody(rigidBodyDesc);
 
-        const colliderDesc = RAPIER.ColliderDesc.roundCylinder(this.tubeRadius/2, this.torusRadius + this.tubeRadius/2, this.tubeRadius/2)
+        const colliderDesc = RAPIER.ColliderDesc.roundCylinder(this.tubeRadius/2, (this.torusRadius + this.tubeRadius/2) / 3, this.tubeRadius/2)
             .setRotation(new T.Quaternion().setFromEuler(this.rotation))
-            .setRestitution(0.7);
-        const collider = this.world.createCollider(colliderDesc, this.rigidBody);
+        this.collider = this.world.createCollider(colliderDesc, this.rigidBody);
 
 
         window.simObjs.set(this.rigidBody, mesh);

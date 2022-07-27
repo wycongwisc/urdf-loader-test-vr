@@ -11,12 +11,7 @@ export class DragControl extends Module {
 
         this.activationRadius = options.activationRadius ?? 0.1;
         this.showOffsetIndicator = options.showOffsetIndicator ?? true;
-        this.showInstructions = options.showInstructions ?? false;
         this.disabled = false;
-
-        this.instructions = this.ui.createContainer('drag-control-activate-instructions', { height: .4, width: .5, backgroundOpacity: 0 });
-        this.instructions.appendChild(this.ui.createText('To activate drag control, move your controller to the robot\'s end effector', { fontSize: 0.025 }));
-
         //
 
         const fsmConfig = this.fsmConfig;
@@ -26,21 +21,11 @@ export class DragControl extends Module {
 
         fsmConfig.methods['onActivateDragControl'] = () => {
             window.controllerGrip.traverse((child) => { if (child instanceof T.Mesh) child.visible = false });
-            if (this.showInstructions) {
-                this.instructions.hide();
-                this.instructions = this.ui.createContainer('drag-control-deactivate-instructions', { height: .4, width: .5, backgroundOpacity: 0 });
-                this.instructions.appendChild(this.ui.createText('To deactivate drag control, squeeze the trigger on your controller', { fontSize: 0.025 }));
-                this.instructions.show();
-            }
         }
 
         fsmConfig.methods['onDeactivateDragControl'] = () => {
             if (this.disabled) return;
 
-            if (this.showInstructions) {
-                this.instructions.hide();
-                this.showInstructions = false;
-            }
             window.controllerGrip.traverse((child) => { if (child instanceof T.Mesh) child.visible = true });
             window.targetCursor.material.color.setHex(0xFFFFFF);
             window.scene.remove(this.offsetIndicator);
@@ -75,12 +60,6 @@ export class DragControl extends Module {
 
     update(t, data) {
         if (this.disabled) return;
-
-        if (this.showInstructions) {
-            if (!this.instructions.visible) this.instructions.show();
-            this.instructions.getObject().position.copy(data.currEEAbsThree.posi.clone().add(new T.Vector3(0, 0.4, 0)));
-            this.instructions.getObject().lookAt(window.camera.position);
-        }
 
         if (this.fsm.is('IDLE') && !this.dragTimeout) {
             if (data.ctrlPose.posi.distanceTo(data.currEEAbsThree.posi) <= this.activationRadius) {

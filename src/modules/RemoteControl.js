@@ -11,15 +11,7 @@ export class RemoteControl extends Module {
         Object.assign(this, params);
 
         this.showOffsetIndicator = options.showOffsetIndicator ?? true;
-        this.showInstructions = options.showInstructions ?? false;
         this.disabled = false;
-
-        this.instructions = this.ui.createContainer('remote-control-instructions', {
-            height: .2,
-            width: .5,
-            backgroundOpacity: 0,
-        });
-        this.instructions.appendChild(this.ui.createText('To activate remote control, click the trigger on your controller', { fontSize: 0.025 }));
 
         //
 
@@ -30,21 +22,10 @@ export class RemoteControl extends Module {
 
         fsmConfig.methods['onActivateRemoteControl'] = () => {
             if (this.disabled) return;
-
-            if (this.showInstructions) {
-                this.instructions.hide();
-                this.instructions = this.ui.createContainer('drag-control-deactivate-instructions', { height: .4, width: .5, backgroundOpacity: 0 });
-                this.instructions.appendChild(this.ui.createText('To deactivate remote control, squeeze the trigger on your controller', { fontSize: 0.025 }));
-                this.instructions.show();
-            }
         };
 
         fsmConfig.methods['onDeactivateRemoteControl'] = () => {
             if (this.disabled) return;
-            if (this.showInstructions) {
-                this.instructions.hide();
-                this.showInstructions = false;
-            }
 
             window.scene.remove(this.offsetIndicator);
             window.targetCursor.material.color.setHex(0xFFFFFF);
@@ -84,35 +65,7 @@ export class RemoteControl extends Module {
     update(t, data) {
         if (this.disabled) return;
 
-        if (this.showInstructions) {
-            if (!this.instructions.visible) this.instructions.show();
-            this.instructions.getObject().position.copy(data.ctrlPose.posi.clone().add(new T.Vector3(0, 0.2, 0)));
-            this.instructions.getObject().lookAt(window.camera.position);
-        }
-
         if (this.fsm.is('REMOTE_CONTROL')) {
-
-            const pos1 = window.robot.links['right_gripper_l_finger_tip'].getWorldPosition(new T.Vector3());
-            const pos2 = window.robot.links['right_gripper_r_finger_tip'].getWorldPosition(new T.Vector3());
-            // opening
-            if (this.controller.gamepad?.buttons[4].pressed && 
-                pos1.distanceTo(pos2) >= .01) {
-                const leftPosition = window.leftFinger.link.translateY(-0.001).getWorldPosition(new T.Vector3());
-                window.leftFinger.rigidBody.setNextKinematicTranslation(leftPosition);
-                const rightPosition = window.rightFinger.link.translateY(0.001).getWorldPosition(new T.Vector3());
-                window.rightFinger.rigidBody.setNextKinematicTranslation(rightPosition);
-            }
-
-            // closing
-            if (this.controller.gamepad?.buttons[5].pressed && 
-                pos1.distanceTo(pos2) <= .08) {
-                const leftPosition = window.leftFinger.link.translateY(0.001).getWorldPosition(new T.Vector3());
-                window.leftFinger.rigidBody.setNextKinematicTranslation(leftPosition);
-                const rightPosition = window.rightFinger.link.translateY(-0.001).getWorldPosition(new T.Vector3());
-                window.rightFinger.rigidBody.setNextKinematicTranslation(rightPosition);
-            }
-
-            
             const deltaPosi = new T.Vector3(); 
             deltaPosi.subVectors(data.ctrlPose.posi, data.prevCtrlPose.posi)
             window.goalEERelThree.posi.add(deltaPosi);

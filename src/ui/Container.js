@@ -25,6 +25,7 @@ export default class Container extends Element {
 
     appendChild(element) {
         this.object.add(element.object);
+        return this;
     }
     
     show() {

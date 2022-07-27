@@ -1,8 +1,7 @@
 import PickAndPlace from "./tasks/PickAndPlace"
 import PoseMatch from './tasks/PoseMatch'
 import StateMachine from "javascript-state-machine"
-import * as T from 'three'
-import UI from 'three-mesh-ui'
+import * as T from 'three' 
 import Module from "./Module";
 import Task from "./tasks/Task"
 
@@ -74,6 +73,6 @@ export class Tasks extends Module {
     }
 
     log(t) {
-        this.task.log(t);
+        this.task?.log(t);
     }
 }

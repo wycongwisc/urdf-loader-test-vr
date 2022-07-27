@@ -12,9 +12,6 @@ export default class Frame extends Mesh {
 
 		super( geometry, material );
 
-		this.castShadow = true;
-		this.receiveShadow = true;
-
 		this.name = 'MeshUI-Frame';
 
 	}
