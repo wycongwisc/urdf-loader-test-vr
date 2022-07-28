@@ -163,10 +163,10 @@ export class VrControl {
                     { ui: this.ui, data: this.data, world: this.world, controller: this.controller }, 
                     { numRounds: 1 }
                 ),
-                new PickAndPlace(
-                    { ui: this.ui, data: this.data, world: this.world }, 
-                    { numRounds: 1 }
-                ),
+                // new PickAndPlace(
+                //     { ui: this.ui, data: this.data, world: this.world }, 
+                //     { numRounds: 1 }
+                // ),
                 // new PoseMatch(
                 //     { ui: this.ui, data: this.data },
                 //     { numRounds: 1 }
