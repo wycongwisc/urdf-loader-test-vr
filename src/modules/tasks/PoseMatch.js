@@ -1,9 +1,6 @@
 import * as T from 'three';
 import Task from './Task'
 import GripperGoal from './objects/GripperGoal';
-import { recursiveSearch } from '../../utils';
-import { Vector3 } from 'three';
-import { Euler } from 'three';
 
 export default class PoseMatch extends Task {
     constructor(params, options = {}) {
@@ -19,20 +16,20 @@ export default class PoseMatch extends Task {
         this.rounds = [
             {
                 goal: new GripperGoal({ 
-                    position: new Vector3(1, 1, 0),
-                    rotation: new Euler(0, Math.PI/2, Math.PI/2, 'XYZ')
+                    position: new T.Vector3(1, 1, 0),
+                    rotation: new T.Euler(0, Math.PI/2, Math.PI/2, 'XYZ')
                 })
             },
             {
                 goal: new GripperGoal({
-                    position: new Vector3(.5, 1, .5),
-                    rotation: new Euler(0, 0, Math.PI/4, 'XYZ')
+                    position: new T.Vector3(.5, 1, .5),
+                    rotation: new T.Euler(0, 0, Math.PI/4, 'XYZ')
                 })
             },
             {
                 goal: new GripperGoal({
-                    position: new Vector3(.5, 1, -.5),
-                    rotation: new Euler(Math.PI/3, Math.PI/2, 0, 'XYZ')
+                    position: new T.Vector3(.5, 1, -.5),
+                    rotation: new T.Euler(Math.PI/3, Math.PI/2, 0, 'XYZ')
                 })
             }
         ];

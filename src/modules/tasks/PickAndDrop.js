@@ -5,12 +5,8 @@
 import * as T from 'three';
 import Task from './Task'
 import Block from './objects/Block'
-import Target from './objects/Target';
 import Table from './objects/Table'
-import StateMachine from "javascript-state-machine"
 import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET } from "../../globals"
-import { getCurrEEPose } from '../../utils';
-import Container from '../../ui/Container';
 import Box from './objects/Box';
 
 // default settings
@@ -82,6 +78,7 @@ export default class PickAndDrop extends Task {
         });
         this.instructions.appendChild(this.ui.createText('Pick and Drop\n', { fontSize: 0.08 }));
         this.instructions.appendChild(this.ui.createText('Complete the task by picking up the blocks with the robot and placing them in the box. Close the box after you are done.'));
+        
         this.blockCounter = this.ui.createContainer('block-counter', {
             height: .1,
             width: .2,
@@ -90,15 +87,13 @@ export default class PickAndDrop extends Task {
         this.blockCounterText = this.ui.createText('- / -', { fontSize: 0.025 });
         this.blockCounter.appendChild(this.blockCounterText);
 
-        this.buttons = this.ui.createContainer('pick-and-drop-buttons', {
+        this.buttons = this.ui.createContainer('pick-and-drop-reset', {
             height: .4,
             position: new T.Vector3(2, 1.2, 0),
             rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
             backgroundOpacity: 0,
         })
         this.buttons.appendChild(this.ui.createButton('Reset', { onClick: () => this.fsm.reset() }))
-
-        
     }
 
     start() {

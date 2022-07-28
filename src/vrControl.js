@@ -21,6 +21,7 @@ import { Grasping } from './modules/Grasping';
 import DragControlTutorial from './modules/tasks/DragControlTutorial';
 import RemoteControlTutorial from './modules/tasks/RemoteControlTutorial';
 import GraspingTutorial from './modules/tasks/GraspingTutorial';
+import Stack from './modules/tasks/Stack';
 
 export class VrControl {
     constructor(params) {
@@ -154,9 +155,13 @@ export class VrControl {
                 new GraspingTutorial(
                     { ui: this.ui, hand: this.hand, controller: this.controller },
                 ),
+                new Stack(
+                    { ui: this.ui, data: this.data, world: this.world, controller: this.controller },
+                    { numRounds: 1 }
+                ),
                 new PickAndDrop(
                     { ui: this.ui, data: this.data, world: this.world, controller: this.controller }, 
-                    { numRounds: 2 }
+                    { numRounds: 1 }
                 ),
                 new PickAndPlace(
                     { ui: this.ui, data: this.data, world: this.world }, 

@@ -88,7 +88,7 @@ export default class PickAndPlace extends Task {
     destruct() {
         this.table.hide();
         this.instructions.hide();
-        // this.data.flush(this.name);
+        this.data.flush(this.name);
     }
 
     /**
@@ -120,34 +120,32 @@ export default class PickAndPlace extends Task {
         const pos2 = window.robot.links['right_gripper_r_finger_tip'].getWorldPosition(new T.Vector3());
         const gripperDistance = pos1.distanceTo(pos2);
 
-        for (const block of blocks) {
-            if (!block.grasped) {
-                const gripperContact = {};
+        if (!block.grasped) {
+            const gripperContact = {};
 
-                this.world.contactsWith(window.robotColliders['right_gripper_l_finger_tip'][0], (collider) => {
-                    if (collider === block.collider) gripperContact.left = block;
-                });
+            this.world.contactsWith(window.robotColliders['right_gripper_l_finger_tip'][0], (collider) => {
+                if (collider === block.collider) gripperContact.left = block;
+            });
 
-                this.world.contactsWith(window.robotColliders['right_gripper_r_finger_tip'][0], (collider) => {
-                    if (collider === block.collider) gripperContact.right = block;
-                });
+            this.world.contactsWith(window.robotColliders['right_gripper_r_finger_tip'][0], (collider) => {
+                if (collider === block.collider) gripperContact.right = block;
+            });
 
-                if (
-                    gripperContact.left 
-                    && gripperContact.right
-                    && gripperContact.left === gripperContact.right 
-                    && gripperDistance < block.size.x + .01 
-                    && gripperDistance > block.size.x
-                ) {
-                    block.grasp(gripper.position, gripper.quaternion);
-                }
-            } else {
-                block.rigidBody.setNextKinematicTranslation(gripper.position);
-                block.rigidBody.setNextKinematicRotation(gripper.quaternion); // TODO
+            if (
+                gripperContact.left 
+                && gripperContact.right
+                && gripperContact.left === gripperContact.right 
+                && gripperDistance < block.size.x + .01 
+                && gripperDistance > block.size.x
+            ) {
+                block.grasp(gripper.position, gripper.quaternion);
+            }
+        } else {
+            block.rigidBody.setNextKinematicTranslation(gripper.position);
+            block.rigidBody.setNextKinematicRotation(gripper.quaternion); // TODO
 
-                if (gripperDistance > block.size.x + .01) {
-                    block.ungrasp(gripper.position, gripper.quaternion)
-                }
+            if (gripperDistance > block.size.x + .01) {
+                block.ungrasp(gripper.position, gripper.quaternion)
             }
         }
 
