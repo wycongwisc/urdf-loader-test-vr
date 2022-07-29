@@ -44,7 +44,7 @@ export default class Block {
         );
 
         this.collider = this.world.createCollider(
-            RAPIER.ColliderDesc.cuboid(this.size.x/2, this.size.y/2, this.size.z/2).setRestitution(0.5), 
+            RAPIER.ColliderDesc.cuboid(this.size.x/2, this.size.y/2, this.size.z/2).setRestitution(0.25), 
             this.rigidBody
         );
 
@@ -63,7 +63,7 @@ export default class Block {
         );
 
         this.collider = this.world.createCollider(
-            RAPIER.ColliderDesc.cuboid(this.size.x/2, this.size.y/2, this.size.z/2).setRestitution(0.5), 
+            RAPIER.ColliderDesc.cuboid(this.size.x/2, this.size.y/2, this.size.z/2).setRestitution(0.25), 
             this.rigidBody
         );
 
@@ -81,7 +81,7 @@ export default class Block {
         );
 
         this.collider = this.world.createCollider(
-            RAPIER.ColliderDesc.cuboid(this.size.x/2, this.size.y/2, this.size.z/2).setRestitution(0.5), 
+            RAPIER.ColliderDesc.cuboid(this.size.x/2, this.size.y/2, this.size.z/2).setRestitution(0.25), 
             this.rigidBody
         );
 

@@ -33,14 +33,6 @@ export default class Stack extends Task {
                         world: this.world,
                         position: new T.Vector3(1, 3, 0) 
                     }),
-                    new Block({ 
-                        world: this.world,
-                        position: new T.Vector3(.9, 3, .25) 
-                    }),
-                    new Block({ 
-                        world: this.world,
-                        position: new T.Vector3(.65, 3, -.25) 
-                    })
                 ],
             },
         ];
@@ -54,7 +46,7 @@ export default class Stack extends Task {
             backgroundOpacity: 0,
         });
         this.instructions.appendChild(this.ui.createText('Block Stacking\n', { fontSize: 0.08 }));
-        this.instructions.appendChild(this.ui.createText('Complete the task by stacking the blocks inside the red circle'));
+        this.instructions.appendChild(this.ui.createText('Complete the task by stacking the blocks'));
 
         this.stackCounter = this.ui.createContainer('stack-counter', {
             height: .1,

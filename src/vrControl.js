@@ -29,7 +29,7 @@ export class VrControl {
         // constants and params
         const that = this;
         const INIT_POSITION = new T.Vector3(0.25, 0, 0.5); // initial position of user after entering VR
-        const INIT_HAND = 'left'; // initial hand used to control robot
+        const INIT_HAND = 'right'; // initial hand used to control robot
 
         this.camera = params.camera;
         this.renderer = params.renderer;
@@ -64,8 +64,8 @@ export class VrControl {
         window.scene.add(this.controller2);
         window.scene.add(this.controllerGrip1);
         window.scene.add(this.controllerGrip2);
-        this.controller = this.controller1;
-        window.controllerGrip = this.controllerGrip1;
+        this.controller = this.controller2;
+        window.controllerGrip = this.controllerGrip2;
 
         this.controllerGrip1.addEventListener('connected', e => {
             this.controller1.handedness = e.data.handedness;
@@ -138,8 +138,8 @@ export class VrControl {
         const grasping = new Grasping({ controller: this.controller });
         window.modules.push(grasping);
 
-        const record = new Record({ fsmConfig, eventConfig, ui: this.ui });
-        window.modules.push(record);
+        // const record = new Record({ fsmConfig, eventConfig, ui: this.ui });
+        // window.modules.push(record);
 
         const tasks = new Tasks(
             { ui: this.ui, data: this.data }, 
