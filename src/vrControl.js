@@ -3,8 +3,7 @@
  */
 
 import * as T from 'three';
-import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
-import { getCtrlPose, getCurrEEPose, updateTargetCursor, resetRobot, updateRobot } from './utils';
+import { getCurrEEPose, updateTargetCursor, resetRobot, updateRobot } from './utils';
 import StateMachine from 'javascript-state-machine';
 import TeleportVR from './utilities/teleportvr';
 import { Record } from './modules/Record';
@@ -22,6 +21,9 @@ import DragControlTutorial from './modules/tasks/DragControlTutorial';
 import RemoteControlTutorial from './modules/tasks/RemoteControlTutorial';
 import GraspingTutorial from './modules/tasks/GraspingTutorial';
 import Stack from './modules/tasks/Stack';
+import Controllers from './utilities/Controllers'
+import ControlStack from './modules/tasks/ControlStack';
+import ControlPoseMatch from './modules/tasks/ControlPoseMatch';
 
 export class VrControl {
     constructor(params) {
@@ -29,7 +31,6 @@ export class VrControl {
         // constants and params
         const that = this;
         const INIT_POSITION = new T.Vector3(0.25, 0, 0.5); // initial position of user after entering VR
-        const INIT_HAND = 'right'; // initial hand used to control robot
 
         this.camera = params.camera;
         this.renderer = params.renderer;
@@ -51,35 +52,10 @@ export class VrControl {
         window.targetCursor = targetCursor;
         updateTargetCursor();
 
-        // controllers
-
-        const controllerModelFactory = new XRControllerModelFactory(); 
-        this.controller1 = this.renderer.xr.getController(0);
-        this.controller2 = this.renderer.xr.getController(1); 
-        this.controllerGrip1 = this.renderer.xr.getControllerGrip(0);
-        this.controllerGrip2 = this.renderer.xr.getControllerGrip(1);
-        this.controllerGrip1.add(controllerModelFactory.createControllerModel(this.controllerGrip1));  
-        this.controllerGrip2.add(controllerModelFactory.createControllerModel(this.controllerGrip2));  
-        window.scene.add(this.controller1);
-        window.scene.add(this.controller2);
-        window.scene.add(this.controllerGrip1);
-        window.scene.add(this.controllerGrip2);
-        this.controller = this.controller2;
-        window.controllerGrip = this.controllerGrip2;
-
-        this.controllerGrip1.addEventListener('connected', e => {
-            this.controller1.handedness = e.data.handedness;
-            this.controller1.gamepad = e.data.gamepad;
-        });
-        this.controllerGrip2.addEventListener('connected', e => {
-            this.controller2.handedness = e.data.handedness;
-            this.controller2.gamepad = e.data.gamepad;
-        });
-        this.hand = INIT_HAND;
-
+        this.teleportvr = new TeleportVR(window.scene, this.camera);
+        this.controller = new Controllers(this.renderer, this.teleportvr);
         // teleportvr
 
-        this.teleportvr = new TeleportVR(window.scene, this.camera);
         this.renderer.xr.addEventListener('sessionstart', () => this.teleportvr.set(INIT_POSITION));
 
         // raycasters
@@ -89,19 +65,14 @@ export class VrControl {
         
         // modules
 
-        const eventConfig = {
-            squeeze: [],
-            select: [
-                () => {
-                    if (window.fsm.is('IDLE')) {
-                        if (this.ui.update(this.raycaster, false)) {
-                            this.ui.update(this.raycaster, true);
-                            return true;
-                        }
-                    }
+        this.controller.addButtonAction('trigger', 'ui-select', () => {
+            if (window.fsm.is('IDLE')) {
+                if (this.ui.update(this.raycaster, false)) {
+                    this.ui.update(this.raycaster, true);
+                    return true;
                 }
-            ]
-        };
+            }
+        })
 
         const fsmConfig = {
             init: 'IDLE',
@@ -109,60 +80,98 @@ export class VrControl {
                 { name: 'goto', from: '*', to: function(s) { return s } }
             ],
             methods: {
-                onTransition: function(state) {
+                onTransition: (state) => {
                     if (state.to !== 'IDLE') window.scene.remove(that.ray);
+                    if (state.to === 'IDLE') {
+                        this.controller.get().grip.traverse((child) => { if (child instanceof T.Mesh) child.visible = true });
+
+                    }
                 }
             }
         };
 
         window.modules = [];
 
-        const teleport = new Teleport({ 
-            teleportvr: this.teleportvr,
-            controllerGrip1: this.controllerGrip1,
-            controllerGrip2: this.controllerGrip2,
-            controller1: this.controller1,
-            controller2: this.controller2, 
-        })
+        const teleport = new Teleport(this.teleportvr);
         window.modules.push(teleport);
 
         // const resetRobot = new ResetRobot({ eventConfig, ui: this.ui }, { showInstructions: true });
         // window.modules.push(resetRobot)
 
-        const dragControl = new DragControl({ fsmConfig, eventConfig, ui: this.ui })
+        const dragControl = new DragControl({ fsmConfig, ui: this.ui, controller: this.controller })
         window.modules.push(dragControl);
 
-        const remoteControl = new RemoteControl({ fsmConfig, eventConfig, ui: this.ui, controller: this.controller })
+        const remoteControl = new RemoteControl({ fsmConfig, ui: this.ui, controller: this.controller })
         window.modules.push(remoteControl);
 
-        const grasping = new Grasping({ controller: this.controller });
+        const grasping = new Grasping(this.controller);
         window.modules.push(grasping);
 
         // const record = new Record({ fsmConfig, eventConfig, ui: this.ui });
         // window.modules.push(record);
 
-        const tasks = new Tasks(
+        const text = () => {
+            return [
+                this.ui.createText(`Drag Control: ${dragControl.disabled ? 'disabled' : dragControl.mode}\n`),
+                this.ui.createText(`${dragControl.disabled ? '' : dragControl.modeInstructions + '\n'}\n`, { fontSize: 0.03 }),
+                this.ui.createText(`Remote Control: ${remoteControl.disabled ? 'disabled' : remoteControl.mode}\n`),
+                this.ui.createText(`${remoteControl.disabled ? '' : remoteControl.modeInstructions + '\n'}\n`, { fontSize: 0.03 }),
+                this.ui.createText(`Grasping: ${grasping.disabled ? 'disabled' : grasping.mode}\n`),
+                this.ui.createText(`${grasping.disabled ? '' : grasping.modeInstructions + '\n'}\n`, { fontSize: 0.03 }),
+            ];
+        }
+
+        let tasks = new Tasks(
             { ui: this.ui, data: this.data }, 
             [   
-                new RemoteControlTutorial(
-                    { ui: this.ui },
-                    { disableModules: ['drag-control'] }
+                // new RemoteControlTutorial(
+                //     { ui: this.ui },
+                //     { disableModules: ['drag-control'] }
+                // ),
+                // new DragControlTutorial(
+                //     { ui: this.ui },
+                //     { disableModules: ['remote-control'] }
+                // ),
+                // new GraspingTutorial(
+                //     { ui: this.ui, hand: this.hand, controller: this.controller },
+                // ),
+                new PoseMatch(
+                    { ui: this.ui, data: this.data },
+                    { disableModules: ['remote-control', 'grasping'], numRounds: 1, initConfig: () => { dragControl.setMode('grip-auto') }, text }
                 ),
-                new DragControlTutorial(
-                    { ui: this.ui },
-                    { disableModules: ['remote-control'] }
+                new PoseMatch(
+                    { ui: this.ui, data: this.data },
+                    { disableModules: ['remote-control', 'grasping'], numRounds: 1, initConfig: () => { dragControl.setMode('grip-toggle') }, text }
                 ),
-                new GraspingTutorial(
-                    { ui: this.ui, hand: this.hand, controller: this.controller },
+                new PoseMatch(
+                    { ui: this.ui, data: this.data },
+                    { disableModules: ['remote-control', 'grasping'], numRounds: 1, initConfig: () => { dragControl.setMode('grip-hold') }, text }
                 ),
-                new Stack(
-                    { ui: this.ui, data: this.data, world: this.world, controller: this.controller },
-                    { numRounds: 1 }
+                new PoseMatch(
+                    { ui: this.ui, data: this.data },
+                    { disableModules: ['drag-control', 'grasping'], numRounds: 1, initConfig: () => { remoteControl.setMode('grip-toggle') }, text }
                 ),
-                new PickAndDrop(
-                    { ui: this.ui, data: this.data, world: this.world, controller: this.controller }, 
-                    { numRounds: 1 }
+                new PoseMatch(
+                    { ui: this.ui, data: this.data },
+                    { disableModules: ['drag-control', 'grasping'], numRounds: 1, initConfig: () => { remoteControl.setMode('grip-hold') }, text }
                 ),
+                new PoseMatch(
+                    { ui: this.ui, data: this.data },
+                    { disableModules: ['remote-control'], numRounds: 1, initConfig: () => { grasping.setMode('ab-hold') }, text}
+                ),
+                new PoseMatch(
+                    { ui: this.ui, data: this.data },
+                    { disableModules: ['remote-control'], numRounds: 1, initConfig: () => { grasping.setMode('trigger-toggle') }, text}
+                ),
+                new PoseMatch(
+                    { ui: this.ui, data: this.data },
+                    { disableModules: ['remote-control'], numRounds: 1, initConfig: () => { grasping.setMode('trigger-hold') }, text}
+                ),
+
+                // new PickAndDrop(
+                //     { ui: this.ui, data: this.data, world: this.world, controller: this.controller }, 
+                //     { numRounds: 1 }
+                // ),
                 // new PickAndPlace(
                 //     { ui: this.ui, data: this.data, world: this.world }, 
                 //     { numRounds: 1 }
@@ -174,6 +183,64 @@ export class VrControl {
             ],
             { navigation: true }
         )
+
+        document.querySelector('#set-task').addEventListener('click', () => {
+
+            tasks.stop();
+
+            const task = document.querySelector('#task').value;
+            const dragControlMode = document.querySelector('#drag-control').value;
+            const remoteControlMode = document.querySelector('#remote-control').value;
+            const graspingMode = document.querySelector('#grasping').value;
+
+            console.log(remoteControlMode)
+
+            const disableModules = [];
+            if (dragControlMode === 'disabled') disableModules.push('drag-control');
+            if (remoteControlMode === 'disabled') disableModules.push('remote-control');
+            if (graspingMode === 'disabled') disableModules.push('grasping');
+
+            const initConfig = () => {
+                if (dragControlMode !== 'disabled') dragControl.setMode(dragControlMode);
+                if (remoteControlMode !== 'disabled') remoteControl.setMode(remoteControlMode);
+                if (graspingMode !== 'disabled') grasping.setMode(graspingMode);
+            }
+
+            let customTask;
+            switch(task) {
+                case 'stack':
+                    customTask = new Stack(
+                        { ui: this.ui, data: this.data, world: this.world, controller: this.controller },
+                        { numRounds: 1, disableModules, initConfig, text }
+                    )
+                    break;
+                case 'pose-match':
+                    customTask = new PoseMatch(
+                        { ui: this.ui, data: this.data },
+                        { numRounds: 1, disableModules, initConfig, text }
+                    )
+                    break;
+                case 'pick-and-place':
+                    customTask = new PickAndPlace(
+                        { ui: this.ui, data: this.data, world: this.world },
+                        { numRounds: 1, disableModules, initConfig, text }
+                    );
+                    break;
+                default:
+                    break;
+            }
+            
+            tasks = new Tasks(
+                { ui: this.ui, data: this.data },
+                [ customTask ]
+            )
+
+            window.modules.pop();
+            window.modules.push(tasks);
+            tasks.start();
+        })
+
+
         window.modules.push(tasks);
 
         window.fsm = new StateMachine(fsmConfig);
@@ -190,56 +257,16 @@ export class VrControl {
 
         tasks.start();
 
-        //
-
-        this.controller.addEventListener('squeeze', () => {
-            for (const handler of eventConfig['squeeze']) {
-                if (handler()) return;
-            }
-        });
-        this.controller.addEventListener('select', () => {
-            for (const handler of eventConfig['select']) {
-                if (handler()) return;
-            }
-        });
-
-        // ui
-
-        // function setHand(hand) {
-        //     this.controller.removeEventListener('select', select);
-        //     this.controller.removeEventListener('squeeze', squeeze);
-        //     this.controller = (hand === this.controller1.handedness) ? this.controller1 : this.controller2;
-        //     window.controllerGrip = (hand === this.controller1.handedness) ? this.controllerGrip1 : this.controllerGrip2;
-        //     this.controller.addEventListener('select', select);
-        //     this.controller.addEventListener('squeeze', squeeze);
-            
-        //     this.hand = hand;
-        // }
-
-        // this.ui.addButtons(
-        //     this.ui.CONTROLLER_SWITCH_PANEL,
-        //     [
-        //         { name: 'Left Hand', onClick: () => setHand('left') },
-        //         { name: 'Right Hand', onClick: () => setHand('right') },
-        //     ]
-        // )
-        // this.ui.addButtons(
-        //     this.ui.REFRESH_PANEL,
-        //     [
-        //         { name: 'Refresh', onClick: () => window.location.reload() }
-        //     ]
-        // )
-
         this.data.logSession(window.modules);
     }
 
     update(t) {
-        this.ctrlPose = getCtrlPose();
+        this.ctrlPose = this.controller.getPose();
         this.currEEAbsThree = getCurrEEPose();
 
         // TODO: have control modes hide the ray 
         if (window.fsm.is('PLAYBACK') || window.fsm.is('IDLE')) {
-            this.raycaster.set(this.ctrlPose.posi, this.controller.getWorldDirection(new T.Vector3()).negate());
+            this.raycaster.set(this.ctrlPose.posi, this.controller.getDirection());
             this.ray.position.copy(this.raycaster.ray.origin);
             this.ray.setDirection(this.raycaster.ray.direction);
             if (window.fsm.is('IDLE') && this.ray.parent !== window.scene) {
@@ -256,6 +283,7 @@ export class VrControl {
             })) return;
         }
 
+        this.controller.update();
         updateTargetCursor();
         updateRobot();
 
@@ -264,7 +292,7 @@ export class VrControl {
 
     log(t) {
         this.data.logRobot(t, window.fsm, window.robot, getCurrEEPose(), window.targetCursor);
-        this.data.logUser(t, this.camera, this.controllerGrip1, this.controllerGrip2, this.hand);
+        this.data.logUser(t, this.camera, this.controller.get('left').grip, this.controller.get('right').grip, this.hand);
 
         for (const module of window.modules) {
             module.log(t);

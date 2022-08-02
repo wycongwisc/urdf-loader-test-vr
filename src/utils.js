@@ -49,13 +49,6 @@ export function getCurrEEPose() {
     }
 }
 
-export function getCtrlPose() {
-    return { 
-        'posi': window.controllerGrip.getWorldPosition(new T.Vector3()),
-        'ori': window.controllerGrip.getWorldQuaternion(new T.Quaternion())
-    } 
-}
-
 export function getGripperPose(tip = false) {
     const gripper = new T.Object3D();
         gripper.position.copy(new T.Vector3(eePose.posi.x, eePose.posi.y, eePose.posi.z));
@@ -107,8 +100,8 @@ export function updateRobot() {
 export function resetRobot() {
     window.goalEERelThree = { 'posi': new T.Vector3(), 'ori': new T.Quaternion().identity() };
     window.relaxedIK.recover_vars([]);
-    updateRobot(window.goalEERelThree);
-    updateTargetCursor(window.goalEERelThree);
+    updateRobot();
+    updateTargetCursor();
     // window.relaxedIK.recover_vars([]);
 }
 

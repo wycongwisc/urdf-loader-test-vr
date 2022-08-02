@@ -53,6 +53,10 @@ export class Tasks extends Module {
         this.fsm.start();
     }
 
+    stop() {
+        this.fsm.stop();
+    }
+
     setTask(taskIndex) {
         this.clearTask();
 
@@ -69,6 +73,10 @@ export class Tasks extends Module {
         if (this.task?.fsm.is('COMPLETE')) {
             this.data.logTask(t, this.task)
             this.fsm.next();
+            if (this.fsm.is('IDLE')) {
+                window.location.reload();
+            }
+
         }
     }
 

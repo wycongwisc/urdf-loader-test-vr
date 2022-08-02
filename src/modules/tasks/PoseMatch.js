@@ -10,9 +10,11 @@ export default class PoseMatch extends Task {
             data: params.data,
         }, {
             numRounds: options.numRounds,
-            disableModules: options.disableModules 
+            disableModules: options.disableModules, 
+            initConfig: options.initConfig
         });
 
+        this.text = options.text;
         this.rounds = [
             {
                 goal: new GripperGoal({ 
@@ -34,6 +36,24 @@ export default class PoseMatch extends Task {
             }
         ];
 
+        this.instructions = this.ui.createContainer('pose-match-instructions', {
+            height: .4,
+            position: new T.Vector3(2, 1.5, 0),
+            rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
+            backgroundOpacity: 0,
+        });
+        this.instructions.appendChild(this.ui.createText('Pose Matching\n', { fontSize: 0.08 }));
+        this.instructions.appendChild(this.ui.createText('Complete the task by moving the gripper into the correct pose\n\n'));
+    }
+
+    start() {
+        this.fsm.start();
+        if (this.text) this.text().forEach((text) => this.instructions.appendChild(text));
+        this.instructions.show();
+    }
+
+    destruct() {
+        this.instructions.hide();
     }
 
     update(t, data) {

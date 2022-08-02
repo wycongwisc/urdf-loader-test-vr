@@ -1,17 +1,18 @@
 import Module from "./Module";
 import * as T from 'three';
-import { getCtrlPose, getCurrEEPose, updateTargetCursor, updateRobot, resetRobot } from '../utils';
+import { getCurrEEPose, updateTargetCursor, updateRobot, resetRobot } from '../utils';
 
 
 export class RemoteControl extends Module {
     constructor(params, options = {}) {
-        super({
-            name: 'remote-control'
-        });
+        super({ name: 'remote-control' });
         Object.assign(this, params);
 
         this.showOffsetIndicator = options.showOffsetIndicator ?? true;
         this.disabled = false;
+        this.setMode(options.mode ?? 'grip-toggle');
+
+        this.click = new Audio('./assets/click.wav');
 
         //
 
@@ -22,6 +23,8 @@ export class RemoteControl extends Module {
 
         fsmConfig.methods['onActivateRemoteControl'] = () => {
             if (this.disabled) return;
+
+            this.click.play();
         };
 
         fsmConfig.methods['onDeactivateRemoteControl'] = () => {
@@ -30,28 +33,74 @@ export class RemoteControl extends Module {
             window.scene.remove(this.offsetIndicator);
             window.targetCursor.material.color.setHex(0xFFFFFF);
         };
+    }
 
-        //
+    setMode(mode) {
+        if (!['grip-toggle', 'grip-hold', 'trigger-hold', 'trigger-toggle'].includes(mode)) throw new Error(`Control mode \"${mode}\" does not exist for Remote Control`);
+        this.mode = mode;
 
-        const eventConfig = this.eventConfig;
+        this.controller.removeButtonAction('grip', 'remote-control');
+        this.controller.removeButtonAction('gripstart', 'remote-control');
+        this.controller.removeButtonAction('gripend', 'remote-control');
+        this.controller.removeButtonAction('trigger', 'remote-control');
+        this.controller.removeButtonAction('triggerstart', 'remote-control');
+        this.controller.removeButtonAction('triggerend', 'remote-control');
 
-        eventConfig['select'].push(() =>{
-            if (this.disabled) return;
+        switch(mode) {
+            case 'grip-hold': 
+                this.controller.addButtonAction('gripstart', 'remote-control', () => {
+                    if (this.disabled) return;
+                    if (this.fsm.is('IDLE')) this.fsm.activateRemoteControl();
+                })
 
-            if (this.fsm.is('IDLE')) {
-                this.fsm.activateRemoteControl();
-                return true;
-            }
+                this.controller.addButtonAction('gripend', 'remote-control', () => {
+                    if (this.disabled) return;
+                    if (this.fsm.is('REMOTE_CONTROL')) this.fsm.deactivateRemoteControl();
+                })
+                this.modeInstructions = 'Activate: Press and hold the grip button.\nDeactivate: Release the grip button.';
+                break;
+            case 'grip-toggle':
+                this.controller.addButtonAction('grip', 'remote-control', () => {
+                    if (this.disabled) return;
+        
+                    if (this.fsm.is('IDLE')) {
+                        this.fsm.activateRemoteControl();
+                    } else if (this.fsm.is('REMOTE_CONTROL')) {
+                        this.fsm.deactivateRemoteControl();
+                    }
+                })
+                this.modeInstructions = 'Activate: Press the grip button.\nDeactivate: Press the grip button again.';
+                break;
+            case 'trigger-hold': 
+                this.controller.addButtonAction('triggerstart', 'remote-control', () => {
+                    if (this.disabled) return;
+                    if (this.fsm.is('IDLE')) this.fsm.activateRemoteControl();
+                })
 
-            if (this.fsm.is('REMOTE_CONTROL')) {
-                this.fsm.deactivateRemoteControl();
-                return true;
-            }
-        })
+                this.controller.addButtonAction('triggerend', 'remote-control', () => {
+                    if (this.disabled) return;
+                    if (this.fsm.is('REMOTE_CONTROL')) this.fsm.deactivateRemoteControl();
+                })
+                this.modeInstructions = 'Activate: Squeeze and hold the trigger.\nDeactivate: Release the trigger.';
+                break;
+            case 'trigger-toggle':
+                this.controller.addButtonAction('trigger', 'remote-control', () => {
+                    if (this.disabled) return;
+        
+                    if (this.fsm.is('IDLE')) {
+                        this.fsm.activateRemoteControl();
+                    } else if (this.fsm.is('REMOTE_CONTROL')) {
+                        this.fsm.deactivateRemoteControl();
+                    }
+                })
+                this.modeInstructions = 'Activate: Squeeze the trigger.\nDeactivate: Squeeze the trigger again.';
+                break;
+            default: 
+                break;
+        }
     }
 
     disable() {
-        console.log('disable remote control')
         if (this.fsm.is('REMOTE_CONTROL')) {
             this.fsm.deactivateRemoteControl();
         }

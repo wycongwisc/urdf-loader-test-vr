@@ -2,6 +2,7 @@ import * as T from 'three';
 import { v4 as id } from 'uuid'
 import Module from "../Module";
 import StateMachine from "javascript-state-machine"
+import { resetRobot } from '../../utils';
 
 const NUM_ROUNDS = 1;
 
@@ -20,6 +21,7 @@ export default class Task extends Module {
         this.id = id();
         this.clock = new T.Clock({ autoStart: false });
         this.roundComplete = new Audio('./assets/round_complete.mp3');
+        this.initConfig = options.initConfig;
 
         this.numRounds = options.numRounds ?? NUM_ROUNDS;
         this.rounds = options.rounds ?? [{}];
@@ -56,11 +58,7 @@ export default class Task extends Module {
                         case 'COMPLETE':
                             that.roundComplete.play();
                             that.data?.flush(this.name);
-                            for (const module of window.modules) {
-                                if (that.disableModules.includes(module.name)) module.enable();
-                            }
-                            that.clearRound();
-                            that.destruct();
+                            that.clear();
                             break;
                         default:
                             that.clearRound();
@@ -68,6 +66,10 @@ export default class Task extends Module {
                     }
                 },
                 onStart: () => {
+                    if (this.initConfig) this.initConfig();
+                    if (window.fsm?.is('DRAG_CONTROL')) window.fsm?.deactivateDragControl();
+                    if (window.fsm?.is('REMOTE_CONTROL')) window.fsm?.deactivateRemoteControl();
+                    resetRobot();
                     for (const module of window.modules) {
                         if (that.disableModules.includes(module.name)) {
                             module.disable();
@@ -118,6 +120,11 @@ export default class Task extends Module {
     }
 
     clear() {
+        for (const module of window.modules) {
+            if (this.disableModules.includes(module.name)) module.enable();
+        }
+        this.clearRound();
+        this.destruct();
         return;
     }
 
@@ -126,7 +133,6 @@ export default class Task extends Module {
      */
     start() {
         this.fsm.start();
-        window.fsm?.goto('IDLE');
     }
 
     /**

@@ -171,6 +171,7 @@ export default class PickAndDrop extends Task {
                     && gripperDistance > block.size.x
                 ) {
                     block.grasp(gripper.position, gripper.quaternion);
+                    window.grasped = true;
                 }
             } else {
                 block.rigidBody.setNextKinematicTranslation(gripper.position);
@@ -178,6 +179,7 @@ export default class PickAndDrop extends Task {
 
                 if (gripperDistance > block.size.x + .01) {
                     block.ungrasp(gripper.position, gripper.quaternion)
+                    window.grasped = false;
                 }
             }
         }

@@ -15,9 +15,11 @@ export default class Stack extends Task {
             controller: params.controller
         }, {
             numRounds: options.numRounds,
-            disableModules: options.disableModules 
+            disableModules: options.disableModules, 
+            initConfig: options.initConfig
         });
 
+        this.text = options.text;
         this.rounds = [
             {
                 blocks: [
@@ -28,10 +30,6 @@ export default class Stack extends Task {
                     new Block({ 
                         world: this.world,
                         position: new T.Vector3(0.8, 3, 0.5) 
-                    }),
-                    new Block({ 
-                        world: this.world,
-                        position: new T.Vector3(1, 3, 0) 
                     }),
                 ],
             },
@@ -46,7 +44,7 @@ export default class Stack extends Task {
             backgroundOpacity: 0,
         });
         this.instructions.appendChild(this.ui.createText('Block Stacking\n', { fontSize: 0.08 }));
-        this.instructions.appendChild(this.ui.createText('Complete the task by stacking the blocks'));
+        this.instructions.appendChild(this.ui.createText('Complete the task by stacking the blocks\n\n'));
 
         this.stackCounter = this.ui.createContainer('stack-counter', {
             height: .1,
@@ -58,7 +56,7 @@ export default class Stack extends Task {
 
         this.buttons = this.ui.createContainer('stack-reset', {
             height: .4,
-            position: new T.Vector3(2, 1.2, 0),
+            position: new T.Vector3(2, 1.0, 0),
             rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
             backgroundOpacity: 0,
         })
@@ -72,10 +70,12 @@ export default class Stack extends Task {
             position: new T.Vector3(0.8, 0, 0),
             rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
         });
+        if (this.text) this.text().forEach((text) => this.instructions.appendChild(text));
         this.table.show();
         this.instructions.show();
         this.buttons.show();
         this.stackCounter.show();
+        
     }
 
     destruct() {
@@ -135,6 +135,7 @@ export default class Stack extends Task {
                     && gripperDistance > block.size.x
                 ) {
                     block.grasp(gripper.position, gripper.quaternion);
+                    window.grasped = true;
                 }
             } else {
                 block.rigidBody.setNextKinematicTranslation(gripper.position);
@@ -142,6 +143,7 @@ export default class Stack extends Task {
 
                 if (gripperDistance > block.size.x + .01) {
                     block.ungrasp(gripper.position, gripper.quaternion)
+                    window.grasped = false;
                 }
             }
         }
@@ -162,7 +164,6 @@ export default class Stack extends Task {
 
         blocks.sort((a, b) => b.mesh.position.y - a.mesh.position.y);
         let stackCount = 1;
-        console.log(blocks)
         for (let i = 0; i < blocks.length - 1; i++) {
             if (blocks[i].grasped) continue;
             if (blocks[i].mesh.position.y - blocks[i + 1].mesh.position.y > .01) {
@@ -193,7 +194,7 @@ export default class Stack extends Task {
             blocks.forEach(block => {
                 if (block.rigidBody.isSleeping()) sleepCount++;
             })
-            if (sleepCount === 3) this.fsm.next();
+            if (sleepCount === blocks.length) this.fsm.next();
         }
 
 

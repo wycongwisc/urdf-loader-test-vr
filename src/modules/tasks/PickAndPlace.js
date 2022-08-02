@@ -29,6 +29,7 @@ export default class PickAndPlace extends Task {
             disableModules: options.disableModules 
         });
 
+        this.text = options.text;
         this.rounds = [
             {
                 block: new Block({ 
@@ -71,7 +72,15 @@ export default class PickAndPlace extends Task {
             backgroundOpacity: 0,
         });
         this.instructions.appendChild(this.ui.createText('Pick and Place\n', { fontSize: 0.08 }));
-        this.instructions.appendChild(this.ui.createText('Complete the task by picking up the block with the robot and placing it inside the circle'));
+        this.instructions.appendChild(this.ui.createText('Complete the task by picking up the block with the robot and placing it inside the circle\n\n'));
+    
+        this.buttons = this.ui.createContainer('pick-and-place-reset', {
+            height: .4,
+            position: new T.Vector3(2, 1.0, 0),
+            rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
+            backgroundOpacity: 0,
+        })
+        this.buttons.appendChild(this.ui.createButton('Reset', { onClick: () => this.fsm.reset() }))
     }
 
     start() {
@@ -81,13 +90,16 @@ export default class PickAndPlace extends Task {
             position: new T.Vector3(0.8, 0, 0),
             rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
         });
+        if (this.text) this.text().forEach((text) => this.instructions.appendChild(text));
         this.table.show();
+        this.buttons.show();
         this.instructions.show();
     }
 
     destruct() {
         this.table.hide();
         this.instructions.hide();
+        this.buttons.hide();
         this.data.flush(this.name);
     }
 
@@ -139,6 +151,7 @@ export default class PickAndPlace extends Task {
                 && gripperDistance > block.size.x
             ) {
                 block.grasp(gripper.position, gripper.quaternion);
+                window.grasped = true;
             }
         } else {
             block.rigidBody.setNextKinematicTranslation(gripper.position);
@@ -146,6 +159,7 @@ export default class PickAndPlace extends Task {
 
             if (gripperDistance > block.size.x + .01) {
                 block.ungrasp(gripper.position, gripper.quaternion)
+                window.grasped = false;
             }
         }
 

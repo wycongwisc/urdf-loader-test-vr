@@ -45,8 +45,8 @@ export function initScene() {
     const gridHelper = new T.GridHelper(10, 20, 0x121A21, 0x121A21);
     scene.add(gridHelper);
 
-    const cameraHelper = new T.CameraHelper(directionalLight.shadow.camera)
-    scene.add(cameraHelper)
+    // const cameraHelper = new T.CameraHelper(directionalLight.shadow.camera)
+    // scene.add(cameraHelper)
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.y = 1;

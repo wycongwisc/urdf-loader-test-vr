@@ -271,34 +271,6 @@ function init() {
         world,
     })
 
-
-    // const geometry = new T.SphereGeometry(1, 32, 16);
-    // const material = new T.MeshStandardMaterial({ color: 0xffff00 });
-    // const sphere = new T.Mesh(geometry, material);
-    // sphere.castShadow = true;
-    // scene.add(sphere);
-
-    // Use the RAPIER module here.
-    // const gravity = { x: 0.0, y: -9.81, z: 0.0 };
-    // const world = new RAPIER.World(gravity);
-
-    // // Create the ground
-    // let groundColliderDesc = RAPIER.ColliderDesc.cuboid(10.0, 0.1, 10.0);
-    // world.createCollider(groundColliderDesc);
-  
-    // // Create a dynamic rigid-body.
-    // let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-    // rigidBodyDesc.setTranslation(0.0, 3.0, 0.0);
-    // let rigidBody = world.createRigidBody(rigidBodyDesc);
-  
-    // // Create a cuboid collider attached to the dynamic rigidBody.
-    // let colliderDesc = RAPIER.ColliderDesc.ball(1)
-    // colliderDesc.setRestitution(0.8)
-    // let collider = world.createCollider(colliderDesc, rigidBody);
-
-
-
-
     // update logic loop
     setTimeout(function update() { 
         if (renderer.xr.isPresenting) {
@@ -339,7 +311,7 @@ function init() {
             lines.renderOrder = Infinity;
             lines.material.depthTest = false;
             lines.material.depthWrite = false;
-            scene.add(lines);
+            // scene.add(lines);
         }
         
         let buffers = world.debugRender();

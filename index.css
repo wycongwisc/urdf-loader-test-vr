@@ -3,6 +3,7 @@ html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
 }
 
 #inputs {
@@ -263,4 +264,30 @@ html, body {
         -ms-transform: rotate(360deg);
         transform: rotate(360deg);
     }
+}
+
+/**/
+
+#top {
+    padding: 1rem;
+    background-color: #233241;
+    color: white;
+}
+
+#toggle-robot {
+    float: right;
+    margin-right: 1rem;
+}
+
+#toggle-physics {
+    float: right;
+}
+
+select {
+    padding: .5rem;
+    margin-right: 1rem;
+}
+
+button {
+    padding: .5rem;
 }
