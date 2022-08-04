@@ -69,18 +69,25 @@ export class Tasks extends Module {
     }
 
     update(t, data) {
-        this.task?.update(t, data);
-        if (this.task?.fsm.is('COMPLETE')) {
-            this.data.logTask(t, this.task)
-            this.fsm.next();
-            if (this.fsm.is('IDLE')) {
-                window.location.reload();
-            }
+        if (!this.task) return;
+        if (this.task.fsm.is('IDLE')) return;
 
+        this.task.update(t, data);
+
+        if (this.task.fsm.is('COMPLETE')) {
+            // this.data.logTask(t, this.task)
+            this.fsm.next();
+            if (this.fsm.is('IDLE')) window.location.reload();
         }
     }
 
     log(t) {
-        this.task?.log(t);
+        if (
+            this.task 
+            && !this.task.fsm.is('IDLE')
+            && !this.task.fsm.is('COMPLETE')
+        ) {
+            this.task.log(t);
+        }
     }
 }

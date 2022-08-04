@@ -42,9 +42,10 @@ export default class Stack extends Task {
             position: new T.Vector3(2, 1.5, 0),
             rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
             backgroundOpacity: 0,
+            alignContent: 'left'
         });
         this.instructions.appendChild(this.ui.createText('Block Stacking\n', { fontSize: 0.08 }));
-        this.instructions.appendChild(this.ui.createText('Complete the task by stacking the blocks\n\n'));
+        this.instructions.appendChild(this.ui.createText('Complete the task by stacking the blocks\n\n', { fontSize: 0.04 }));
 
         this.stackCounter = this.ui.createContainer('stack-counter', {
             height: .1,
@@ -56,26 +57,26 @@ export default class Stack extends Task {
 
         this.buttons = this.ui.createContainer('stack-reset', {
             height: .4,
-            position: new T.Vector3(2, 1.0, 0),
+            position: new T.Vector3(2, 1.55, .5),
             rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
             backgroundOpacity: 0,
         })
         this.buttons.appendChild(this.ui.createButton('Reset', { onClick: () => this.fsm.reset() }))
     }
 
-    start() {
-        this.fsm.start();
-        this.table = new Table({ 
+    async start() {
+        this.table = await Table.build({ 
             world: this.world, 
             position: new T.Vector3(0.8, 0, 0),
             rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
-        });
+        })
         if (this.text) this.text().forEach((text) => this.instructions.appendChild(text));
         this.table.show();
         this.instructions.show();
         this.buttons.show();
         this.stackCounter.show();
-        
+
+        this.fsm.start();
     }
 
     destruct() {
@@ -100,8 +101,6 @@ export default class Stack extends Task {
     }
 
     update(t, data) {
-        if (this.fsm.is('COMPLETE')) return;
-
         const round = this.round;
         const blocks = round.blocks;
         const gripper = this.computeGripper(data.currEEAbsThree);
@@ -196,11 +195,60 @@ export default class Stack extends Task {
             })
             if (sleepCount === blocks.length) this.fsm.next();
         }
-
-
     }
 
-    log(t) {
-        return;
+    log(t, init = false) {
+        let data;
+
+        if (init) {
+
+            data = [[ 'time', 'sawyer', 'table' ]];
+            this.round.blocks.forEach((block, i) => data[0].push(`block-${i + 1}`));
+            this.data.initScene(data);
+
+        } 
+        
+        data = [ (t - this.startTime) / 1000, ...this.getState() ];
+        this.data.log(data);
+    }
+
+   /**
+    * 
+    * @param {Boolean} string If true, returns an array of strings instead of an array of objects.
+    * @returns An array of data corresponding to the state of each object
+    */
+    getState(string = true) {
+
+        const robot = window.robot;
+        const table = this.table.mesh;
+
+        let state = [
+            {
+                position: { x: robot.position.x, y: robot.position.y, z: robot.position.z },
+                rotation: { x: robot.quaternion.x, y: robot.quaternion.y, z: robot.quaternion.z, w: robot.quaternion.w },
+                scale: { x: robot.scale.x, y: robot.scale.y, z: robot.scale.z },
+                joints: []
+            },
+            {
+                position: { x: table.position.x, y: table.position.y, z: table.position.z },
+                rotation: { x: table.quaternion.x, y: table.quaternion.y, z: table.quaternion.z, w: table.quaternion.w },
+                scale: { x: table.scale.x, y: table.scale.y, z: table.scale.z },
+            }
+        ]
+
+        for (const joint of ["right_j0", "right_j1", "right_j2", "right_j3", "right_j4", "right_j5", "right_j6"]) {
+            state[0].joints.push({ name: joint, angle: robot.joints[joint].jointValue[0] });
+        }
+
+        for (const block of this.round.blocks) {
+            state.push({
+                position: { x: block.mesh.position.x, y: block.mesh.position.y, z: block.mesh.position.z },
+                rotation: { x: block.mesh.quaternion.x, y: block.mesh.quaternion.y, z: block.mesh.quaternion.z, w: block.mesh.quaternion.w },
+                scale: { x: block.mesh.scale.x, y: block.mesh.scale.y, z: block.mesh.scale.z },
+            })
+        }
+
+        if (string) state = state.map((s) => JSON.stringify(s))
+        return state;
     }
 }

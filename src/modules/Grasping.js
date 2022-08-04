@@ -31,7 +31,7 @@ export class Grasping extends Module {
                 window.leftFinger.rigidBody.setNextKinematicTranslation(leftPosition);
                 const rightPosition = window.rightFinger.link.translateY(-0.001).getWorldPosition(new T.Vector3());
                 window.rightFinger.rigidBody.setNextKinematicTranslation(rightPosition);
-                this.controller.get().gamepad?.hapticActuators[0].pulse(.25, 18);
+                this.controller.get().gamepad?.hapticActuators?.[0].pulse(.25, 18);
             } else {
                 return true;
             }
@@ -47,7 +47,7 @@ export class Grasping extends Module {
                 window.leftFinger.rigidBody.setNextKinematicTranslation(leftPosition);
                 const rightPosition = window.rightFinger.link.translateY(0.001).getWorldPosition(new T.Vector3());
                 window.rightFinger.rigidBody.setNextKinematicTranslation(rightPosition);
-                this.controller.get().gamepad?.hapticActuators[0].pulse(.25, 18);
+                this.controller.get().gamepad?.hapticActuators?.[0].pulse(.25, 18);
             } else {
                 return true;
             }

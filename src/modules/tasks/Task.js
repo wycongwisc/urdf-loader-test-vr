@@ -57,7 +57,7 @@ export default class Task extends Module {
                             break;
                         case 'COMPLETE':
                             that.roundComplete.play();
-                            that.data?.flush(this.name);
+                            that.data.flush();
                             that.clear();
                             break;
                         default:
@@ -75,6 +75,8 @@ export default class Task extends Module {
                             module.disable();
                         }
                     }
+                    this.startTime = Date.now();
+                    this.log(this.startTime, true);
                 },
             }
         })
@@ -86,6 +88,7 @@ export default class Task extends Module {
      * @param {Number} roundIndex 
      */
     setRound(roundIndex) {
+        console.log(roundIndex)
         if (!this.rounds || !this.rounds[roundIndex]) {
             console.warn(`Round ${roundIndex + 1} does not exist for task ${this.name}`)
             return;

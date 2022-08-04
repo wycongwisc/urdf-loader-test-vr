@@ -98,13 +98,13 @@ export class VrControl {
         // const resetRobot = new ResetRobot({ eventConfig, ui: this.ui }, { showInstructions: true });
         // window.modules.push(resetRobot)
 
-        const dragControl = new DragControl({ fsmConfig, ui: this.ui, controller: this.controller })
-        window.modules.push(dragControl);
+        // const dragControl = new DragControl({ fsmConfig, ui: this.ui, controller: this.controller })
+        // window.modules.push(dragControl);
 
         const remoteControl = new RemoteControl({ fsmConfig, ui: this.ui, controller: this.controller })
         window.modules.push(remoteControl);
 
-        const grasping = new Grasping(this.controller);
+        const grasping = new Grasping(this.controller, { mode: 'trigger-hold' });
         window.modules.push(grasping);
 
         // const record = new Record({ fsmConfig, eventConfig, ui: this.ui });
@@ -135,39 +135,42 @@ export class VrControl {
                 // new GraspingTutorial(
                 //     { ui: this.ui, hand: this.hand, controller: this.controller },
                 // ),
-                new PoseMatch(
-                    { ui: this.ui, data: this.data },
-                    { disableModules: ['remote-control', 'grasping'], numRounds: 1, initConfig: () => { dragControl.setMode('grip-auto') }, text }
-                ),
-                new PoseMatch(
-                    { ui: this.ui, data: this.data },
-                    { disableModules: ['remote-control', 'grasping'], numRounds: 1, initConfig: () => { dragControl.setMode('grip-toggle') }, text }
-                ),
-                new PoseMatch(
-                    { ui: this.ui, data: this.data },
-                    { disableModules: ['remote-control', 'grasping'], numRounds: 1, initConfig: () => { dragControl.setMode('grip-hold') }, text }
-                ),
-                new PoseMatch(
-                    { ui: this.ui, data: this.data },
-                    { disableModules: ['drag-control', 'grasping'], numRounds: 1, initConfig: () => { remoteControl.setMode('grip-toggle') }, text }
-                ),
-                new PoseMatch(
-                    { ui: this.ui, data: this.data },
-                    { disableModules: ['drag-control', 'grasping'], numRounds: 1, initConfig: () => { remoteControl.setMode('grip-hold') }, text }
-                ),
-                new PoseMatch(
-                    { ui: this.ui, data: this.data },
-                    { disableModules: ['remote-control'], numRounds: 1, initConfig: () => { grasping.setMode('ab-hold') }, text}
-                ),
-                new PoseMatch(
-                    { ui: this.ui, data: this.data },
-                    { disableModules: ['remote-control'], numRounds: 1, initConfig: () => { grasping.setMode('trigger-toggle') }, text}
-                ),
-                new PoseMatch(
-                    { ui: this.ui, data: this.data },
-                    { disableModules: ['remote-control'], numRounds: 1, initConfig: () => { grasping.setMode('trigger-hold') }, text}
-                ),
-
+                new Stack(
+                    { ui: this.ui, data: this.data, world: this.world, controller: this.controller },
+                    { numRounds: 1 }
+                )
+                // new PoseMatch(
+                //     { ui: this.ui, data: this.data },
+                //     { disableModules: ['remote-control', 'grasping'], numRounds: 1, initConfig: () => { dragControl.setMode('grip-auto') }, text }
+                // ),
+                // new PoseMatch(
+                //     { ui: this.ui, data: this.data },
+                //     { disableModules: ['remote-control', 'grasping'], numRounds: 1, initConfig: () => { dragControl.setMode('grip-toggle') }, text }
+                // ),
+                // new PoseMatch(
+                //     { ui: this.ui, data: this.data },
+                //     { disableModules: ['remote-control', 'grasping'], numRounds: 1, initConfig: () => { dragControl.setMode('grip-hold') }, text }
+                // ),
+                // new PoseMatch(
+                //     { ui: this.ui, data: this.data },
+                //     { disableModules: ['drag-control', 'grasping'], numRounds: 1, initConfig: () => { remoteControl.setMode('grip-toggle') }, text }
+                // ),
+                // new PoseMatch(
+                //     { ui: this.ui, data: this.data },
+                //     { disableModules: ['drag-control', 'grasping'], numRounds: 1, initConfig: () => { remoteControl.setMode('grip-hold') }, text }
+                // ),
+                // new PoseMatch(
+                //     { ui: this.ui, data: this.data },
+                //     { disableModules: ['remote-control'], numRounds: 1, initConfig: () => { grasping.setMode('ab-hold') }, text}
+                // ),
+                // new PoseMatch(
+                //     { ui: this.ui, data: this.data },
+                //     { disableModules: ['remote-control'], numRounds: 1, initConfig: () => { grasping.setMode('trigger-toggle') }, text}
+                // ),
+                // new PoseMatch(
+                //     { ui: this.ui, data: this.data },
+                //     { disableModules: ['remote-control'], numRounds: 1, initConfig: () => { grasping.setMode('trigger-hold') }, text}
+                // ),
                 // new PickAndDrop(
                 //     { ui: this.ui, data: this.data, world: this.world, controller: this.controller }, 
                 //     { numRounds: 1 }
@@ -237,7 +240,6 @@ export class VrControl {
 
             window.modules.pop();
             window.modules.push(tasks);
-            tasks.start();
         })
 
 
@@ -255,9 +257,11 @@ export class VrControl {
             module.setFSM(window.fsm)
         });
 
-        tasks.start();
 
-        this.data.logSession(window.modules);
+        this.renderer.xr.addEventListener('sessionstart', async () => {
+            await this.data.initSession();
+            tasks.start();
+        })
     }
 
     update(t) {
