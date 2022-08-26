@@ -1,113 +1,158 @@
 import * as T from 'three';
 import RAPIER from '@dimforge/rapier3d';
+import loadGLTF from '../../../utilities/loadGLTF';
+import SceneObject from './SceneObject';
+// import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
+// import download from '../../../utilities/download';
 
-export default class Block {
-    constructor(params) {
-        this.world = params.world;
-        this.position = params.position ?? new T.Vector3();
-        this.rotation = params.rotation ?? new T.Euler();
-        this.color = params.color ?? 0xFF0000;
-        this.velocity = params.velocity ?? 0;
-        this.size = params.size ?? new T.Vector3(0.05, 0.05, 0.05);
-        
-        this.visible = false;
+const PATH = './models/block.glb';
+
+export default class Block extends SceneObject {
+    constructor(utilities, options = {}) {
+        super('block', utilities);
+
+        this.initPosition = options.position ?? new T.Vector3();
+        this.initRotation = options.rotation ?? new T.Euler();
+        this.initScale = options.scale ?? new T.Vector3(1, 1, 1);
+
+        this.color = options.color ?? 0xFF0000;
+        this.loaded = false;
         this.grasped = false;
+    }
 
-        const mesh = new T.Mesh( 
-            new T.BoxGeometry( 
-                this.size.x,
-                this.size.y,
-                this.size.z,
-                1, 1, 1 
-            ),
-            new T.MeshStandardMaterial({ color: this.color })
-        );
+    static async init(utilities) {
+        const block = new Block(utilities);
+        await block.fetch();
+        return block;
+    }
 
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
+    async fetch() {
+        const gltf = await loadGLTF(PATH);
+        const mesh = gltf.scene;
+
+        // position and rotation will be overridden by the physics engine
+        // these values are set here to prevent teleporting on load
+        mesh.position.copy(this.initPosition);
+        mesh.rotation.copy(this.initRotation);
+        mesh.scale.copy(this.initScale);
+        mesh.traverse(child => { child.castShadow = true, child.receiveShadow = true });
 
         this.mesh = mesh;
     }
 
-    show() {
-        if (this.visible) return;
-        else this.visible = true;
+    set(init) {
+        if (this.loaded) this.destruct();
 
-        const mesh = this.mesh;
-        mesh.position.copy(this.position);
-        mesh.rotation.copy(this.rotation);
+        this.initPosition = init.position ?? this.initPosition;
+        this.initRotation = init.rotation ?? this.initRotation;
+        this.initScale = init.scale ?? this.initScale;
 
-        this.rigidBody = this.world.createRigidBody(
-            RAPIER.RigidBodyDesc.dynamic()
-                .setTranslation(mesh.position.x, mesh.position.y, mesh.position.z)
-                .setRotation(mesh.quaternion)
-        );
+        this.mesh.position.copy(this.initPosition);
+        this.mesh.rotation.copy(this.initRotation);
+        this.mesh.scale.copy(this.initScale);
 
-        this.collider = this.world.createCollider(
-            RAPIER.ColliderDesc.cuboid(this.size.x/2, this.size.y/2, this.size.z/2).setRestitution(0.25), 
-            this.rigidBody
-        );
-
-        window.simObjs.set(this.rigidBody, mesh);
-        window.scene.add(mesh);
+        this.load();
     }
 
-    grasp(position, quaternion) {
+    /**
+     * 
+     * @param {string} type 
+     * @param {T.Vector3} initPosition 
+     * @param {T.Quaternion} initRotation 
+     */
+    load(type = 'dynamic', initPosition, initRotation) {
+        const position = initPosition ?? this.initPosition;
+        const rotation = initRotation ?? new T.Quaternion().setFromEuler(this.initRotation);
+        
+        const rigidBodyDesc = (
+            (type === 'dynamic') ? RAPIER.RigidBodyDesc.dynamic()
+            : (type === 'kinematicPositionBased') ? RAPIER.RigidBodyDesc.kinematicPositionBased()
+            : undefined
+        )?.setTranslation(position.x, position.y, position.z).setRotation(rotation);
+        
+        const rigidBody = this.world.createRigidBody(rigidBodyDesc);
+
+        // build colliders
+        const colliderDesc = RAPIER.ColliderDesc.cuboid(
+            0.05 * this.initScale.x / 2, 
+            0.05 * this.initScale.y / 2, 
+            0.05 * this.initScale.z / 2
+        ).setRestitution(0.25);
+        const collider = this.world.createCollider(colliderDesc, rigidBody);
+        collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
+
+        window.simObjs.set(rigidBody, this.mesh);
+        window.scene.add(this.mesh);
+
+        this.loaded = true;
+
+        this.rigidBody = rigidBody;
+        this.colliders = [collider];
+    }
+
+    /**
+     * 
+     * @param {T.Vector3} position 
+     * @param {T.Quaternion} rotation 
+     */
+    grasp(position, rotation) {
+        this.destruct();
+        // switch to KinematicPositionBased rigid-body so the pose of the block can be set according to the gripper
+        this.load('kinematicPositionBased', position, rotation);
         this.grasped = true;
-        this.destruct();
-
-        this.rigidBody = this.world.createRigidBody(
-            RAPIER.RigidBodyDesc.kinematicPositionBased()
-                .setTranslation(position.x, position.y, position.z)
-                .setRotation(quaternion)
-        );
-
-        this.collider = this.world.createCollider(
-            RAPIER.ColliderDesc.cuboid(this.size.x/2, this.size.y/2, this.size.z/2).setRestitution(0.25), 
-            this.rigidBody
-        );
-
-        window.simObjs.set(this.rigidBody, this.mesh);
     }
 
-    ungrasp(position, quaternion) {
-        this.grasped = false;
+    /**
+     * 
+     * @param {T.Vector3} position 
+     * @param {T.Quaternion} rotation 
+     */
+    ungrasp(position, rotation) {
         this.destruct();
-
-        this.rigidBody = this.world.createRigidBody(
-            RAPIER.RigidBodyDesc.dynamic()
-                .setTranslation(position.x, position.y, position.z)
-                .setRotation(quaternion)
-        );
-
-        this.collider = this.world.createCollider(
-            RAPIER.ColliderDesc.cuboid(this.size.x/2, this.size.y/2, this.size.z/2).setRestitution(0.25), 
-            this.rigidBody
-        );
-
-        window.simObjs.set(this.rigidBody, this.mesh);
-    }
-
-    hide() {
-        this.visible = false;
-
-        window.scene.remove(this.mesh);
-        this.destruct();
+        this.load('dynamic', position, rotation)
     }
 
     destruct() {
+        this.grasped = false;
+        window.scene.remove(this.mesh);
         window.simObjs.delete(this.rigidBody);
         this.world.removeRigidBody(this.rigidBody);
+        this.loaded = false;
     }
 
-    // reset() {
-    //     this.grasped = false;
-    //     this.released = false;
-    //     this.grasp_offset = undefined;
+    /**
+     * Detects the grasping interaction between gripper and block. This method needs to be improved.
+     * @param {} world 
+     */
+    update(world, gripper) {
+        const pos1 = window.robot.links['right_gripper_l_finger_tip'].getWorldPosition(new T.Vector3());
+        const pos2 = window.robot.links['right_gripper_r_finger_tip'].getWorldPosition(new T.Vector3());
+        const width = pos1.distanceTo(pos2);
 
-    //     this.mesh.position.copy(this.initPos);
-    //     this.mesh.rotation.z = this.initAngle; 
+        if (!this.grasped) {
+            let [left, right] = [false, false];
 
-    //     this.mesh.updateMatrixWorld();
-    // }
+            world.contactsWith(window.robotColliders['right_gripper_l_finger_tip'][0], (collider) => {
+                if (collider === this.colliders[0]) left = true;
+            });
+
+            world.contactsWith(window.robotColliders['right_gripper_r_finger_tip'][0], (collider) => {
+                if (collider === this.colliders[0]) right = true;
+            });
+
+            if (left && right && width < .05 * this.initScale.x + .01 && width > .05 * this.initScale.x) {
+                this.grasp(gripper.position, gripper.quaternion);
+                window.grasped = true;
+            }
+
+        } else {
+            this.rigidBody.setNextKinematicTranslation(gripper.position);
+            this.rigidBody.setNextKinematicRotation(gripper.quaternion);
+
+            if (width > .05 * this.initScale.x + .01) {
+                this.ungrasp(gripper.position, gripper.quaternion)
+                window.grasped = false;
+            }
+        }
+    }
 }

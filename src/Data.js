@@ -6,7 +6,7 @@ export class Data {
     buffer = [];
     BUFFER_SIZE = 500; // number of data entries stored before a POST request is called
     SESSION_ID = id();
-    SCRIPT_PATH = 'https://script.google.com/macros/s/AKfycbzbmD5OSCvp4LB5zAVMS9v5tCVZCJeZS66bZ9JLFNtlu5CB1KedWGTtDmr-IEpXgMfK/exec';
+    SCRIPT_PATH = 'https://script.google.com/macros/s/AKfycbx-oipZwXMsD3XrA1vRWF3Ut5-uVPCYvfRrdRB8kju3GledkjUJly9nvZzioGW0Ck5A/exec';
     sceneCount = 0; 
 
     constructor(params) {
@@ -18,6 +18,7 @@ export class Data {
      * @param {*} table 
      */
     post(data, type, params = {}) {
+        // return;
         console.log(type, data, params);
 
         // add session id to beginning of each row
@@ -46,26 +47,31 @@ export class Data {
     }
 
     flush() {
-        this.post(this.buffer, 'scene', {
+        this.post(this.buffer, 'trial', {
             sessionId: this.SESSION_ID,
-            sceneId: this.currentSceneId,
-            sceneName: `scene-${this.sceneCount.toString().padStart(2, '0')}`
+            trialId: this.currentTrialId,
         })
         this.buffer = [];
     }
 
     // log initial configs of every object in the scene
-    initScene(data) {
-        this.currentSceneId = id();
-        this.sceneCount++;
+    startTrial(data) {
+        this.currentTrialId = id();
 
-        this.post(data, 'init-scene', {
-            time: new Date(),
+        this.post(data, 'start-trial', {
             sessionId: this.SESSION_ID,
-            sceneId: this.currentSceneId,
-            sceneName: `scene-${this.sceneCount.toString().padStart(2, '0')}`
+            trialId: this.currentTrialId,
         });
     }
+
+    endTrial(data) {
+        this.post(data, 'end-trial', {
+            sessionId: this.SESSION_ID,
+            trialId: this.currentTrialId
+        });
+    }
+
+
 
     async initSession() {
         const ip = await fetch('https://api.ipify.org').then(response => { return response.text() });

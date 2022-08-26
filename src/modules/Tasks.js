@@ -1,9 +1,9 @@
-import PickAndPlace from "./tasks/PickAndPlace"
+import PickAndPlace from './tasks/PickAndPlace'
 import PoseMatch from './tasks/PoseMatch'
-import StateMachine from "javascript-state-machine"
+import StateMachine from 'javascript-state-machine'
 import * as T from 'three' 
-import Module from "./Module";
-import Task from "./tasks/Task"
+import Module from './Module';
+import Task from './tasks/Task'
 
 export class Tasks extends Module {
     constructor(params, tasks, options = {}) {
@@ -61,6 +61,7 @@ export class Tasks extends Module {
         this.clearTask();
 
         this.task = this.tasks[taskIndex];
+        console.log(this.task)
         this.task.start();
     }
 

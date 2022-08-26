@@ -7,61 +7,35 @@ import Task from './Task'
 import Block from './objects/Block'
 import Target from './objects/Target';
 import Table from './objects/Table'
-import StateMachine from "javascript-state-machine"
 import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET } from "../../globals"
-import { getCurrEEPose } from '../../utils';
-import Container from '../../ui/Container';
-import Box from './objects/Box';
-
-// default settings
-
-const NUM_ROUNDS = 1;
 
 export default class PickAndPlace extends Task {
-    constructor(params, options = {}) {
-        super({
-            name: 'pick-and-place',
-            ui: params.ui,
-            data: params.data,
-            world: params.world
-        }, {
-            numRounds: options.numRounds,
-            disableModules: options.disableModules 
-        });
 
-        this.text = options.text;
-        this.rounds = [
-            {
-                block: new Block({ 
-                    world: this.world,
-                    position: new T.Vector3(1, 3, 0.2) 
-                }),
-                target: new Target({ 
-                    world: this.world,
-                    position: new T.Vector3(0.7, .9, 0.75) 
-                })
-            },
-            {
-                block: new Block({ 
-                    world: this.world,
-                    position: new T.Vector3(0.8, 3, 0.5) 
-                }),
-                target: new Target({ 
-                    world: this.world,
-                    position: new T.Vector3(1, .9, -0.5) 
-                })
-            },
-            {
-                block: new Block({ 
-                    world: this.world,
-                    position: new T.Vector3(1, 3, 0) 
-                }),
-                target: new Target({ 
-                    world: this.world,
-                    position: new T.Vector3(0.5, .9, 0.5) 
-                })
-            }
+    static async init(utilities, condition, options = {}) {
+        const task = new PickAndPlace(utilities, condition, options);
+        task.objects = [
+            await Block.init(utilities),
+            await Target.init(utilities),
+            await Table.init(utilities),
         ]
+        return task;
+    }
+
+    constructor(utilities, condition, options) {
+        super('pick-and-place', utilities, condition, options, [
+            () => {
+                this.objects[0].set({ position: new T.Vector3(1, 3, 0.2)  });
+                this.objects[1].set({ position: new T.Vector3(0.7, .9, 0.75) });
+            },
+            () => {
+                this.objects[0].set({ position: new T.Vector3(0.8, 3, 0.5)  });
+                this.objects[1].set({ position: new T.Vector3(1, .9, -0.5) });
+            },
+            () => {
+                this.objects[0].set({ position: new T.Vector3(1, 3, 0)  });
+                this.objects[1].set({ position: new T.Vector3(0.5, .9, 0.5) });
+            }
+        ])
 
         //
 
@@ -73,35 +47,20 @@ export default class PickAndPlace extends Task {
         });
         this.instructions.appendChild(this.ui.createText('Pick and Place\n', { fontSize: 0.08 }));
         this.instructions.appendChild(this.ui.createText('Complete the task by picking up the block with the robot and placing it inside the circle\n\n'));
-    
-        this.buttons = this.ui.createContainer('pick-and-place-reset', {
-            height: .4,
-            position: new T.Vector3(2, 1.0, 0),
-            rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
-            backgroundOpacity: 0,
-        })
-        this.buttons.appendChild(this.ui.createButton('Reset', { onClick: () => this.fsm.reset() }))
     }
 
-    start() {
-        this.fsm.start();
-        this.table = new Table({ 
-            world: this.world, 
+    async onStart() {
+        this.instructions.show();
+        this.objects[2].set({ 
             position: new T.Vector3(0.8, 0, 0),
             rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
         });
-        if (this.text) this.text().forEach((text) => this.instructions.appendChild(text));
-        this.table.show();
-        this.buttons.show();
-        this.instructions.show();
     }
 
-    destruct() {
-        this.table.hide();
+    onStop() {
         this.instructions.hide();
-        this.buttons.hide();
-        this.data.flush(this.name);
     }
+
 
     /**
      * Constrcts an object representing the gripper in THREE space (there is probably a better way to do this)
@@ -118,68 +77,30 @@ export default class PickAndPlace extends Task {
     }
 
     update(t, data) {
-        if (this.fsm.is('COMPLETE')) return;
 
-        const round = this.round;
-        const block = round.block;
-        const target = round.target;
+        const objects = this.objects;
+        const block = objects[0];
+        const target = objects[1];
+        const table = objects[2];
+
         const gripper = this.computeGripper(data.currEEAbsThree);
         
         this.instructions.getObject().lookAt(window.camera.position);
 
         // hacked grasping mechanics
-        const pos1 = window.robot.links['right_gripper_l_finger_tip'].getWorldPosition(new T.Vector3());
-        const pos2 = window.robot.links['right_gripper_r_finger_tip'].getWorldPosition(new T.Vector3());
-        const gripperDistance = pos1.distanceTo(pos2);
+        block.update(this.world, gripper);
 
-        if (!block.grasped) {
-            const gripperContact = {};
+        table.update(this.world, this.controller);
 
-            this.world.contactsWith(window.robotColliders['right_gripper_l_finger_tip'][0], (collider) => {
-                if (collider === block.collider) gripperContact.left = block;
-            });
-
-            this.world.contactsWith(window.robotColliders['right_gripper_r_finger_tip'][0], (collider) => {
-                if (collider === block.collider) gripperContact.right = block;
-            });
-
-            if (
-                gripperContact.left 
-                && gripperContact.right
-                && gripperContact.left === gripperContact.right 
-                && gripperDistance < block.size.x + .01 
-                && gripperDistance > block.size.x
-            ) {
-                block.grasp(gripper.position, gripper.quaternion);
-                window.grasped = true;
+        this.world.contactsWith(this.ground, (c) => {
+            if (c === block.colliders[0]) {
+                this.fsm.next();
+                return;
             }
-        } else {
-            block.rigidBody.setNextKinematicTranslation(gripper.position);
-            block.rigidBody.setNextKinematicRotation(gripper.quaternion); // TODO
-
-            if (gripperDistance > block.size.x + .01) {
-                block.ungrasp(gripper.position, gripper.quaternion)
-                window.grasped = false;
-            }
-        }
-
-        this.world.contactsWith(block.collider, (collider) => {
-            if (collider === target.collider) this.fsm.nxet();
         })
-    }
-
-    log(t) {
-        const block = this.round.block;
-        const target = this.round.target;
-
-        this.data.log(t, [
-            this.id,
-            this.fsm.state,
-            target.mesh.position.x + ' ' + target.mesh.position.y + ' ' + target.mesh.position.z,
-            target.mesh.quaternion.x + ' ' + target.mesh.quaternion.y + ' ' + target.mesh.quaternion.z + ' ' + block.mesh.quaternion.w,
-            block.mesh.position.x + ' ' + block.mesh.position.y + ' ' + block.mesh.position.z,
-            block.mesh.quaternion.x + ' ' + block.mesh.quaternion.y + ' ' + block.mesh.quaternion.z + ' ' + block.mesh.quaternion.w,
-            block.grasped,
-        ], this.name)
+        
+        this.world.contactsWith(block.collider, (collider) => {
+            if (collider === target.colliders[0]) this.fsm.nxet();
+        })
     }
 }

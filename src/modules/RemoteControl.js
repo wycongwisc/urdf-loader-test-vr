@@ -4,40 +4,33 @@ import { getCurrEEPose, updateTargetCursor, updateRobot, resetRobot } from '../u
 
 
 export class RemoteControl extends Module {
-    constructor(params, options = {}) {
-        super({ name: 'remote-control' });
-        Object.assign(this, params);
+    constructor(utilities, options = {}) {
+        super('remote-control', utilities);
 
+        // ========== options ==========
         this.showOffsetIndicator = options.showOffsetIndicator ?? true;
-        this.disabled = false;
-        this.setMode(options.mode ?? 'grip-toggle');
+        this.controlMode = options.controlMode ?? 'grip-toggle';
+        // =============================
 
         this.click = new Audio('./assets/click.wav');
+    }
 
-        //
-
-        const fsmConfig = this.fsmConfig;
-
-        fsmConfig.transitions.push({ name: 'activateRemoteControl', from: 'IDLE', to: 'REMOTE_CONTROL' });
-        fsmConfig.transitions.push({ name: 'deactivateRemoteControl', from: 'REMOTE_CONTROL', to: 'IDLE' });
-
-        fsmConfig.methods['onActivateRemoteControl'] = () => {
-            if (this.disabled) return;
-
-            this.click.play();
+    load(config) {
+        config.transitions.push({ name: 'activateRemoteControl', from: 'IDLE', to: 'REMOTE_CONTROL' });
+        config.transitions.push({ name: 'deactivateRemoteControl', from: 'REMOTE_CONTROL', to: 'IDLE' });
+        config.methods['onActivateRemoteControl'] = () => { 
+            this.click.play() 
         };
-
-        fsmConfig.methods['onDeactivateRemoteControl'] = () => {
-            if (this.disabled) return;
-
+        config.methods['onDeactivateRemoteControl'] = () => {
             window.scene.remove(this.offsetIndicator);
             window.targetCursor.material.color.setHex(0xFFFFFF);
         };
+
+        this.loadControlMode(this.controlMode);
     }
 
-    setMode(mode) {
+    loadControlMode(mode) {
         if (!['grip-toggle', 'grip-hold', 'trigger-hold', 'trigger-toggle'].includes(mode)) throw new Error(`Control mode \"${mode}\" does not exist for Remote Control`);
-        this.mode = mode;
 
         this.controller.removeButtonAction('grip', 'remote-control');
         this.controller.removeButtonAction('gripstart', 'remote-control');
@@ -49,20 +42,16 @@ export class RemoteControl extends Module {
         switch(mode) {
             case 'grip-hold': 
                 this.controller.addButtonAction('gripstart', 'remote-control', () => {
-                    if (this.disabled) return;
                     if (this.fsm.is('IDLE')) this.fsm.activateRemoteControl();
                 })
 
                 this.controller.addButtonAction('gripend', 'remote-control', () => {
-                    if (this.disabled) return;
                     if (this.fsm.is('REMOTE_CONTROL')) this.fsm.deactivateRemoteControl();
                 })
                 this.modeInstructions = 'Activate: Press and hold the grip button.\nDeactivate: Release the grip button.';
                 break;
             case 'grip-toggle':
                 this.controller.addButtonAction('grip', 'remote-control', () => {
-                    if (this.disabled) return;
-        
                     if (this.fsm.is('IDLE')) {
                         this.fsm.activateRemoteControl();
                     } else if (this.fsm.is('REMOTE_CONTROL')) {
@@ -73,20 +62,16 @@ export class RemoteControl extends Module {
                 break;
             case 'trigger-hold': 
                 this.controller.addButtonAction('triggerstart', 'remote-control', () => {
-                    if (this.disabled) return;
                     if (this.fsm.is('IDLE')) this.fsm.activateRemoteControl();
                 })
 
                 this.controller.addButtonAction('triggerend', 'remote-control', () => {
-                    if (this.disabled) return;
                     if (this.fsm.is('REMOTE_CONTROL')) this.fsm.deactivateRemoteControl();
                 })
                 this.modeInstructions = 'Activate: Squeeze and hold the trigger.\nDeactivate: Release the trigger.';
                 break;
             case 'trigger-toggle':
                 this.controller.addButtonAction('trigger', 'remote-control', () => {
-                    if (this.disabled) return;
-        
                     if (this.fsm.is('IDLE')) {
                         this.fsm.activateRemoteControl();
                     } else if (this.fsm.is('REMOTE_CONTROL')) {
@@ -100,30 +85,21 @@ export class RemoteControl extends Module {
         }
     }
 
-    disable() {
-        if (this.fsm.is('REMOTE_CONTROL')) {
-            this.fsm.deactivateRemoteControl();
-        }
-        this.disabled = true;
+    reset() {
+        if (this.fsm.is('REMOTE_CONTROL')) this.fsm.deactivateRemoteControl();
     }
 
-    enable() {
-        this.disabled = false;
-    }
-
-    update(t, data) {
-        if (this.disabled) return;
-
+    update(t, info) {
         if (this.fsm.is('REMOTE_CONTROL')) {
             const deltaPosi = new T.Vector3(); 
-            deltaPosi.subVectors(data.ctrlPose.posi, data.prevCtrlPose.posi)
+            deltaPosi.subVectors(info.ctrlPose.posi, info.prevCtrlPose.posi)
             window.goalEERelThree.posi.add(deltaPosi);
 
             const deltaOri = new T.Quaternion();
-            deltaOri.multiplyQuaternions(data.ctrlPose.ori.clone(), data.prevCtrlPose.ori.clone().invert())
+            deltaOri.multiplyQuaternions(info.ctrlPose.ori.clone(), info.prevCtrlPose.ori.clone().invert())
             window.goalEERelThree.ori.premultiply(deltaOri);
 
-            this.showOffsetIndicator && this.updateOffsetIndicator(data.currEEAbsThree.posi, window.targetCursor.position);
+            this.showOffsetIndicator && this.updateOffsetIndicator(info.currEEAbsThree.posi, window.targetCursor.position);
             updateTargetCursor(window.goalEERelThree);
             updateRobot(window.goalEERelThree);
         }

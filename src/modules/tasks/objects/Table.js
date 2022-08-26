@@ -1,89 +1,132 @@
 import * as T from 'three';
 import loadGLTF from '../../../utilities/loadGLTF';
 import RAPIER from '@dimforge/rapier3d';
+import Controllers from '../../../utilities/Controllers'
+import SceneObject from './SceneObject';
+import { v4 as id } from 'uuid'
 
-export default class Table {
-    constructor(params) {
-        this.world = params.world;
-        this.mesh = new T.Group();
-        this.scale = params.scale ?? new T.Vector3(.011, .011, .011);
-        this.position = params.position ?? new T.Vector3();
-        this.rotation = params.rotation ?? new T.Euler();
-        this.height = 80 * this.scale.y;
-        this.visible = false;
+const PATH = './models/table.glb';
+
+export default class Table extends SceneObject {
+    constructor(utilities, options = {}) {
+        super('table', utilities);
+        this.initPosition = options.position ?? new T.Vector3();
+        this.initRotation = options.rotation ?? new T.Euler();
+        this.initScale = options.scale ?? new T.Vector3(.011, .011, .011);
+        this.loaded = false;
     }
 
-    static async build(params) {
-        const table = new Table(params);
-        await table.load();
+    static async init(utilities) {
+        const table = new Table(utilities);
+        await table.fetch();
         return table;
     }
 
-    async load() {
-        const gltf = await loadGLTF('./models/table/scene.gltf');
+    async fetch() {
+        const gltf = await loadGLTF(PATH);
         const mesh = gltf.scene;
 
-        mesh.rotation.copy(this.rotation);
-        mesh.position.copy(this.position);
-        mesh.scale.copy(this.scale); 
+        // position and rotation will be overridden by the physics engine
+        // these values are set here to prevent teleporting on load
+        mesh.position.copy(this.initPosition);
+        mesh.rotation.copy(this.initRotation);
+        mesh.scale.copy(this.initScale);
         mesh.traverse(child => { child.castShadow = true, child.receiveShadow = true });
-        this.mesh = mesh;
 
-        return this;
+        this.mesh = mesh;
     }
 
-    show() {
-        if (this.visible) return;
-        else this.visible = true;
+    set(init) {
+        if (this.loaded) this.destruct();
 
-        const mesh = this.mesh;
+        this.initPosition = init.position ?? this.initPosition;
+        this.initRotation = init.rotation ?? this.initRotation;
+        this.initScale = init.scale ?? this.initScale;
+
+        this.mesh.position.copy(this.initPosition);
+        this.mesh.rotation.copy(this.initRotation);
+        this.mesh.scale.copy(this.initScale);
+
+        this.load();
+    }
+
+    load() {
+        // build rigid-body
         const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(mesh.position.x, mesh.position.y, mesh.position.z)
-            .setRotation(mesh.quaternion)
+            .setTranslation(this.initPosition.x, this.initPosition.y, this.initPosition.z)
+            .setRotation(new T.Quaternion().setFromEuler(this.initRotation))
             .lockTranslations()
             .lockRotations()
-        this.rigidBody = this.world.createRigidBody(rigidBodyDesc);
-        window.simObjs.set(this.rigidBody, mesh);
+        const rigidBody = this.world.createRigidBody(rigidBodyDesc);
 
-        const colliders = [
-            RAPIER.ColliderDesc.cuboid(80 * this.scale.x, 1.5 * this.scale.y, 48 * this.scale.z)
-                .setTranslation(0, this.height - (1.5 * this.scale.y), 0),
-            //
-            RAPIER.ColliderDesc.cuboid(4 * this.scale.x, 39 * this.scale.y, 4 * this.scale.z)
-                .setTranslation(68 * this.scale.x, 39 * this.scale.y, -36 * this.scale.z),
-            RAPIER.ColliderDesc.cuboid(4 * this.scale.x, 39 * this.scale.y, 4 * this.scale.z)
-                .setTranslation(68 * this.scale.x, 39 * this.scale.y, 36 * this.scale.z),
-            RAPIER.ColliderDesc.cuboid(4 * this.scale.x, 39 * this.scale.y, 4 * this.scale.z)
-                .setTranslation(-68 * this.scale.x, 39 * this.scale.y, -36 * this.scale.z),
-            RAPIER.ColliderDesc.cuboid(4 * this.scale.x, 39 * this.scale.y, 4 * this.scale.z)
-                .setTranslation(-68 * this.scale.x, 39 * this.scale.y, 36 * this.scale.z),
-            // 
-            RAPIER.ColliderDesc.cuboid(68 * this.scale.x, 6 * this.scale.y, 1.5 * this.scale.z)
-                .setTranslation(0, 72 * this.scale.y, -35 * this.scale.z),
-            RAPIER.ColliderDesc.cuboid(68 * this.scale.x, 6 * this.scale.y, 1.5 * this.scale.z)
-                .setTranslation(0, 72 * this.scale.y, 35 * this.scale.z),
-            RAPIER.ColliderDesc.cuboid(1.5 * this.scale.x, 6 * this.scale.y, 38 * this.scale.z)
-                .setTranslation(67 * this.scale.x, 72 * this.scale.y, 0),
-            RAPIER.ColliderDesc.cuboid(1.5 * this.scale.x, 6 * this.scale.y, 38 * this.scale.z)
-                .setTranslation(-67 * this.scale.x, 72 * this.scale.y, 0),
+        // build colliders
+        const colliderDescs = [
+            // top
+            RAPIER.ColliderDesc.cuboid(80 * this.initScale.x, 1.5 * this.initScale.y, 48 * this.initScale.z)
+                .setTranslation(0, 80 * this.initScale.y - (1.5 * this.initScale.y), 0),
+
+            // legs
+            RAPIER.ColliderDesc.cuboid(4 * this.initScale.x, 39 * this.initScale.y, 4 * this.initScale.z)
+                .setTranslation(68 * this.initScale.x, 39 * this.initScale.y, -36 * this.initScale.z),
+            RAPIER.ColliderDesc.cuboid(4 * this.initScale.x, 39 * this.initScale.y, 4 * this.initScale.z)
+                .setTranslation(68 * this.initScale.x, 39 * this.initScale.y, 36 * this.initScale.z),
+            RAPIER.ColliderDesc.cuboid(4 * this.initScale.x, 39 * this.initScale.y, 4 * this.initScale.z)
+                .setTranslation(-68 * this.initScale.x, 39 * this.initScale.y, -36 * this.initScale.z),
+            RAPIER.ColliderDesc.cuboid(4 * this.initScale.x, 39 * this.initScale.y, 4 * this.initScale.z)
+                .setTranslation(-68 * this.initScale.x, 39 * this.initScale.y, 36 * this.initScale.z),
+
+            // leg connectors
+            RAPIER.ColliderDesc.cuboid(68 * this.initScale.x, 6 * this.initScale.y, 1.5 * this.initScale.z)
+                .setTranslation(0, 72 * this.initScale.y, -35 * this.initScale.z),
+            RAPIER.ColliderDesc.cuboid(68 * this.initScale.x, 6 * this.initScale.y, 1.5 * this.initScale.z)
+                .setTranslation(0, 72 * this.initScale.y, 35 * this.initScale.z),
+            RAPIER.ColliderDesc.cuboid(1.5 * this.initScale.x, 6 * this.initScale.y, 38 * this.initScale.z)
+                .setTranslation(67 * this.initScale.x, 72 * this.initScale.y, 0),
+            RAPIER.ColliderDesc.cuboid(1.5 * this.initScale.x, 6 * this.initScale.y, 38 * this.initScale.z)
+                .setTranslation(-67 * this.initScale.x, 72 * this.initScale.y, 0),
         ]
 
-        this.colliders = []
-        colliders.forEach(desc => { 
-            const collider = this.world.createCollider(desc, this.rigidBody);
+        const colliders = []
+        for (const colliderDesc of colliderDescs) {
+            const collider = this.world.createCollider(colliderDesc, rigidBody);
             collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
-            this.colliders.push(collider);
-        });
+            colliders.push(collider);
+        }
 
-        window.scene.add(mesh);
+        window.simObjs.set(rigidBody, this.mesh);
+        window.scene.add(this.mesh);
+
+        this.loaded = true;
+
+        this.colliders = colliders;
+        this.rigidBody = rigidBody;
     }
 
-    hide() {
-        this.visible = false;
-
+    destruct() {
         window.scene.remove(this.mesh);
         window.simObjs.delete(this.rigidBody);
         this.world.removeRigidBody(this.rigidBody);
+        this.loaded = false;
     }
 
+    /**
+     * Detects collision between robot and table and provides haptic feedback.
+     * @param {*} world 
+     * @param {Controllers} controller 
+     */
+    update(world, controller) {
+        let tableContact = false;
+        for (const colliderName in window.robotColliders) {
+            const colliders = window.robotColliders[colliderName];
+            for (const collider of colliders) {
+                world.contactsWith(collider, (collider2) => {
+                    if (this.colliders.includes(collider2) && !tableContact) {
+                        controller.get().gamepad?.hapticActuators[0].pulse(1, 18);
+                        tableContact = true;
+                    }
+                })
+            }
+        }
+
+    }
 }

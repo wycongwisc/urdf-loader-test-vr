@@ -4,45 +4,38 @@ import Task from './Task'
 import Table from './objects/Table'
 import Block from './objects/Block'
 import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET } from "../../globals"
+import { v4 as id } from 'uuid';
 
 export default class Stack extends Task {
-    constructor(params, options = {}) {
-        super({
-            name: 'stack',
-            ui: params.ui,
-            data: params.data,
-            world: params.world,
-            controller: params.controller
-        }, {
-            numRounds: options.numRounds,
-            disableModules: options.disableModules, 
-            initConfig: options.initConfig
-        });
 
-        this.text = options.text;
-        this.rounds = [
-            {
-                blocks: [
-                    new Block({ 
-                        world: this.world,
-                        position: new T.Vector3(.7, 3, -.5) 
-                    }),
-                    new Block({ 
-                        world: this.world,
-                        position: new T.Vector3(0.8, 3, 0.5) 
-                    }),
-                ],
+    static async init(utilities, condition,  options = {}) {
+        const task = new Stack(utilities, condition, options);
+        task.objects = [
+            await Block.init(utilities),
+            await Block.init(utilities),
+            await Table.init(utilities),
+        ]
+        return task;
+    }
+
+    constructor(utilities, condition, options) {
+        super('stack', utilities, condition, options, [
+            () => {
+                this.objects[0].set({ position: new T.Vector3(0.7, 3.0, -0.5) });
+                this.objects[1].set({ position: new T.Vector3(0.8, 3.0, 0.5) });
             },
-        ];
-
-        //
+            () => {
+                this.objects[0].set({ position: new T.Vector3(0.7, 3.0, -0.5) });
+                this.objects[1].set({ position: new T.Vector3(0.8, 3.0, 0.5) });
+            }
+        ]);
 
         this.instructions = this.ui.createContainer('stack-instructions', {
             height: .4,
             position: new T.Vector3(2, 1.5, 0),
             rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
             backgroundOpacity: 0,
-            alignContent: 'left'
+            alignContent: 'center'
         });
         this.instructions.appendChild(this.ui.createText('Block Stacking\n', { fontSize: 0.08 }));
         this.instructions.appendChild(this.ui.createText('Complete the task by stacking the blocks\n\n', { fontSize: 0.04 }));
@@ -54,35 +47,20 @@ export default class Stack extends Task {
         });
         this.stackCounterText = this.ui.createText('- / -', { fontSize: 0.025 });
         this.stackCounter.appendChild(this.stackCounterText);
-
-        this.buttons = this.ui.createContainer('stack-reset', {
-            height: .4,
-            position: new T.Vector3(2, 1.55, .5),
-            rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
-            backgroundOpacity: 0,
-        })
-        this.buttons.appendChild(this.ui.createButton('Reset', { onClick: () => this.fsm.reset() }))
     }
 
-    async start() {
-        this.table = await Table.build({ 
-            world: this.world, 
+    async onStart() {
+        this.instructions.show();
+        this.stackCounter.show();
+        this.objects[2].set({ 
             position: new T.Vector3(0.8, 0, 0),
             rotation: new T.Euler(0, -Math.PI/2, 0, 'XYZ'),
-        })
-        if (this.text) this.text().forEach((text) => this.instructions.appendChild(text));
-        this.table.show();
-        this.instructions.show();
-        this.buttons.show();
-        this.stackCounter.show();
+        });
 
-        this.fsm.start();
     }
 
-    destruct() {
-        this.table.hide();
+    onStop() {
         this.instructions.hide();
-        this.buttons.hide();
         this.stackCounter.hide();
     }
 
@@ -100,71 +78,39 @@ export default class Stack extends Task {
         return gripper;
     }
 
-    update(t, data) {
-        const round = this.round;
-        const blocks = round.blocks;
-        const gripper = this.computeGripper(data.currEEAbsThree);
+    onUpdate(t, info) {
+
+        const objects = this.objects;
+        const blocks = objects.filter((o) => o instanceof Block);
+        const table = objects.filter((o) => o instanceof Table)[0];
+        const gripper = this.computeGripper(info.currEEAbsThree);
         
         this.instructions.getObject().lookAt(window.camera.position);
-        this.buttons.getObject().lookAt(window.camera.position);
         this.stackCounter.getObject().lookAt(window.camera.position);
 
-        // hacked grasping mechanics
-        const pos1 = window.robot.links['right_gripper_l_finger_tip'].getWorldPosition(new T.Vector3());
-        const pos2 = window.robot.links['right_gripper_r_finger_tip'].getWorldPosition(new T.Vector3());
-        const gripperDistance = pos1.distanceTo(pos2);
 
-        for (const block of blocks) {
-            if (!block.grasped) {
-                const gripperContact = {};
-
-                this.world.contactsWith(window.robotColliders['right_gripper_l_finger_tip'][0], (collider) => {
-                    if (collider === block.collider) gripperContact.left = block;
-                });
-
-                this.world.contactsWith(window.robotColliders['right_gripper_r_finger_tip'][0], (collider) => {
-                    if (collider === block.collider) gripperContact.right = block;
-                });
-
-                if (
-                    gripperContact.left 
-                    && gripperContact.right
-                    && gripperContact.left === gripperContact.right 
-                    && gripperDistance < block.size.x + .01 
-                    && gripperDistance > block.size.x
-                ) {
-                    block.grasp(gripper.position, gripper.quaternion);
-                    window.grasped = true;
-                }
-            } else {
-                block.rigidBody.setNextKinematicTranslation(gripper.position);
-                block.rigidBody.setNextKinematicRotation(gripper.quaternion); // TODO
-
-                if (gripperDistance > block.size.x + .01) {
-                    block.ungrasp(gripper.position, gripper.quaternion)
-                    window.grasped = false;
-                }
-            }
-        }
+        for (const block of blocks) block.update(this.world, gripper);
 
         // detect collision with table
-        let tableContact = false;
-        for (const colliderName in window.robotColliders) {
-            const colliders = window.robotColliders[colliderName];
-            for (const collider of colliders) {
-                this.world.contactsWith(collider, (collider2) => {
-                    if (this.table?.colliders.includes(collider2) && !tableContact) {
-                        this.controller.gamepad?.hapticActuators[0].pulse(1, 18);
-                        tableContact = true;
-                    }
-                })
-            }
-        }
+        table.update(this.world, this.controller);
 
+        this.world.contactsWith(this.ground, (c) => {
+            for (const block of blocks) {
+                if (c === block.colliders[0]) this.fsm.next();
+            }
+        })
+        
         blocks.sort((a, b) => b.mesh.position.y - a.mesh.position.y);
         let stackCount = 1;
         for (let i = 0; i < blocks.length - 1; i++) {
             if (blocks[i].grasped) continue;
+
+            const onGround = false;
+            this.world.contactsWith(this.ground, (c) => {
+                if (c === blocks[i + 1].colliders[0]) onGround = true;
+            })
+            if (onGround) continue;
+
             if (blocks[i].mesh.position.y - blocks[i + 1].mesh.position.y > .01) {
                 stackCount++;
             }
@@ -197,19 +143,22 @@ export default class Stack extends Task {
         }
     }
 
-    log(t, init = false) {
+    log(t, start = false, end = false, trial) {
         let data;
 
-        if (init) {
-
-            data = [[ 'time', 'sawyer', 'table' ]];
-            this.round.blocks.forEach((block, i) => data[0].push(`block-${i + 1}`));
-            this.data.initScene(data);
-
+        if (start) {
+            data = [[ 'time', 'headset_' + id(), 'controller-left_' + id(), 'controller-right_' + id(), 'sawyer_' + id() ]]
+            this.objects.forEach((o, i) => data[0].push(`${o.name}_${o.id}`));
+            this.data.startTrial(data);
         } 
         
         data = [ (t - this.startTime) / 1000, ...this.getState() ];
         this.data.log(data);
+
+        if (end) {
+            data = [[ t, this.condition.name, this.name, `${Number(trial) + 1}`, JSON.stringify({ timeElapsed: t - this.startTime }) ]];
+            this.data.endTrial(data);
+        }
     }
 
    /**
@@ -219,36 +168,42 @@ export default class Stack extends Task {
     */
     getState(string = true) {
 
-        const robot = window.robot;
-        const table = this.table.mesh;
-
-        let state = [
-            {
-                position: { x: robot.position.x, y: robot.position.y, z: robot.position.z },
-                rotation: { x: robot.quaternion.x, y: robot.quaternion.y, z: robot.quaternion.z, w: robot.quaternion.w },
-                scale: { x: robot.scale.x, y: robot.scale.y, z: robot.scale.z },
-                joints: []
-            },
-            {
-                position: { x: table.position.x, y: table.position.y, z: table.position.z },
-                rotation: { x: table.quaternion.x, y: table.quaternion.y, z: table.quaternion.z, w: table.quaternion.w },
-                scale: { x: table.scale.x, y: table.scale.y, z: table.scale.z },
-            }
-        ]
-
-        for (const joint of ["right_j0", "right_j1", "right_j2", "right_j3", "right_j4", "right_j5", "right_j6"]) {
-            state[0].joints.push({ name: joint, angle: robot.joints[joint].jointValue[0] });
+        const cameraState = {
+            position: { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z },
+            rotation: { x: this.camera.quaternion.x, y: this.camera.quaternion.y, z: this.camera.quaternion.z, w: this.camera.quaternion.w },
+            scale: { x: this.camera.scale.x, y: this.camera.scale.y, z: this.camera.scale.z },
         }
 
-        for (const block of this.round.blocks) {
-            state.push({
-                position: { x: block.mesh.position.x, y: block.mesh.position.y, z: block.mesh.position.z },
-                rotation: { x: block.mesh.quaternion.x, y: block.mesh.quaternion.y, z: block.mesh.quaternion.z, w: block.mesh.quaternion.w },
-                scale: { x: block.mesh.scale.x, y: block.mesh.scale.y, z: block.mesh.scale.z },
+        const controllerStates = [];
+        for (const controller of [ this.controller.get('left').grip, this.controller.get('right').grip ]) {
+            controllerStates.push({
+                position: { x: controller.position.x, y: controller.position.y, z: controller.position.z },
+                rotation: { x: controller.quaternion.x, y: controller.quaternion.y, z: controller.quaternion.z, w: controller.quaternion.w },
+                scale: { x: controller.scale.x, y: controller.scale.y, z: controller.scale.z },
             })
         }
 
-        if (string) state = state.map((s) => JSON.stringify(s))
-        return state;
+        const robot = window.robot;
+        const robotState = {
+            position: { x: robot.position.x, y: robot.position.y, z: robot.position.z },
+            rotation: { x: robot.quaternion.x, y: robot.quaternion.y, z: robot.quaternion.z, w: robot.quaternion.w },
+            scale: { x: robot.scale.x, y: robot.scale.y, z: robot.scale.z },
+            joints: []
+        }
+
+        for (const joint of ["right_j0", "right_j1", "right_j2", "right_j3", "right_j4", "right_j5", "right_j6"]) {
+            robotState.joints.push({ name: joint, angle: robot.joints[joint].jointValue[0] });
+        }
+
+        const objectStates = [];
+        for (const object of this.objects) {
+            objectStates.push({
+                position: { x: object.mesh.position.x, y: object.mesh.position.y, z: object.mesh.position.z },
+                rotation: { x: object.mesh.quaternion.x, y: object.mesh.quaternion.y, z: object.mesh.quaternion.z, w: object.mesh.quaternion.w },
+                scale: { x: object.mesh.scale.x, y: object.mesh.scale.y, z: object.mesh.scale.z },
+            })
+        }
+
+        return [cameraState, ...controllerStates, robotState, ...objectStates].map(s => JSON.stringify(s));
     }
 }

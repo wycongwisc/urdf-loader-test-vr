@@ -1,54 +1,83 @@
 import * as T from 'three';
 import RAPIER from '@dimforge/rapier3d';
+import Block from './Block';
+import { TorusBufferGeometry } from 'three';
 
-export default class Target {
-    constructor(params) {
-        this.world = params.world;
-        this.position = params.position ?? new T.Vector3();
-        this.rotation = params.rotation ?? new T.Euler(Math.PI/2, 0, 0, 'XYZ');
-        this.torusRadius = params.torusRadius ?? 0.05;
-        this.tubeRadius = params.tubeRadius ?? 0.005;
-        this.color = params.color ?? 0xFF0000;
-        this.velocity = params.velocity;
-        this.visible = false;
+
+const PATH = './models/target.glb';
+const TORUS_RADIUS = 0.05;
+const TUBE_RADIUS = 0.005;
+
+export default class Target extends SceneObject {
+    constructor(utilities, options = {}) {
+        super('target', utilities);
+        this.initPosition = options.position ?? new T.Vector3();
+        this.initRotation = options.rotation ?? new T.Euler(Math.PI/2, 0, 0, 'XYZ');
+        this.initScale = options.scale ?? new T.Vector3(1, 1, 1);
+        this.color = options.color ?? 0xFF0000;
+        this.loaded = false;
     }
 
-    show() {
-        if (this.visible) return;
-        else this.visible = true;
+    static async init(utilities) {
+        const target = new Target(utilities);
+        await target.fetch();
+        return target;
+    }
 
-        const mesh = new T.Mesh( 
-            new T.TorusGeometry(this.torusRadius, this.tubeRadius, 64, 64),
-            new T.MeshBasicMaterial({ color: this.color })
-        );
+    async fetch() {
+        const gltf = await loadGLTF(PATH);
+        const mesh = gltf.scene;
 
-        mesh.position.copy(this.position);
-        mesh.rotation.copy(this.rotation);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
+        // position and rotation will be overridden by the physics engine
+        // these values are set here to prevent teleporting on load
+        mesh.position.copy(this.initPosition);
+        mesh.rotation.copy(this.initRotation);
+        mesh.scale.copy(this.initScale);
+        mesh.traverse(child => { child.castShadow = true, child.receiveShadow = true });
 
-        const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(mesh.position.x, mesh.position.y, mesh.position.z)
-            .setRotation(mesh.quaternion)
-            .lockTranslations()
-            .lockRotations()
-        this.rigidBody = this.world.createRigidBody(rigidBodyDesc);
-
-        const colliderDesc = RAPIER.ColliderDesc.roundCylinder(this.tubeRadius/2, (this.torusRadius + this.tubeRadius/2) / 3, this.tubeRadius/2)
-            .setRotation(new T.Quaternion().setFromEuler(this.rotation))
-        this.collider = this.world.createCollider(colliderDesc, this.rigidBody);
-
-
-        window.simObjs.set(this.rigidBody, mesh);
-        window.scene.add(mesh);
         this.mesh = mesh;
     }
 
-    hide() {
-        this.visible = false;
+    set(init) {
+        if (this.loaded) this.destruct();
 
+        this.initPosition = init.position ?? this.initPosition;
+        this.initRotation = init.rotation ?? this.initRotation;
+        this.initScale = init.scale ?? this.initScale;
+
+        this.mesh.position.copy(this.initPosition);
+        this.mesh.rotation.copy(this.initRotation);
+        this.mesh.scale.copy(this.initScale);
+
+        this.load();
+    }
+
+    load() {
+        const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+            .setTranslation(this.initPosition.x, this.initPosition.y, this.initPosition.z)
+            .setRotation(new T.Quaternion().setFromEuler(this.initRotation))
+            .lockTranslations()
+            .lockRotations()
+        const rigidBody = this.world.createRigidBody(rigidBodyDesc);
+
+        const colliderDesc = RAPIER.ColliderDesc.roundCylinder(TUBE_RADIUS/2, (TORUS_RADIUS + TUBE_RADIUS/2) / 3, TUBE_RADIUS/2)
+            .setRotation(new T.Quaternion().setFromEuler(this.initRotation))
+        const collider = this.world.createCollider(colliderDesc, rigidBody);
+
+        window.simObjs.set(rigidBody, this.mesh);
+        window.scene.add(this.mesh);
+
+        this.loaded = true;
+
+        this.colliders = [collider];
+        this.rigidBody = rigidBody;
+
+    }
+
+    destruct() {
         window.scene.remove(this.mesh);
         window.simObjs.delete(this.rigidBody);
         this.world.removeRigidBody(this.rigidBody);
+        this.loaded = false;
     }
 }

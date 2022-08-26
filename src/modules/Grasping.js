@@ -2,17 +2,21 @@ import Module from "./Module";
 import * as T from 'three';
 
 export class Grasping extends Module {
-    constructor(controller, options = {}) {
-        super({ name: 'grasping' });
-        this.controller = controller;
-        this.setMode(options.mode ?? 'ab-hold');
-        this.disabled = false;
+    constructor(utilities, options = {}) {
+        super('grasping', utilities);
+
+        // ========== options ==========
+        this.controlMode = options.controlMode ?? 'ab-hold';
+        // =============================
     }
 
-    setMode(mode) {
-        if (!['ab-hold', 'trigger-toggle', 'trigger-hold'].includes(mode)) throw new Error(`Control mode \"${mode}\" does not exist for Grasping`);
-        this.mode = mode;
+    load() {
+        this.loadControlMode(this.controlMode);
+    }
 
+    loadControlMode(mode) {
+        if (!['ab-hold', 'trigger-toggle', 'trigger-hold'].includes(mode)) throw new Error(`Control mode \"${mode}\" does not exist for Grasping`);
+        
         this.controller.removeButtonAction('a', 'grasping');
         this.controller.removeButtonAction('b', 'grasping');
         this.controller.removeButtonAction('trigger', 'grasping');
@@ -22,8 +26,6 @@ export class Grasping extends Module {
         this.controller.removeButtonAction('triggerend', 'grasping');
 
         const open = () => {
-            if (this.disabled) return;
-
             const pos1 = window.robot.links['right_gripper_l_finger_tip'].getWorldPosition(new T.Vector3());
             const pos2 = window.robot.links['right_gripper_r_finger_tip'].getWorldPosition(new T.Vector3());
             if (pos1.distanceTo(pos2) <= .08) {
@@ -38,8 +40,6 @@ export class Grasping extends Module {
         }
 
         const close = () => {
-            if (this.disabled) return;
-
             const pos1 = window.robot.links['right_gripper_l_finger_tip'].getWorldPosition(new T.Vector3());
             const pos2 = window.robot.links['right_gripper_r_finger_tip'].getWorldPosition(new T.Vector3());
             if (pos1.distanceTo(pos2) >= .01 && !window.grasped) {
@@ -82,13 +82,5 @@ export class Grasping extends Module {
             default: 
                 break;
         }
-    }
-
-    disable() {
-        this.disabled = true;
-    }
-
-    enable() {
-        this.disabled = false;
     }
 }

@@ -46,6 +46,7 @@ export default class Controllers {
             'thumbstickPress': {},
             'a': {},
             'b': {},
+            'a&b': {}
         };
 
         this.controller.forEach(controller => {
@@ -151,6 +152,12 @@ export default class Controllers {
 
         if (this.get().gamepad.buttons[5].pressed) {
             for (const action of Object.values(this.buttons['b'])) {
+                if (action()) return;
+            }
+        }
+
+        if (this.get().gamepad.buttons[4].pressed && this.get().gamepad.buttons[5].pressed) {
+            for (const action of Object.values(this.buttons['a&b'])) {
                 if (action()) return;
             }
         }

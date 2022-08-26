@@ -1,15 +1,21 @@
 export default class Module {
-    constructor(params) {
-        this.name = params.name;
+    constructor(name, utilities) {
+        this.name = name;
+
+        Object.assign(this, utilities);
     }
 
     setFSM(fsm) {
         this.fsm = fsm;
     }
 
-    update(t, data) {
-        return;
-    }
+    load(config) { }
+
+    unload() { }
+
+    update(t, info) { }
+
+    reset() { }
 
     log(t) {
         return;

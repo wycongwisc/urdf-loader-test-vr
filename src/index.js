@@ -8,12 +8,13 @@ import { getCurrEEPose } from './utils';
 
 import ThreeMeshUI from 'three-mesh-ui'
 
-import { VrControl } from './vrControl.js'
+import Control from './Control.js'
 import { Data } from './Data';
 import { UI } from './UI';
 import { recurseMaterialTraverse } from './utilities/robotHelper';
 
 import RAPIER from '@dimforge/rapier3d';
+
 // relaxedikDemo();
 
 /**
@@ -184,7 +185,6 @@ function loadRobot(name, file, info, nn, loadScreen = false) {
                 } 
             }
 
-
             const position = robot.getWorldPosition(new T.Vector3());
             const quaternion = robot.getWorldQuaternion(new T.Quaternion());
             const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
@@ -217,10 +217,10 @@ const groundDesc = RAPIER.RigidBodyDesc.fixed()
 const groundRigidBody = world.createRigidBody(groundDesc);
 let currCollisionGroup_membership = 0x0001;
 const groundColliderDesc = RAPIER.ColliderDesc.cuboid(10.0, 0.1, 10.0).setDensity(2.0);
-const groundCollider = world.createCollider(groundColliderDesc, groundRigidBody);
+const ground = world.createCollider(groundColliderDesc, groundRigidBody);
 const robotCollisionGroups = 0x00010002;
 const groundCollisionGroups = 0x00020001;
-groundCollider.setCollisionGroups(groundCollisionGroups);
+ground.setCollisionGroups(groundCollisionGroups);
 
 window.simObjs = new Map();
 
@@ -247,7 +247,7 @@ getURDFFromURL("https://raw.githubusercontent.com/yepw/robot_configs/master/ur5_
     // loadRobot('ur5', robots.ur5.file, robots.ur5.info, robots.ur5.nn, true);
 })
 
-function init() {
+async function init() {
 
     document.querySelector('#toggle-physics').onclick = function() {
         if (lines.parent === scene) scene.remove(lines)
@@ -263,12 +263,13 @@ function init() {
 
     const ui = new UI();
 
-    const vrControl = new VrControl({
+    const control = await Control.init({
         camera,
         renderer,
         data,
         ui,
         world,
+        ground
     })
 
     // update logic loop
@@ -277,8 +278,8 @@ function init() {
             // pass timestamp to ensure tables can be joined by timestamp
             // only update and log data if user is in VR
             const t = Date.now();
-            vrControl.update(t);
-            vrControl.log(t);
+            control.update(t);
+            control.log(t);
         }
         setTimeout(update, 5);
     }, 5);
@@ -290,7 +291,7 @@ function init() {
         const events = new RAPIER.EventQueue(true);
         world.step(events);
 
-        // vrControl.updatePhysics(events);
+        // control.updatePhysics(events);
         window.simObjs.forEach((mesh, rigidBody) => {
             const position = rigidBody.translation();
             mesh.position.set(position.x, position.y, position.z);
@@ -324,7 +325,7 @@ function init() {
     // render loop
     renderer.setAnimationLoop( function () {
         ThreeMeshUI.update();
-        vrControl.teleportvr?.update();
+        control.teleportvr?.update();
         renderer.render(scene, camera);
     });
 }

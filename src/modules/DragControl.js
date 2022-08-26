@@ -3,46 +3,39 @@ import * as T from 'three';
 import { getCurrEEPose, updateTargetCursor, updateRobot, resetRobot } from '../utils';
 
 export class DragControl extends Module {
-    constructor(params, options = {}) {
-        super({ name: 'drag-control' });
-        Object.assign(this, params);
+    constructor(utilities, options = {}) {
+        super('drag-control', utilities);
 
+        // ========== options ==========
         this.activationRadius = options.activationRadius ?? 0.1;
         this.showOffsetIndicator = options.showOffsetIndicator ?? true;
-        this.disabled = false;
-        this.setMode(options.mode ?? 'grip-auto');
+        this.controlMode = options.controlMode ?? 'grip-auto';
+        // =============================
 
         this.click = new Audio('./assets/click.wav');
+    }
 
-        //
-
-        const fsmConfig = this.fsmConfig;
-
-        fsmConfig.transitions.push({ name: 'activateDragControl', from: 'IDLE', to: 'DRAG_CONTROL' });
-        fsmConfig.transitions.push({ name: 'deactivateDragControl', from: 'DRAG_CONTROL', to: 'IDLE' });
-
-        fsmConfig.methods['onActivateDragControl'] = () => {
-            if (this.disabled) return;
-
+    load(config) {
+        config.transitions.push({ name: 'activateDragControl', from: 'IDLE', to: 'DRAG_CONTROL' });
+        config.transitions.push({ name: 'deactivateDragControl', from: 'DRAG_CONTROL', to: 'IDLE' });
+        config.methods['onActivateDragControl'] = () => {
             this.click.play();
             this.controller.get().grip.traverse((child) => { if (child instanceof T.Mesh) child.visible = false });
         }
-
-        fsmConfig.methods['onDeactivateDragControl'] = () => {
-            if (this.disabled) return;
-
-            // this.click.play();
+        config.methods['onDeactivateDragControl'] = () => {
+            this.click.play();
             this.controller.get().grip.traverse((child) => { if (child instanceof T.Mesh) child.visible = true });
             window.targetCursor.material.color.setHex(0xFFFFFF);
             window.scene.remove(this.offsetIndicator);
             this.dragTimeout = true;
             setTimeout(() => this.dragTimeout = false, 1000);
         }
+
+        this.loadControlMode(this.controlMode);
     }
 
-    setMode(mode) {
+    loadControlMode(mode) {
         if (!['grip-auto', 'grip-toggle', 'grip-hold', 'trigger-auto', 'trigger-toggle', 'trigger-hold'].includes(mode)) throw new Error(`Control mode \"${mode}\" does not exist for Drag Control`);
-        this.mode = mode;
 
         this.controller.removeButtonAction('grip', 'drag-control');
         this.controller.removeButtonAction('gripstart', 'drag-control');
@@ -54,8 +47,6 @@ export class DragControl extends Module {
         switch(mode) {
             case 'grip-hold': 
                 this.controller.addButtonAction('gripstart', 'drag-control', () => {
-                    if (this.disabled) return;
-
                     if (
                         this.fsm.is('IDLE') 
                         && this.controller.getPose().posi.distanceTo(getCurrEEPose().posi) <= this.activationRadius
@@ -65,15 +56,12 @@ export class DragControl extends Module {
                 })
 
                 this.controller.addButtonAction('gripend', 'drag-control', () => {
-                    if (this.disabled) return;
                     if (this.fsm.is('DRAG_CONTROL')) this.fsm.deactivateDragControl();
                 })
                 this.modeInstructions = 'Activate: Move the controller to the gripper and hold the grip button\nDeactivate: Release the grip button.';
                 break;
             case 'grip-toggle':
                 this.controller.addButtonAction('grip', 'drag-control', () => {
-                    if (this.disabled) return;
-
                     if (
                         this.fsm.is('IDLE') 
                         && this.controller.getPose().posi.distanceTo(getCurrEEPose().posi) <= this.activationRadius
@@ -88,15 +76,12 @@ export class DragControl extends Module {
                 break;
             case 'grip-auto': 
                 this.controller.addButtonAction('grip', 'drag-control', () => {
-                    if (this.disabled) return;
                     if (this.fsm.is('DRAG_CONTROL')) this.fsm.deactivateDragControl();
                 })
                 this.modeInstructions = 'Activate: Move the controller to the gripper.\nDeactivate: Press the grip button.';
                 break;
             case 'trigger-hold': 
                 this.controller.addButtonAction('triggerstart', 'drag-control', () => {
-                    if (this.disabled) return;
-
                     if (
                         this.fsm.is('IDLE') 
                         && this.controller.getPose().posi.distanceTo(getCurrEEPose().posi) <= this.activationRadius
@@ -106,15 +91,12 @@ export class DragControl extends Module {
                 })
 
                 this.controller.addButtonAction('triggerend', 'drag-control', () => {
-                    if (this.disabled) return;
                     if (this.fsm.is('DRAG_CONTROL')) this.fsm.deactivateDragControl();
                 })
                 this.modeInstructions = 'Activate: Move the controller to the gripper, then squeeze and hold the trigger.\nDeactivate: Release the trigger.';
                 break;
             case 'trigger-toggle':
                 this.controller.addButtonAction('trigger', 'drag-control', () => {
-                    if (this.disabled) return;
-
                     if (
                         this.fsm.is('IDLE') 
                         && this.controller.getPose().posi.distanceTo(getCurrEEPose().posi) <= this.activationRadius
@@ -129,7 +111,6 @@ export class DragControl extends Module {
                 break;
             case 'trigger-auto': 
                 this.controller.addButtonAction('trigger', 'drag-control', () => {
-                    if (this.disabled) return;
                     if (this.fsm.is('DRAG_CONTROL')) this.fsm.deactivateDragControl();
                 })
                 this.modeInstructions = 'Activate: Move the controller to the gripper.\nDeactivate: Squeeze the trigger.';
@@ -139,24 +120,16 @@ export class DragControl extends Module {
         }
     }
 
-    disable() {
+    reset() {
         if (this.fsm.is('DRAG_CONTROL')) this.fsm.deactivateDragControl();
-        this.disabled = true;
     }
 
-    enable() {
-        this.disabled = false;
-    }
-
-    update(t, data) {
-        if (this.disabled) return;
-
-        console.log(this.dragTimeout)
+    update(t, info) {
         if (
-            ['trigger-auto', 'grip-auto'].includes(this.mode)
+            ['trigger-auto', 'grip-auto'].includes(this.controlMode)
             && this.fsm.is('IDLE') 
             && !this.dragTimeout
-            && data.ctrlPose.posi.distanceTo(data.currEEAbsThree.posi) <= this.activationRadius
+            && info.ctrlPose.posi.distanceTo(info.currEEAbsThree.posi) <= this.activationRadius
         ) {
             this.fsm.activateDragControl();
         }
@@ -164,14 +137,14 @@ export class DragControl extends Module {
         if (this.fsm.is('DRAG_CONTROL')) {
 
             const deltaPosi = new T.Vector3();
-            deltaPosi.subVectors(data.ctrlPose.posi, window.initEEAbsThree.posi)
+            deltaPosi.subVectors(info.ctrlPose.posi, window.initEEAbsThree.posi)
             window.goalEERelThree.posi.copy(deltaPosi);
 
             const deltaOri = new T.Quaternion();
-            deltaOri.multiplyQuaternions(data.ctrlPose.ori, data.prevCtrlPose.ori.invert())
+            deltaOri.multiplyQuaternions(info.ctrlPose.ori, info.prevCtrlPose.ori.invert())
             window.goalEERelThree.ori.premultiply(deltaOri);
 
-            this.showOffsetIndicator && this.updateOffsetIndicator(data.currEEAbsThree.posi, window.targetCursor.position);
+            this.showOffsetIndicator && this.updateOffsetIndicator(info.currEEAbsThree.posi, window.targetCursor.position);
             updateTargetCursor(window.goalEERelThree);
             updateRobot(window.goalEERelThree);
         }
