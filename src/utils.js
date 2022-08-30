@@ -1,8 +1,18 @@
 import * as T from 'three';
 import { create, all } from 'mathjs'
+import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET } from './globals'
 
 const config = { }
 const math = create(all, config);
+
+export function computeGripper(eePose) {
+    const gripper = new T.Object3D();
+    gripper.position.copy(new T.Vector3(eePose.posi.x, eePose.posi.y, eePose.posi.z));
+    gripper.quaternion.copy(new T.Quaternion(eePose.ori.x, eePose.ori.y, eePose.ori.z, eePose.ori.w));
+    gripper.quaternion.multiply(EE_TO_THREE_ROT_OFFSET);
+    gripper.translateX(EE_TO_GRIPPER_OFFSET); // get tip of the gripper
+    return gripper;
+}
 
 export function rotQuaternion(q, rot) {
     let axisAngle = quaternionToAxisAngle(q);

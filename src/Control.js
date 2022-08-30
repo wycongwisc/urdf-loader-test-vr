@@ -12,7 +12,7 @@ import { RemoteControl } from './modules/RemoteControl';
 import { Tasks } from './modules/Tasks';
 import PickAndPlace from './modules/tasks/PickAndPlace';
 import PoseMatch from './modules/tasks/PoseMatch';
-import CustomTask from './modules/tasks/CustomTask';
+import End from './modules/tasks/End';
 import PickAndDrop from './modules/tasks/PickAndDrop';
 import { ResetRobot } from './modules/ResetRobot';
 import { Teleport } from './modules/Teleport';
@@ -62,42 +62,75 @@ export default class Control {
 
         control.renderer.xr.addEventListener('sessionstart', () => control.teleportvr.set(INIT_POSITION));
 
+
         const utilities = {
             data: control.data,
             ui: control.ui,
             world: control.world,
             controller: control.controller,
             camera: control.camera,
-            ground: control.ground
+            ground: control.ground,
+            onComplete: () => control.fsm.next()
         }
 
         control.tasks = [
-            // await PickAndPlace.init(
-            //     utilities,
-            //     new Condition('remote-control-only', [
-            //         new RemoteControl(utilities, { controlMode: 'grip-toggle' }),
-            //         new Grasping(utilities, { controlMode: 'trigger-toggle' }),
-            //         new InteractiveUI(utilities)
-            //     ]),
-            //     { numRounds: 3 }
-            // ),
-            await Stack.init(
+            await DragControlTutorial.init(
                 utilities,
-                new Condition('remote-control-only', [
-                    new RemoteControl(utilities, { controlMode: 'grip-toggle' }),
+                new Condition('drag-control-only', [
+                    new DragControl(utilities, { controlMode: 'grip-toggle' })
+                ])
+            ),
+            await GraspingTutorial.init(
+                utilities,
+                new Condition('drag-control-only', [
+                    new DragControl(utilities, { controlMode: 'grip-toggle' }),
                     new Grasping(utilities, { controlMode: 'trigger-toggle' }),
-                    new InteractiveUI(utilities)
+                ])
+            ),
+            await PickAndDrop.init(
+                utilities,
+                new Condition('drag-control-only', [
+                    new DragControl(utilities, { controlMode: 'grip-toggle' }),
+                    new Grasping(utilities, { controlMode: 'trigger-toggle' }),
                 ]),
-                { numRounds: 2 }
+                { numRounds: 2, text: 'Use drag control to pick up the blocks and place them in the box. Once every block is in the box, complete the task by closing the lid.\n\n' }
             ),
             await Stack.init(
                 utilities,
                 new Condition('drag-control-only', [
                     new DragControl(utilities, { controlMode: 'grip-toggle' }),
                     new Grasping(utilities, { controlMode: 'trigger-toggle' }),
-                    new InteractiveUI(utilities)
                 ]),
-                { numRounds: 2 }
+                { numRounds: 2, text: 'Use drag control to stack the blocks in any order. To complete the task, make sure the stack does not tip over.\n\n' }
+            ),
+            await RemoteControlTutorial.init(
+                utilities,
+                new Condition('remote-control-only', [
+                    new RemoteControl(utilities, { controlMode: 'grip-toggle' }),
+                    new Grasping(utilities, { controlMode: 'trigger-toggle' }),
+                ])
+            ),
+            await PickAndDrop.init(
+                utilities,
+                new Condition('remote-control-only', [
+                    new RemoteControl(utilities, { controlMode: 'grip-toggle' }),
+                    new Grasping(utilities, { controlMode: 'trigger-toggle' }),
+                ]),
+                { numRounds: 2, text: 'Use remote control to pick up the blocks and place them in the box. Once every block is in the box, complete the task by closing the lid.\n\n' }
+            ),
+            await Stack.init(
+                utilities,
+                new Condition('remote-control-only', [
+                    new RemoteControl(utilities, { controlMode: 'grip-toggle' }),
+                    new Grasping(utilities, { controlMode: 'trigger-toggle' }),
+                ]),
+                { numRounds: 2, text: 'Use remote control to stack the blocks in any order. To complete the task, make sure the stack does not tip over.\n\n' }
+            ),
+            await End.init(
+                utilities,
+                new Condition('remote-control-only', [
+                    new RemoteControl(utilities, { controlMode: 'grip-toggle' }),
+                ]),
             )
         ]
 
@@ -128,16 +161,26 @@ export default class Control {
                 },
                 onNext: (state) => {
                     // control.tasks[Number(state.from)].stop(); // stop the current task
-                    if (state.to === 'IDLE') window.location.reload(); 
-                    else control.tasks[Number(state.to)].start(); // start the next task
+
+                    console.log(state)
+
+                    if (state.to === 'IDLE') {
+                        window.location.reload(); 
+                    } else {
+                        control.tasks[Number(state.to)].start(); // start the next task
+                    }
                 }
             }
         })
 
         control.renderer.xr.addEventListener('sessionstart', async () => {
             await control.data.initSession();
-            // tasks.start();
             control.fsm.start();
+        })
+
+        control.controller.get('left').controller.addEventListener('select', () => {
+            console.log('remote reset')
+            control.tasks[Number(control.fsm.state)].fsm.reset();
         })
 
         return control;
@@ -155,9 +198,8 @@ export default class Control {
 
         if (this.fsm.state !== 'IDLE') {
             const task = this.tasks[Number(this.fsm.state)];
-            task.update(t, state);
-            task.log(t);
-            if (task.fsm.is('COMPLETE')) this.fsm.next();
+            task.update(Date.now(), state);
+            task.log(Date.now());
         }
 
         this.controller.update();

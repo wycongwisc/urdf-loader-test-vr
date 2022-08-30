@@ -5,6 +5,7 @@ import * as yaml from 'js-yaml';
 import { getURDFFromURL } from './utilities/loaderHelper';
 import initRelaxedIK, { RelaxedIK } from "../relaxed_ik_web/pkg/relaxed_ik_web.js";
 import { getCurrEEPose } from './utils';
+import loadGLTF from './utilities/loadGLTF';
 
 import ThreeMeshUI from 'three-mesh-ui'
 
@@ -248,7 +249,7 @@ getURDFFromURL("https://raw.githubusercontent.com/yepw/robot_configs/master/ur5_
 })
 
 async function init() {
-
+    
     document.querySelector('#toggle-physics').onclick = function() {
         if (lines.parent === scene) scene.remove(lines)
         else scene.add(lines)
@@ -269,7 +270,7 @@ async function init() {
         data,
         ui,
         world,
-        ground
+        ground,
     })
 
     // update logic loop

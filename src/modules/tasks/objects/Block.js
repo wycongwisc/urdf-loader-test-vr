@@ -8,8 +8,8 @@ import SceneObject from './SceneObject';
 const PATH = './models/block.glb';
 
 export default class Block extends SceneObject {
-    constructor(utilities, options = {}) {
-        super('block', utilities);
+    constructor(params, options = {}) {
+        super('block', params);
 
         this.initPosition = options.position ?? new T.Vector3();
         this.initRotation = options.rotation ?? new T.Euler();
@@ -20,8 +20,8 @@ export default class Block extends SceneObject {
         this.grasped = false;
     }
 
-    static async init(utilities) {
-        const block = new Block(utilities);
+    static async init(params) {
+        const block = new Block(params);
         await block.fetch();
         return block;
     }
@@ -37,21 +37,7 @@ export default class Block extends SceneObject {
         mesh.scale.copy(this.initScale);
         mesh.traverse(child => { child.castShadow = true, child.receiveShadow = true });
 
-        this.mesh = mesh;
-    }
-
-    set(init) {
-        if (this.loaded) this.destruct();
-
-        this.initPosition = init.position ?? this.initPosition;
-        this.initRotation = init.rotation ?? this.initRotation;
-        this.initScale = init.scale ?? this.initScale;
-
-        this.mesh.position.copy(this.initPosition);
-        this.mesh.rotation.copy(this.initRotation);
-        this.mesh.scale.copy(this.initScale);
-
-        this.load();
+        this.meshes = [mesh];
     }
 
     /**
@@ -81,8 +67,8 @@ export default class Block extends SceneObject {
         const collider = this.world.createCollider(colliderDesc, rigidBody);
         collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
 
-        window.simObjs.set(rigidBody, this.mesh);
-        window.scene.add(this.mesh);
+        window.simObjs.set(rigidBody, this.meshes[0]);
+        window.scene.add(this.meshes[0]);
 
         this.loaded = true;
 
@@ -114,7 +100,7 @@ export default class Block extends SceneObject {
 
     destruct() {
         this.grasped = false;
-        window.scene.remove(this.mesh);
+        window.scene.remove(this.meshes[0]);
         window.simObjs.delete(this.rigidBody);
         this.world.removeRigidBody(this.rigidBody);
         this.loaded = false;

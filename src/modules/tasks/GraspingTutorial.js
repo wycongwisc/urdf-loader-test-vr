@@ -1,56 +1,61 @@
 import Task from './Task'
 import * as T from 'three';
+import { Grasping } from '../Grasping';
 
 export default class GraspingTutorial extends Task {
-    constructor(params, options = {}) {
-        super({
-            name: 'grasping-tutorial',
-            ui: params.ui,
-            controller: params.controller
-        }, {
-            numRounds: 2,
-            disableModules: options.disableModules
-        });
-
-        this.hand = params.hand;
-
-        this.rounds = [
-            {
-                instruction: this.ui.createContainer(
-                    'grasping-open-instructions', 
-                    { height: .4, width: .5, backgroundOpacity: 0 }
-                ).appendChild(
-                    this.ui.createText(
-                        `To open the gripper, hold ${this.hand === 'left' ? '(Y)' : '(B)'}`,
-                        { fontSize: 0.025 }
-                    )
-                )
-            },
-            {
-                instruction: this.ui.createContainer(
-                    'grasping-close-instructions', 
-                    { height: .4, width: .5, backgroundOpacity: 0 }
-                ).appendChild(
-                    this.ui.createText(
-                        `To close the gripper, hold ${this.hand === 'left' ? '(X)' : '(A)'}`, 
-                        { fontSize: 0.025 }
-                    )
-                )
-            }
-        ]
-
+    static async init(params, condition, options = {}) {
+        const task = new GraspingTutorial(params, condition, { numRounds: 2, resetAfterTrial: false });
+        task.objects = {}
+        return task;
     }
 
-    update(t, data) {
-        const instruction = this.round.instruction;
-        instruction.getObject().position.copy(data.ctrlPose.posi.clone().add(new T.Vector3(0, 0.2, 0)));
-        instruction.getObject().lookAt(window.camera.position);
+    constructor(params, condition, options) {
+        super('grasping-tutorial', params, condition, options, [
+            () => {
+                this.closeInstructions.show();
+            },
+            () => {
+                this.closeInstructions.hide();
+                this.openInstructions.show();
+            }
+        ]);
+    }
 
-        if (this.controller.gamepad?.buttons[5].pressed && this.fsm.is('1')) {
+    onStart() {
+        this.openInstructions = this.ui.createContainer('grasping-open-instructions', { 
+            height: .4, width: .5, backgroundOpacity: 0 
+        });
+        this.openInstructions.appendChild(
+            this.ui.createText('To open the gripper, squeeze the trigger again.', { fontSize: 0.025 })
+        );
+
+        this.closeInstructions = this.ui.createContainer('grasping-close-instructions', { 
+            height: .4, width: .5, backgroundOpacity: 0 
+        });
+        this.closeInstructions.appendChild(
+            this.ui.createText('To close the gripper, squeeze the trigger', { fontSize: 0.025 })
+        );
+    }
+
+    onStop() {
+        this.closeInstructions.hide()
+        this.openInstructions.hide();
+    }
+
+    onUpdate(t, info) {
+        this.openInstructions.getObject().position.copy(info.currEEAbsThree.posi.clone().add(new T.Vector3(0, 0.2, 0)));
+        this.openInstructions.getObject().lookAt(window.camera.position);
+
+        this.closeInstructions.getObject().position.copy(info.currEEAbsThree.posi.clone().add(new T.Vector3(0, 0.2, 0)));
+        this.closeInstructions.getObject().lookAt(window.camera.position);
+
+        const grasping = this.condition.modules.find((m) => m instanceof Grasping);
+
+        if (grasping.lastAction === 'close' && this.fsm.is('0')) {
+            if (grasping.controlMode === 'trigger-toggle' && !grasping.closed) return;
             this.fsm.next();
-        }
-
-        if (this.controller.gamepad?.buttons[4].pressed && this.fsm.is('2')) {
+        } else if (grasping.lastAction === 'open' && this.fsm.is('1')) {
+            if (grasping.controlMode === 'trigger-toggle' && grasping.closed) return;
             this.fsm.next();
         }
     }

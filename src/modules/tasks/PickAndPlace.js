@@ -7,22 +7,22 @@ import Task from './Task'
 import Block from './objects/Block'
 import Target from './objects/Target';
 import Table from './objects/Table'
-import { EE_TO_GRIPPER_OFFSET, EE_TO_THREE_ROT_OFFSET } from "../../globals"
+import { computeGripper } from '../../utils';
 
 export default class PickAndPlace extends Task {
 
-    static async init(utilities, condition, options = {}) {
-        const task = new PickAndPlace(utilities, condition, options);
+    static async init(params, condition, options = {}) {
+        const task = new PickAndPlace(params, condition, options);
         task.objects = [
-            await Block.init(utilities),
-            await Target.init(utilities),
-            await Table.init(utilities),
+            await Block.init(params),
+            await Target.init(params),
+            await Table.init(params),
         ]
         return task;
     }
 
-    constructor(utilities, condition, options) {
-        super('pick-and-place', utilities, condition, options, [
+    constructor(params, condition, options) {
+        super('pick-and-place', params, condition, options, [
             () => {
                 this.objects[0].set({ position: new T.Vector3(1, 3, 0.2)  });
                 this.objects[1].set({ position: new T.Vector3(0.7, .9, 0.75) });
@@ -61,29 +61,13 @@ export default class PickAndPlace extends Task {
         this.instructions.hide();
     }
 
-
-    /**
-     * Constrcts an object representing the gripper in THREE space (there is probably a better way to do this)
-     * @param {*} eePose 
-     * @returns
-     */
-    computeGripper(eePose) {
-        const gripper = new T.Object3D();
-        gripper.position.copy(new T.Vector3(eePose.posi.x, eePose.posi.y, eePose.posi.z));
-        gripper.quaternion.copy(new T.Quaternion(eePose.ori.x, eePose.ori.y, eePose.ori.z, eePose.ori.w));
-        gripper.quaternion.multiply(EE_TO_THREE_ROT_OFFSET);
-        gripper.translateX(EE_TO_GRIPPER_OFFSET); // get tip of the gripper
-        return gripper;
-    }
-
-    update(t, data) {
-
+    onUpdate(t, data) {
         const objects = this.objects;
         const block = objects[0];
         const target = objects[1];
         const table = objects[2];
 
-        const gripper = this.computeGripper(data.currEEAbsThree);
+        const gripper = computeGripper(data.currEEAbsThree);
         
         this.instructions.getObject().lookAt(window.camera.position);
 
@@ -100,7 +84,7 @@ export default class PickAndPlace extends Task {
         })
         
         this.world.contactsWith(block.collider, (collider) => {
-            if (collider === target.colliders[0]) this.fsm.nxet();
+            if (collider === target.colliders[0]) this.fsm.next();
         })
     }
 }

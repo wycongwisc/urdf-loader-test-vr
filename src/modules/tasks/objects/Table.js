@@ -8,18 +8,18 @@ import { v4 as id } from 'uuid'
 const PATH = './models/table.glb';
 
 export default class Table extends SceneObject {
-    constructor(utilities, options = {}) {
-        super('table', utilities);
+    constructor(params, options = {}) {
+        super('table', params);
         this.initPosition = options.position ?? new T.Vector3();
         this.initRotation = options.rotation ?? new T.Euler();
         this.initScale = options.scale ?? new T.Vector3(.011, .011, .011);
         this.loaded = false;
     }
 
-    static async init(utilities) {
-        const table = new Table(utilities);
-        await table.fetch();
-        return table;
+    static async init(params) {
+        const object = new Table(params);
+        await object.fetch();
+        return object;
     }
 
     async fetch() {
@@ -33,21 +33,7 @@ export default class Table extends SceneObject {
         mesh.scale.copy(this.initScale);
         mesh.traverse(child => { child.castShadow = true, child.receiveShadow = true });
 
-        this.mesh = mesh;
-    }
-
-    set(init) {
-        if (this.loaded) this.destruct();
-
-        this.initPosition = init.position ?? this.initPosition;
-        this.initRotation = init.rotation ?? this.initRotation;
-        this.initScale = init.scale ?? this.initScale;
-
-        this.mesh.position.copy(this.initPosition);
-        this.mesh.rotation.copy(this.initRotation);
-        this.mesh.scale.copy(this.initScale);
-
-        this.load();
+        this.meshes = [mesh];
     }
 
     load() {
@@ -93,19 +79,20 @@ export default class Table extends SceneObject {
             colliders.push(collider);
         }
 
-        window.simObjs.set(rigidBody, this.mesh);
-        window.scene.add(this.mesh);
+        window.simObjs.set(rigidBody, this.meshes[0]);
+        window.scene.add(this.meshes[0]);
+
+        this.rigidBody = rigidBody;
+        this.colliders = colliders;
 
         this.loaded = true;
-
-        this.colliders = colliders;
-        this.rigidBody = rigidBody;
     }
 
     destruct() {
-        window.scene.remove(this.mesh);
+        window.scene.remove(this.meshes[0]);
         window.simObjs.delete(this.rigidBody);
         this.world.removeRigidBody(this.rigidBody);
+        
         this.loaded = false;
     }
 

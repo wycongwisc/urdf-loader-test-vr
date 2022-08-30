@@ -2,6 +2,7 @@ import * as T from 'three';
 import RAPIER from '@dimforge/rapier3d';
 import Block from './Block';
 import { TorusBufferGeometry } from 'three';
+import SceneObject from './SceneObject';
 
 
 const PATH = './models/target.glb';
@@ -9,8 +10,8 @@ const TORUS_RADIUS = 0.05;
 const TUBE_RADIUS = 0.005;
 
 export default class Target extends SceneObject {
-    constructor(utilities, options = {}) {
-        super('target', utilities);
+    constructor(params, options = {}) {
+        super('target', params);
         this.initPosition = options.position ?? new T.Vector3();
         this.initRotation = options.rotation ?? new T.Euler(Math.PI/2, 0, 0, 'XYZ');
         this.initScale = options.scale ?? new T.Vector3(1, 1, 1);
@@ -18,8 +19,8 @@ export default class Target extends SceneObject {
         this.loaded = false;
     }
 
-    static async init(utilities) {
-        const target = new Target(utilities);
+    static async init(params) {
+        const target = new Target(params);
         await target.fetch();
         return target;
     }
@@ -35,21 +36,7 @@ export default class Target extends SceneObject {
         mesh.scale.copy(this.initScale);
         mesh.traverse(child => { child.castShadow = true, child.receiveShadow = true });
 
-        this.mesh = mesh;
-    }
-
-    set(init) {
-        if (this.loaded) this.destruct();
-
-        this.initPosition = init.position ?? this.initPosition;
-        this.initRotation = init.rotation ?? this.initRotation;
-        this.initScale = init.scale ?? this.initScale;
-
-        this.mesh.position.copy(this.initPosition);
-        this.mesh.rotation.copy(this.initRotation);
-        this.mesh.scale.copy(this.initScale);
-
-        this.load();
+        this.meshes = [mesh];
     }
 
     load() {
@@ -64,7 +51,7 @@ export default class Target extends SceneObject {
             .setRotation(new T.Quaternion().setFromEuler(this.initRotation))
         const collider = this.world.createCollider(colliderDesc, rigidBody);
 
-        window.simObjs.set(rigidBody, this.mesh);
+        window.simObjs.set(rigidBody, this.meshes[0]);
         window.scene.add(this.mesh);
 
         this.loaded = true;
@@ -75,7 +62,7 @@ export default class Target extends SceneObject {
     }
 
     destruct() {
-        window.scene.remove(this.mesh);
+        window.scene.remove(this.meshes[0]);
         window.simObjs.delete(this.rigidBody);
         this.world.removeRigidBody(this.rigidBody);
         this.loaded = false;

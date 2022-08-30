@@ -1,152 +1,117 @@
-// import * as T from 'three';
-// import RAPIER from '@dimforge/rapier3d';
+import * as T from 'three';
+import RAPIER from '@dimforge/rapier3d';
+import loadGLTF from '../../../utilities/loadGLTF';
+import SceneObject from './SceneObject';
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
+import download from '../../../utilities/download';
 
-// export default class Box {
-//     constructor(params) {
+const PATH_BOX = './models/box.glb';
+const PATH_LID = './models/lid.glb';
 
-//         this.world = params.world;
-//         this.position = params.position ?? new T.Vector3();
-//         this.rotation = params.rotation ?? new T.Euler(Math.PI/2, 0, 0, 'XYZ');
-//         this.color = params.color ?? 0x949494;
-//         this.size = params.size ?? new T.Vector3(0.2, 0.1, 0.15);
-//         this.thickness = params.thickness ?? 0.01;
+export default class Box extends SceneObject {
+    constructor(params, options = {}) {
+        super('box', params);
 
-//         this.visible = false;
-//         this.grasped = false;
+        this.initPosition = options.position ?? new T.Vector3();
+        this.initRotation = options.rotation ?? new T.Euler(Math.PI/2, 0, 0, 'XYZ');
+        this.initScale = options.scale ?? new T.Vector3(1, 1, 1);
 
-//         this.colliders = [];
+        this.loaded = false;
 
-//         // sides
-//         const shape = new T.Shape();
-//         shape.moveTo(0, 0);
-//         shape.lineTo(0, this.size.z);
-//         shape.lineTo(this.size.x, this.size.z);
-//         shape.lineTo(this.size.x, 0);
-//         shape.lineTo(0, 0);
+        this.size = new T.Vector3(0.2 * this.initScale.x, 0.1 * this.initScale.y, 0.15 * this.initScale.z);
+        this.thickness = 0.01;
+    }
 
-//         shape.moveTo(this.thickness, this.thickness);
-//         shape.lineTo(this.size.x - this.thickness, this.thickness);
-//         shape.lineTo(this.size.x - this.thickness, this.size.z - this.thickness);
-//         shape.lineTo(this.thickness, this.size.z - this.thickness);
-//         shape.lineTo(this.thickness, this.thickness);
+    static async init(params) {
+        const object = new Box(params);
+        await object.fetch();
+        return object;
+    }
 
-//         const sides  = new T.Mesh(
-//             new T.ExtrudeGeometry(shape, { steps: 2, depth: this.size.y, bevelEnabled: false }), 
-//             new T.MeshStandardMaterial({ color: this.color, roughness: 0.4, metalness: 0.9 })
-//         );
+    async fetch() {
+        const gltfs = [
+            await loadGLTF(PATH_BOX),
+            await loadGLTF(PATH_LID)
+        ]
 
-//         // hinge
-//         const hinge = new T.Mesh(
-//             new T.CylinderGeometry(this.thickness / 2.5, this.thickness / 2.5, this.size.z * .75, 16),
-//             new T.MeshStandardMaterial({ color: this.color, roughness: 0.4, metalness: 0.9 })
-//         )
-//         hinge.translateY(this.size.z / 2);
+        const meshes = [
+            gltfs[0].scene,
+            gltfs[1].scene,
+        ];
 
-//         // bottom
-//         const bottom = new T.Mesh(
-//             new T.BoxGeometry(this.size.x, this.size.z, this.thickness, 1, 1, 1), 
-//             new T.MeshStandardMaterial({ color: this.color, roughness: 0.4, metalness: 0.9 })
-//         );
-//         bottom.translateX(this.size.x / 2);
-//         bottom.translateY(this.size.z / 2);
-//         bottom.translateZ(this.size.x / 2 - this.thickness / 2);
+        for (const mesh of meshes) {
+            mesh.position.copy(this.initPosition);
+            mesh.rotation.copy(this.initRotation);
+            mesh.scale.copy(this.initScale);
+            mesh.traverse(child => { child.castShadow = true, child.receiveShadow = true });
+        }
 
-//         const body = new T.Group();
-//         body.add(sides);
-//         body.add(hinge);
-//         body.add(bottom);
+        this.meshes = meshes;
+    }
 
-//         // lid
-//         const lid = new T.Mesh(
-//             new T.BoxGeometry(this.size.x, this.size.z, this.thickness, 1, 1, 1), 
-//             new T.MeshStandardMaterial({ color: this.color, roughness: 0.4, metalness: 0.9 })
-//         );
+    load() {
+        const meshes = this.meshes;
+        const boxRigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+            .setTranslation(this.initPosition.x, this.initPosition.y, this.initPosition.z)
+            .setRotation(new T.Quaternion().setFromEuler(this.initRotation))
+        const boxRigidBody = this.world.createRigidBody(boxRigidBodyDesc);
 
-//         this.meshes = [body, lid];
-//         this.meshes.forEach((mesh) => {
-//             mesh.castShadow = true;
-//             mesh.receiveShadow = true;
-//         })
+        const lidRigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+            .setTranslation(this.initPosition.x, this.initPosition.y, this.initPosition.z)
+            .setRotation(new T.Quaternion().setFromEuler(this.initRotation))
+        const lidRigidBody = this.world.createRigidBody(lidRigidBodyDesc);
 
-//     }
+        const colliderDescs = [
+            // bottom
+            RAPIER.ColliderDesc.cuboid(this.size.x / 2, this.size.z / 2, this.thickness / 2)
+                    .setTranslation(this.size.x / 2, this.size.z / 2, this.size.y - (this.thickness / 2)),
 
-//     show() {
-//         if (this.visible) return;
-//         else this.visible = true;
+            // sides
+            RAPIER.ColliderDesc.cuboid(this.thickness / 2, this.size.z / 2, this.size.y / 2)
+                    .setTranslation(this.thickness / 2, this.size.z / 2, this.size.y / 2),
+            RAPIER.ColliderDesc.cuboid(this.thickness / 2, this.size.z / 2, this.size.y / 2)
+                    .setTranslation(this.size.x - this.thickness / 2, this.size.z / 2, this.size.y / 2),
+            RAPIER.ColliderDesc.cuboid(this.size.x / 2, this.thickness / 2, this.size.y / 2)
+                    .setTranslation(this.size.x / 2, this.thickness / 2, this.size.y / 2),
+            RAPIER.ColliderDesc.cuboid(this.size.x / 2, this.thickness / 2, this.size.y / 2)
+                    .setTranslation(this.size.x / 2, this.size.z - this.thickness / 2, this.size.y / 2),
 
-//         const meshes = this.meshes;
+            // lid
+            RAPIER.ColliderDesc.cuboid(this.size.x / 2, this.size.z / 2, this.thickness / 2)
+        ]
 
-//         meshes.forEach((mesh) => {
-//             mesh.position.copy(this.position);
-//             mesh.rotation.copy(this.rotation);
-//         })
+        const colliders = [];
+        for (const [index, colliderDesc] of colliderDescs.entries()) {
+            colliders.push(
+                (index === 5) ? 
+                    this.world.createCollider(colliderDesc, lidRigidBody) :
+                    this.world.createCollider(colliderDesc, boxRigidBody)
+            )
+        }
 
-//         const body = this.world.createRigidBody(
-//             RAPIER.RigidBodyDesc.dynamic()
-//                 .setTranslation(meshes[0].position.x, meshes[0].position.y, meshes[0].position.z)
-//                 .setRotation(meshes[0].quaternion)
-//         );
+        this.world.createImpulseJoint(RAPIER.JointData.revolute(
+            new RAPIER.Vector3(0, this.size.z / 2, 0),
+            new RAPIER.Vector3(this.size.x / 2, 0, 0),
+            new RAPIER.Vector3(0, 1, 0),
+        ), boxRigidBody, lidRigidBody);
 
-//         const colliderDescs = [
-//             // bottom
-//             RAPIER.ColliderDesc.cuboid(this.size.x / 2, this.size.z / 2, this.thickness / 2)
-//                     .setTranslation(this.size.x / 2, this.size.z / 2, this.size.y - (this.thickness / 2)),
-//             // sides
-//             RAPIER.ColliderDesc.cuboid(this.thickness / 2, this.size.z / 2, this.size.y / 2)
-//                     .setTranslation(this.thickness / 2, this.size.z / 2, this.size.y / 2),
-//             RAPIER.ColliderDesc.cuboid(this.thickness / 2, this.size.z / 2, this.size.y / 2)
-//                     .setTranslation(this.size.x - this.thickness / 2, this.size.z / 2, this.size.y / 2),
-//             RAPIER.ColliderDesc.cuboid(this.size.x / 2, this.thickness / 2, this.size.y / 2)
-//                     .setTranslation(this.size.x / 2, this.thickness / 2, this.size.y / 2),
-//             RAPIER.ColliderDesc.cuboid(this.size.x / 2, this.thickness / 2, this.size.y / 2)
-//                     .setTranslation(this.size.x / 2, this.size.z - this.thickness / 2, this.size.y / 2),
-//             // top
-//             RAPIER.ColliderDesc.cuboid(this.size.x / 2, this.size.z / 2, this.thickness / 2)
-//         ]
+        window.simObjs.set(lidRigidBody, meshes[1])
+        window.simObjs.set(boxRigidBody, meshes[0]);
+        meshes.forEach((mesh) => window.scene.add(mesh));
 
-//         colliderDescs.forEach((desc, i) => { 
-//             if (i !== 5) this.colliders.push(this.world.createCollider(desc, body));
-//         });
+        this.rigidBodies = [boxRigidBody, lidRigidBody];
+        this.colliders = colliders;
 
-//         const lid = this.world.createRigidBody(
-//             RAPIER.RigidBodyDesc.dynamic()
-//                 .setTranslation(meshes[0].position.x, meshes[0].position.y, meshes[0].position.z)
-//                 .setRotation(meshes[0].quaternion)
-//         );
-//         this.colliders.push(this.world.createCollider(colliderDescs[5], lid));
+        this.loaded = true;
+    }
 
-//         this.world.createImpulseJoint(RAPIER.JointData.revolute(
-//             new RAPIER.Vector3(0, this.size.z / 2, 0),
-//             new RAPIER.Vector3(this.size.x / 2, 0, 0),
-//             new RAPIER.Vector3(0, 1, 0),
-//         ), body, lid);
+    destruct() {
+        for (const mesh of this.meshes) window.scene.remove(mesh);
+        for (const rigidBody of this.rigidBodies) {
+            window.simObjs.delete(rigidBody);
+            this.world.removeRigidBody(rigidBody);
+        }
 
-
-//         this.rigidBodies = [body, lid];
-
-//         window.simObjs.set(lid, meshes[1])
-//         window.simObjs.set(body, meshes[0]);
-//         meshes.forEach((mesh) => window.scene.add(mesh));
-//     }
-
-//     hide() {
-//         this.visible = false;
-
-//         this.meshes.forEach((mesh) => window.scene.remove(mesh));
-//         this.rigidBodies.forEach((rigidBody) => {
-//             window.simObjs.delete(rigidBody);
-//             this.world.removeRigidBody(rigidBody);
-//         })
-//     }
-
-//     // reset() {
-//     //     this.grasped = false;
-//     //     this.released = false;
-//     //     this.grasp_offset = undefined;
-
-//     //     this.mesh.position.copy(this.initPos);
-//     //     this.mesh.rotation.z = this.initAngle; 
-
-//     //     this.mesh.updateMatrixWorld();
-//     // }
-// }
+        this.loaded = false;
+    }
+}

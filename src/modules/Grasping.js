@@ -8,6 +8,8 @@ export class Grasping extends Module {
         // ========== options ==========
         this.controlMode = options.controlMode ?? 'ab-hold';
         // =============================
+
+        this.lastAction = undefined;
     }
 
     load() {
@@ -34,6 +36,8 @@ export class Grasping extends Module {
                 const rightPosition = window.rightFinger.link.translateY(-0.001).getWorldPosition(new T.Vector3());
                 window.rightFinger.rigidBody.setNextKinematicTranslation(rightPosition);
                 this.controller.get().gamepad?.hapticActuators?.[0].pulse(.25, 18);
+
+                this.lastAction = 'open';
             } else {
                 return true;
             }
@@ -48,6 +52,8 @@ export class Grasping extends Module {
                 const rightPosition = window.rightFinger.link.translateY(0.001).getWorldPosition(new T.Vector3());
                 window.rightFinger.rigidBody.setNextKinematicTranslation(rightPosition);
                 this.controller.get().gamepad?.hapticActuators?.[0].pulse(.25, 18);
+
+                this.lastAction = 'close'
             } else {
                 return true;
             }
@@ -60,15 +66,15 @@ export class Grasping extends Module {
                 this.modeInstructions = 'Close: Squeeze and hold the trigger.\nOpen: Release the trigger.';
                 break;
             case 'trigger-toggle':
-                let closed = false;
+                this.closed = false;
                 this.controller.addButtonAction('trigger', 'grasping', () => {
-                    if (closed) {
+                    if (this.closed) {
                         this.controller.addButtonAction('triggerreleased', 'grasping', () => {
-                            if (open()) closed = false;
+                            if (open()) this.closed = false;
                         });
                     } else {
                         this.controller.addButtonAction('triggerreleased', 'grasping', () => {
-                            if (close()) closed = true;
+                            if (close()) this.closed = true;
                         });
                     }
                 });

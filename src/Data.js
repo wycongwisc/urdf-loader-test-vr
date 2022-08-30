@@ -6,7 +6,7 @@ export class Data {
     buffer = [];
     BUFFER_SIZE = 500; // number of data entries stored before a POST request is called
     SESSION_ID = id();
-    SCRIPT_PATH = 'https://script.google.com/macros/s/AKfycbx-oipZwXMsD3XrA1vRWF3Ut5-uVPCYvfRrdRB8kju3GledkjUJly9nvZzioGW0Ck5A/exec';
+    SCRIPT_PATH = 'https://script.google.com/macros/s/AKfycbzwApGpPCnrxRGrndclYFbO4szYDzn0llJamw8DqAUKVwEUeLGRBy-OMIoPm7EUapBO/exec';
     sceneCount = 0; 
 
     constructor(params) {
@@ -18,8 +18,9 @@ export class Data {
      * @param {*} table 
      */
     post(data, type, params = {}) {
-        // return;
         console.log(type, data, params);
+        // return;
+        
 
         // add session id to beginning of each row
         // for (const row of data) row.unshift(this.SESSION_ID)
@@ -41,37 +42,20 @@ export class Data {
         })
     }
 
-    push(row) {
+    log(id, row) {
+        if (!id) return;
+        
         this.buffer.push(row);
-        if (this.buffer.length >= this.BUFFER_SIZE) this.flush();
+        if (this.buffer.length >= this.BUFFER_SIZE) this.flush(id);
     }
 
-    flush() {
+    flush(id) {
         this.post(this.buffer, 'trial', {
             sessionId: this.SESSION_ID,
-            trialId: this.currentTrialId,
+            trialId: id,
         })
         this.buffer = [];
     }
-
-    // log initial configs of every object in the scene
-    startTrial(data) {
-        this.currentTrialId = id();
-
-        this.post(data, 'start-trial', {
-            sessionId: this.SESSION_ID,
-            trialId: this.currentTrialId,
-        });
-    }
-
-    endTrial(data) {
-        this.post(data, 'end-trial', {
-            sessionId: this.SESSION_ID,
-            trialId: this.currentTrialId
-        });
-    }
-
-
 
     async initSession() {
         const ip = await fetch('https://api.ipify.org').then(response => { return response.text() });
@@ -87,64 +71,35 @@ export class Data {
             // locationData.country
         ]]
 
-        // does not use the buffer because this only happens once
         this.post(data, 'session', {
             sessionId: this.SESSION_ID
         });
     }
-    
-    log(data) {
-        this.push(data);
+
+    /**
+     * 
+     * @param {Array} objects 
+     */
+    createTrial(header, initState) {
+        const trialId = id();
+
+        const data = [header, initState];
+        this.post(data, 'create-trial', {
+            sessionId: this.SESSION_ID,
+            trialId,
+        });
+
+        return trialId;
     }
 
-    logRobot(t, fsm, robot, eePose, target) {
-        // const pos1 = window.robot.links['right_gripper_l_finger_tip'].getWorldPosition(new T.Vector3());
-        // const pos2 = window.robot.links['right_gripper_r_finger_tip'].getWorldPosition(new T.Vector3());
-        // const gripperDistance = pos1.distanceTo(pos2);
-
-        // const row = [
-        //     t, 
-        //     this.SESSION_ID, 
-        //     robot.robotName, 
-        //     fsm.state
-        // ];
-        // for (const joint of ["right_j0", "right_j1", "right_j2", "right_j3", "right_j4", "right_j5", "right_j6"]) {
-        //     const currJoint = robot.joints[joint];
-        //     row.push(currJoint.jointValue[0]);
-        // }
-        // row.push(gripperDistance);
-        // row.push(`${eePose.posi.x} ${eePose.posi.y} ${eePose.posi.z}`);
-        // row.push(`${eePose.ori.x} ${eePose.ori.y} ${eePose.ori.z} ${eePose.ori.w}`);
-        // row.push(`${target.position.x} ${target.position.y} ${target.position.z}`)
-        // row.push(`${target.quaternion.x} ${target.quaternion.y} ${target.quaternion.z} ${target.quaternion.w}`)
-        // this.push(row, 'robot');
+    endTrial(data, id) {
+        this.flush(id);
+        this.post(data, 'end-trial', {
+            sessionId: this.SESSION_ID,
+            trialId: id,
+        });
     }
 
-    logUser(t, camera, controller1, controller2, hand) {
-        // const worldDirection = new T.Vector3();
-        // camera.getWorldDirection(worldDirection);
 
-        // this.push([
-        //     t, 
-        //     this.SESSION_ID,
-        //     `${camera.position.x} ${camera.position.y} ${camera.position.z}`,
-        //     `${camera.quaternion.x} ${camera.quaternion.y} ${camera.quaternion.z} ${camera.quaternion.w}`,
-        //     `${worldDirection.x} ${worldDirection.y} ${worldDirection.z}`,
-        //     `${controller1.position.x} ${controller1.position.y} ${controller1.position.z}`,
-        //     `${controller1.quaternion.x} ${controller1.quaternion.y} ${controller1.quaternion.z} ${controller1.quaternion.w}`,
-        //     `${controller2.position.x} ${controller2.position.y} ${controller2.position.z}`,
-        //     `${controller2.quaternion.x} ${controller2.quaternion.y} ${controller2.quaternion.z} ${controller2.quaternion.w}`,
-        //     hand,
-        // ], 'user');
-    }
 
-    logTask(t, task) {
-        // this.push([
-        //     t, 
-        //     this.SESSION_ID, 
-        //     task.id,
-        //     task.name,
-        //     task.startTime
-        // ], table);
-    }
 }
