@@ -1,9 +1,8 @@
 import * as T from 'three';
 import { v4 as id } from 'uuid'
 import StateMachine from "javascript-state-machine"
-import { resetRobot } from '../../utils';
-import { sounds } from '../../utilities/sounds'
-import { arraySlice } from 'three/src/animation/AnimationUtils';
+import { resetRobot } from '../utils';
+import { sounds } from '../utilities/sounds'
 
 const NUM_ROUNDS = 1;
 

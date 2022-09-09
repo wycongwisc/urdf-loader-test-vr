@@ -1,17 +1,9 @@
-import ThreeMeshUI from 'three-mesh-ui'
-import * as T from 'three'
-import Container from './ui/Container'
-import Element from './ui/Element'
-import Text from './ui/Text'
-import Button from './ui/Button'
+import Container from '../ui/Container'
+import Text from '../ui/Text'
+import Button from '../ui/Button'
 
 export class UI {
     constructor() {
-        this.FONT_FAMILY = (location.hostname === 'localhost') ? 
-            './assets/Roboto-msdf.json' : '/urdf-loader-test-vr/assets/Roboto-msdf.json';
-        this.FONT_TEXTURE = (location.hostname === 'localhost') ? 
-            './assets/Roboto-msdf.png' : '/urdf-loader-test-vr/assets/Roboto-msdf.png';
-
         this.elements = [];
     }
 

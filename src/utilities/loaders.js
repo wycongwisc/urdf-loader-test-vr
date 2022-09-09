@@ -1,10 +1,24 @@
-import { fetchFromURL } from "../helpers.js";
+import * as T from 'three';
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import RAPIER from "@dimforge/rapier3d";
+
+const loader = new GLTFLoader();
 
 function createBlob(text) {
     var blob = new Blob([text], {
         type: 'text/plain'
     });
     return blob;
+}
+
+export function fetchFromURL(url, func) {
+    fetch(url)
+        .then(res => res.blob()) // Gets the response and returns it as a blob
+        .then(blob => {
+            // temp
+            func(blob);
+        }
+    );
 }
 
 // func acts on a blob
@@ -135,7 +149,7 @@ function getDAESFromURL(meshBlob, imageMap, meshURL, func) {
     fr.readAsText(meshBlob);
 }
 
-export function loadJsonURL(link, func) {
+export function loadJSONURL(link, func) {
     fetchFromURL(link, (blob) => {
         let fr = new FileReader();
         fr.onload = function () {
@@ -146,7 +160,7 @@ export function loadJsonURL(link, func) {
     })
 }
 
-export function loadJsonFile(file, func) {
+export function loadJSONFile(file, func) {
     let fr = new FileReader();
     fr.onload = function () {
         let jsonStr = fr.result;
@@ -186,3 +200,81 @@ function getDAEFiles(daeFiles, fileArray, func) {
 
     recursiveDAEModify(daeFiles, fileArray, 0)
 }
+
+/**
+ * A wrapper for the GLTFLoader so that it can be used with async/await syntax
+ * @param {String} url The url to a `.gltf` or `.glb`.
+ * @returns 
+ */
+export function loadGLTF(url) {
+    return new Promise((resolve, reject) => {
+        loader.load(url, data => resolve(data), null, reject);
+    });
+}
+
+/**
+ * Loads a mesh and its corresponding physics components (rigid-body & collider) given the url to a `.gltf`. 
+ * **This function should not be used because the RAPIER trimesh does not detect collisions properly.**
+ * @param {String} url The url to a `.gltf` or `.glb`.
+ * @param {*} transform The initial pose of the object.
+ * @param {*} world 
+ * @param {String} rigidBodyType 
+ * @returns {Array<Object>} 
+ */
+export async function loadRAPIERFromGLTF(url, transform, world, rigidBodyType='dynamic') {
+    const gltf = await loadGLTF(url);
+    const mesh = gltf.scene;
+
+    // mesh.rotation.copy(transform.rotation);
+    // mesh.position.copy(transform.position);
+    mesh.scale.copy(transform.scale);
+    mesh.traverse(child => { child.castShadow = true, child.receiveShadow = true });
+
+    // build rigid-body
+    const rigidBodyDesc = rigidBodyType === 'dynamic' ? RAPIER.RigidBodyDesc.dynamic()
+                        : rigidBodyType === 'fixed' ? RAPIER.RigidBodyDesc.fixed()
+                        : rigidBodyType === 'kinematicPositionBased' ? RAPIER.RigidBodyDesc.kinematicPositionBased()
+                        : rigidBodyType === 'kinematicVelocityBased' ? RAPIER.RigidBodyDesc.kinematicVelocityBased()
+                        : undefined;
+
+    if (!rigidBodyDesc) throw new Error(`Rigid-body with type ${rigidBodyType} does not exist.`);
+
+    const rigidBody = world.createRigidBody(rigidBodyDesc);
+    rigidBody.setTranslation(transform.position.x, transform.position.y, transform.position.z);
+    rigidBody.setRotation(new T.Quaternion().setFromEuler(transform.rotation));
+
+    // build collider
+    let objectMesh;
+    mesh.traverse((child) => {
+        if (child.geometry?.type === 'BufferGeometry')
+            objectMesh = child;
+    })
+
+    if (!objectMesh) throw new Error('BufferGeometry does not exist.');
+
+    const vertices = objectMesh.geometry.getAttribute('position').array.slice();
+    const indices = objectMesh.geometry.index;
+
+    const rotation = new T.Quaternion();
+    let currMesh = objectMesh;
+    while (currMesh) {
+        rotation.multiply(currMesh.quaternion);
+        currMesh = currMesh.parent;
+    }
+
+    const scale = mesh.scale.clone();
+    scale.multiplyScalar(100);
+    for (let i = 0; i < vertices.length; i += 3) {
+        vertices[i] *= scale.x;
+        vertices[i + 1] *= scale.y;
+        vertices[i + 2] *= scale.z;
+    }
+
+    const colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices.array)
+        .setRotation(rotation)
+    const collider = world.createCollider(colliderDesc, rigidBody);
+    collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+
+    return [mesh, rigidBody, collider];
+}                
+

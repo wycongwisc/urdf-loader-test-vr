@@ -1,15 +1,15 @@
-import Task from './Task'
+import Task from '../Task'
 import * as T from 'three';
 
-export default class RemoteControlTutorial extends Task {
+export default class DragControlTutorial extends Task {
     static async init(params, condition, options = {}) {
-        const task = new RemoteControlTutorial(params, condition, { numRounds: 2, resetAfterTrial: false });
+        const task = new DragControlTutorial(params, condition, { numRounds: 2, resetAfterTrial: false });
         task.objects = {}
         return task;
     }
 
     constructor(params, condition, options) {
-        super('remote-control-tutorial', params, condition, options, [
+        super('drag-control-tutorial', params, condition, options, [
             () => {
                 this.activateInstructions.show();
             },
@@ -21,18 +21,18 @@ export default class RemoteControlTutorial extends Task {
     }
 
     onStart() {
-        this.activateInstructions = this.ui.createContainer('remote-control-activate-instructions', { 
+        this.activateInstructions = this.ui.createContainer('drag-control-activate-instructions', { 
             height: .4, width: .5, backgroundOpacity: 0 
         });
         this.activateInstructions.appendChild(
-            this.ui.createText('To activate remote control, press the grip button.', { fontSize: 0.025 })
+            this.ui.createText('To activate drag control, move your controller to the robot\'s end effector and press the grip button.', { fontSize: 0.025 })
         );
 
-        this.deactivateInstructions = this.ui.createContainer('remote-control-deactivate-instructions', { 
+        this.deactivateInstructions = this.ui.createContainer('drag-control-deactivate-instructions', { 
             height: .4, width: .5, backgroundOpacity: 0 
         });
         this.deactivateInstructions.appendChild(
-            this.ui.createText('To deactivate remote control, press the grip button again.', { fontSize: 0.025 })
+            this.ui.createText('To deactivate drag control, press the grip button again.', { fontSize: 0.025 })
         );
     }
 
@@ -48,7 +48,7 @@ export default class RemoteControlTutorial extends Task {
         this.deactivateInstructions.getObject().position.copy(info.currEEAbsThree.posi.clone().add(new T.Vector3(0, 0.2, 0)));
         this.deactivateInstructions.getObject().lookAt(window.camera.position);
 
-        if (this.condition?.fsm.is('REMOTE_CONTROL') && this.fsm.is('0')) {
+        if (this.condition?.fsm.is('DRAG_CONTROL') && this.fsm.is('0')) {
             this.fsm.next();
         }
 

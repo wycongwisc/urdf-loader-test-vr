@@ -4,7 +4,6 @@ import Block from './Block';
 import { TorusBufferGeometry } from 'three';
 import SceneObject from './SceneObject';
 
-
 const PATH = './models/target.glb';
 const TORUS_RADIUS = 0.05;
 const TUBE_RADIUS = 0.005;

@@ -1,7 +1,7 @@
 import Module from "./Module";
 import * as T from 'three';
 
-export class Grasping extends Module {
+export default class Grasping extends Module {
     constructor(utilities, options = {}) {
         super('grasping', utilities);
 

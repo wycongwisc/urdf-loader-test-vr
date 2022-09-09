@@ -2,8 +2,6 @@ import * as T from 'three';
 import RAPIER from '@dimforge/rapier3d';
 import loadGLTF from '../../../utilities/loadGLTF';
 import SceneObject from './SceneObject';
-// import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
-// import download from '../../../utilities/download';
 
 const PATH = './models/block.glb';
 

@@ -1,6 +1,7 @@
 import Module from "./Module";
 import * as T from 'three';
-import { getCurrEEPose, updateTargetCursor, updateRobot, resetRobot } from '../utils';
+import { getCurrEEPose, updateTargetCursor, updateRobot } from '../utilities/robot';
+import { CLICK } from '../utilities/sounds'
 
 export class DragControl extends Module {
     constructor(utilities, options = {}) {
@@ -11,19 +12,17 @@ export class DragControl extends Module {
         this.showOffsetIndicator = options.showOffsetIndicator ?? true;
         this.controlMode = options.controlMode ?? 'grip-auto';
         // =============================
-
-        this.click = new Audio('./assets/click.wav');
     }
 
     load(config) {
         config.transitions.push({ name: 'activateDragControl', from: 'IDLE', to: 'DRAG_CONTROL' });
         config.transitions.push({ name: 'deactivateDragControl', from: 'DRAG_CONTROL', to: 'IDLE' });
         config.methods['onActivateDragControl'] = () => {
-            this.click.play();
+            CLICK.play();
             this.controller.get().grip.traverse((child) => { if (child instanceof T.Mesh) child.visible = false });
         }
         config.methods['onDeactivateDragControl'] = () => {
-            this.click.play();
+            CLICK.play();
             this.controller.get().grip.traverse((child) => { if (child instanceof T.Mesh) child.visible = true });
             window.targetCursor.material.color.setHex(0xFFFFFF);
             window.scene.remove(this.offsetIndicator);

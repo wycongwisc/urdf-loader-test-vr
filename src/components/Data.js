@@ -1,4 +1,3 @@
-import * as T from 'three';
 import { v4 as id } from 'uuid'
 
 export class Data {
@@ -7,10 +6,6 @@ export class Data {
     BUFFER_SIZE = 500; // number of data entries stored before a POST request is called
     SESSION_ID = id();
     SCRIPT_PATH = 'https://script.google.com/macros/s/AKfycbzwApGpPCnrxRGrndclYFbO4szYDzn0llJamw8DqAUKVwEUeLGRBy-OMIoPm7EUapBO/exec';
-    sceneCount = 0; 
-
-    constructor(params) {
-    }
 
     /**
      * Sends the data to Google Sheets. Call this method directly to bypass the buffer.
@@ -18,13 +13,7 @@ export class Data {
      * @param {*} table 
      */
     post(data, type, params = {}) {
-        console.log(type, data, params);
-        // return;
-        
-
-        // add session id to beginning of each row
-        // for (const row of data) row.unshift(this.SESSION_ID)
-        
+        // console.log(type, data, params);
         fetch(this.SCRIPT_PATH, {
             method: "POST",
             headers: {
@@ -99,7 +88,4 @@ export class Data {
             trialId: id,
         });
     }
-
-
-
 }

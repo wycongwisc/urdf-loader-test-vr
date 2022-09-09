@@ -2,7 +2,7 @@ import * as T from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
-export function initScene() {
+export default function init() {
 
     // scene
     const scene = new T.Scene();

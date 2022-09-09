@@ -1,6 +1,6 @@
-import Task from './Task'
+import Task from '../Task'
 import * as T from 'three';
-import { Grasping } from '../Grasping';
+import Grasping from '../../modules/Grasping';
 
 export default class GraspingTutorial extends Task {
     static async init(params, condition, options = {}) {

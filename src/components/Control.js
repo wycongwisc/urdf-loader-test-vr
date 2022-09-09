@@ -3,37 +3,31 @@
  */
 
 import * as T from 'three';
-import { getCurrEEPose, updateTargetCursor, resetRobot, updateRobot } from './utils';
+import { getCurrEEPose, updateTargetCursor, updateRobot } from './utilities/robot';
 import StateMachine from 'javascript-state-machine';
-import TeleportVR from './utilities/teleportvr';
-import { Record } from './modules/Record';
-import { DragControl } from './modules/DragControl';
-import { RemoteControl } from './modules/RemoteControl';
-import { Tasks } from './modules/Tasks';
-import PickAndPlace from './modules/tasks/PickAndPlace';
-import PoseMatch from './modules/tasks/PoseMatch';
-import End from './modules/tasks/End';
-import PickAndDrop from './modules/tasks/PickAndDrop';
-import { ResetRobot } from './modules/ResetRobot';
-import { Teleport } from './modules/Teleport';
-import { Grasping } from './modules/Grasping';
-import DragControlTutorial from './modules/tasks/DragControlTutorial';
-import RemoteControlTutorial from './modules/tasks/RemoteControlTutorial';
-import GraspingTutorial from './modules/tasks/GraspingTutorial';
-import Stack from './modules/tasks/Stack';
-import Controllers from './utilities/Controllers'
-import ControlStack from './modules/tasks/ControlStack';
-import ControlPoseMatch from './modules/tasks/ControlPoseMatch';
-import Table from './modules/tasks/objects/Table';
+import TeleportVR from '../utilities/teleportvr';
+import Controllers from './Controllers'
 import Condition from './Condition';
-import InteractiveUI from './modules/InteractiveUI';
+
+// tasks
+import DragControlTutorial from '../tasks/DragControlTutorial';
+import RemoteControlTutorial from '../tasks/RemoteControlTutorial';
+import GraspingTutorial from '../tasks/GraspingTutorial';
+import PickAndDrop from '../tasks/PickAndDrop';
+import Stack from '../tasks/Stack';
+import End from '../tasks/End';
+
+// modules
+import { DragControl } from '../modules/DragControl';
+import { RemoteControl } from '../modules/RemoteControl';
+import { Grasping } from '../modules/Grasping';
+
+// initial position of user after entering VR
+const INIT_POSITION = new T.Vector3(0.25, 0, 0.5);
 
 export default class Control {
     static async init(params) {
         const control = new Control();
-
-        // constants and params
-        const INIT_POSITION = new T.Vector3(0.25, 0, 0.5); // initial position of user after entering VR
 
         control.camera = params.camera;
         control.renderer = params.renderer;
@@ -43,7 +37,6 @@ export default class Control {
         control.ground = params.ground;
 
         // initial end effector pose
-
         window.initEEAbsThree = getCurrEEPose();
         window.goalEERelThree = { 'posi': new T.Vector3(), 'ori': new T.Quaternion().identity() };
         
@@ -56,12 +49,12 @@ export default class Control {
         window.targetCursor = targetCursor;
         updateTargetCursor();
 
-        control.teleportvr = new TeleportVR(window.scene, control.camera);
         control.controller = new Controllers(control.renderer, control.teleportvr);
-        // teleportvr
 
+        // whether or not teleportation is enabled, 
+        // teleportvr is still initialized here because it is used to set the initial position of the user
+        control.teleportvr = new TeleportVR(window.scene, control.camera);
         control.renderer.xr.addEventListener('sessionstart', () => control.teleportvr.set(INIT_POSITION));
-
 
         const utilities = {
             data: control.data,
@@ -156,18 +149,15 @@ export default class Control {
             ],
             methods: {
                 onStart: () => {
-                    const task = control.tasks[0];
-                    task.start();
+                    control.tasks[0].start();
                 },
                 onNext: (state) => {
-                    // control.tasks[Number(state.from)].stop(); // stop the current task
-
-                    console.log(state)
-
                     if (state.to === 'IDLE') {
+                        // refreshes the page (i.e. kicks the user out of VR) once all tasks are completed
                         window.location.reload(); 
                     } else {
-                        control.tasks[Number(state.to)].start(); // start the next task
+                        // starts the next task
+                        control.tasks[Number(state.to)].start();
                     }
                 }
             }
@@ -178,16 +168,14 @@ export default class Control {
             control.fsm.start();
         })
 
+        // use the trigger on the left controller to reset the current trial
         control.controller.get('left').controller.addEventListener('select', () => {
-            console.log('remote reset')
             control.tasks[Number(control.fsm.state)].fsm.reset();
         })
 
         return control;
     }
 
-    constructor(params) {
-    }
 
     update(t) {
         const state = {
@@ -196,6 +184,8 @@ export default class Control {
             prevCtrlPose: this.prevCtrlPose,
         }
 
+        // calls the update function of the current task
+        // which is determined by the state of the finite state machine
         if (this.fsm.state !== 'IDLE') {
             const task = this.tasks[Number(this.fsm.state)];
             task.update(Date.now(), state);
@@ -207,9 +197,6 @@ export default class Control {
         updateRobot();
         
         this.prevCtrlPose = {...state.ctrlPose};
-    }
-
-    log(t) {
     }
 }
 

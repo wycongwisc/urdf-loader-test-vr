@@ -15,15 +15,11 @@ export default class Condition {
             methods: {}
         };
 
-        for (const module of this.modules) {
-            module.load(config);
-        }
+        for (const module of this.modules) module.load(config);
 
         this.fsm = new StateMachine(config);
 
-        for (const module of this.modules) {
-            module.setFSM(this.fsm);
-        }
+        for (const module of this.modules) module.setFSM(this.fsm);
 
         this.isLoaded = true;
     }
