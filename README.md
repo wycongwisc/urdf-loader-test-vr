@@ -30,7 +30,7 @@ This is because the class requires asynchrounous operations on initialization wh
 
 ### /index.js
 
-This is the entry point of the application. It sets up the THREE scene, loads in the robot and its corresponding physics objects, and initializes the [components] of the application. It also creates three separate loops: one for logic, one for physics, and one for rendering. 
+This is the entry point of the application. It sets up the THREE scene, loads in the robot and its corresponding physics objects, and initializes the [components](#components) of the application. It also creates three separate loops: one for logic, one for physics, and one for rendering. 
 
 ### Components
 
@@ -50,7 +50,7 @@ This class is designed to map all controls to a single "main" controller by defa
 
 #### /Condition.js
 
-This contains an array of [modules] and a finite state machine that is used to control the "control state" (ex. `IDLE`, `DRAG_CONTROL`, `REMOTE_CONTROL`, etc.). This state machine is constructed dynamically because it is shared by all of the modules.
+This contains an array of [modules](#modules) and a finite state machine that is used to control the "control state" (ex. `IDLE`, `DRAG_CONTROL`, `REMOTE_CONTROL`, etc.). This state machine is constructed dynamically because it is shared by all of the modules.
 
 This class is designed to setup the various conditions an experiment may have, which is determined by the array of modules that are passed in.
 
